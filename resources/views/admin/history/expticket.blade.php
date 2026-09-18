@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>IFCA Software</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link href="{{ url('assets/admin/css/exportpdf/bootstrap.min.css');}}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/admin/css/exportpdf/skin-yellow.min.css'); }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/admin/css/exportpdf/AdminLTE.min.css'); }}" rel="stylesheet" type="text/css" />
+  <style type="text/css">.boxx{position: relative;width: 16px;height: 16px;border-radius: 3px;}
+    .footer{position: fixed; bottom: 0px; text-align: center;}
+    thead:before, thead:after { display: none; }tbody:before, tbody:after { display: none; }</style>
+  </head>
+  <body>
+    <section class="invoice" style="margin:0px!important;">
+      <h4>History Ticket</h4><hr/>
+      <table id="tbLog" class="table table-bordered table-striped" style="width:100%!important">
+        <thead  style="background:#ffa500;">
+          <tr class="odd">
+            <th class="sorting_asc" style="width: 6px;padding: 4px"> #</th>
+            <th  style="width: 10px;padding: 4px">Ticket Number</th>
+            <th style="width: 10px;padding: 4px">Category</th>
+            <th  style="width: 70px!important;padding: 4px">Tenant Name</th>
+            <th class="sorting" style="width: 20px;padding: 4px">Description</th>
+            <th class="sorting" style="width: 50px;padding: 4px">Reported Date</th>
+            <th class="sorting" style="width: 15px;padding: 4px">Request By</th>
+            <th class="sorting" style="width: 5px;padding: 4px">Lot No</th>
+            <th class="sorting" style="width: 15px;padding: 4px">Ticket Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php 
+          if(!empty($listD)) {
+            echo $listD;
+          } else {
+            echo "Data Not Available";
+          }
+          ?>
+        </tbody>
+      </table>
+      <div class="footer">
+        <p style="font-size:8px">WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal</p>
+      </div> 
+    </section>
+  </body>
+  </html>

@@ -1,0 +1,790 @@
+<?php
+
+namespace App\Http\Controllers\Tenant;
+
+use App\Http\Controllers\Controller;
+use App\Support\TenantScope;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
+use PDF;
+
+class DashController extends Controller
+{
+    public function index()
+    {
+        $tenant_no = Session::get('tenant_df');
+        $entity = Session::get('entity_cd');
+        $project = Session::get('project_no');
+        $id_tenant = Session::get('Tuser_id');
+        $tenant_flag = Session::get('Tflag');
+        $crit = array('tenant_no' => $tenant_no,'id_tenant' =>$id_tenant);
+
+        // Combo Lot No
+        $cbLot = $this->getLotNo($tenant_no);
+
+        // Meter ID akan diambil setelah Utility dipilih
+        $cbMeterId = '';
+
+        // Billing Outstanding
+        $business_no = Session::get('business_no');
+        $criteria = array(
+            'business_no'=>$business_no, 
+            'tenant_no'=>$tenant_no
+        );
+        $dataTenancy = DB::table('pm_tenancy')
+            ->where($criteria)
+            ->get();
+        $list_bill = '';
+        
+        $i = 1;
+
+        // Proforma Payment
+        $sumProforma = [];
+        $totalProforma = '';
+        $dataproforma = $this->get_proforma_by_tenant($entity,$project,$tenant_no);
+        if ($dataproforma->isNotEmpty()) {
+
+            foreach ($dataproforma as $proforma) {
+
+                $currency = strtoupper(trim($proforma->currency_cd));
+                $outstanding = ($proforma->base_amt ?? 0) + ($proforma->tax_amt ?? 0);
+
+                if (!isset($sumProforma[$currency])) {
+                    $sumProforma[$currency] = 0;
+                }
+
+                $sumProforma[$currency] += $outstanding;
+                $i++;
+            }
+
+            $first = true;
+
+            foreach ($sumProforma as $currency => $amount) {
+
+                // Untuk ditampilkan di card
+                if (!$first) {
+                    $totalProforma .= '<br>';
+                }
+
+                $totalProforma .= $currency.' '.number_format($amount,2,",",".");
+            }
+
+            $statusProforma = false;
+
+        } else {
+
+            $statusProforma = true;
+
+        }
+
+        // INVOICE STATUS
+        $sumInvoice = [];
+        $totalInvoice = '';
+        $dataInvoice = $this->get_invoice_by_tenant($entity,$project,$tenant_no);
+        if ($dataInvoice->isNotEmpty()) {
+
+            foreach ($dataInvoice as $invoice) {
+
+                $currency = strtoupper(trim($invoice->currency_cd));
+                $outstanding = ($invoice->fdoc_amt ?? 0);
+
+                if (!isset($sumInvoice[$currency])) {
+                    $sumInvoice[$currency] = 0;
+                }
+
+                $sumInvoice[$currency] += $outstanding;
+                $i++;
+            }
+
+            $first = true;
+
+            foreach ($sumInvoice as $currency => $amount) {
+
+                // Untuk ditampilkan di card
+                if (!$first) {
+                    $totalInvoice .= '<br>';
+                }
+
+                $totalInvoice .= $currency.' '.number_format($amount,2,",",".");
+            }
+
+            $statusInvoice = false;
+
+        } else {
+
+            $statusInvoice = true;
+
+        }
+        // Our Latest Ticket
+        $flagsurvey = 1;
+        $list_hticket = "";
+        $i = 1;
+
+        $htenants = DB::connection('TWP')
+    ->table('mgr.sv_entry_multi_dt as dt')
+    ->leftJoin('mgr.sv_entry_multi as m', 'm.complain_no', '=', 'dt.complain_no')
+    ->whereIn('m.debtor_acct', TenantScope::tenantNos())
+    ->orderBy('dt.reported_date', 'desc')
+    ->orderBy('dt.complain_no', 'desc')
+    ->select(
+        'dt.*',
+        'm.category_cd'
+    )
+    ->get();
+
+if (!empty($htenants)) {
+    foreach ($htenants as $tenant)
+    {
+        // =========================
+        // CEK RECHARGEABLE / NON
+        // =========================
+        $billingType = 'Non-Rechargeable';
+
+        $report = DB::connection('TWP')
+            ->table('mgr.sv_entry_multi_dt')
+            ->where('complain_no', $tenant->complain_no)
+            ->whereIn('debtor_acct', TenantScope::tenantNos())
+            ->where('reported_by', 'TWP')
+            ->first();
+
+        if ($report) {
+
+            $checkRecharge = DB::connection('TWP')
+                ->table('mgr.sv_entry_dt')
+                ->where('report_no', $report->report_no)
+                ->first();
+
+            if ($checkRecharge) {
+                $billingType = 'Rechargeable';
+            }
+        }
+
+        // =========================
+        // HTML TABLE
+        // =========================
+        $list_hticket .= '<tr class="odd">';
+        $list_hticket .= '<td>'.$i.'</td>';
+        $list_hticket .= '<td>'.$tenant->complain_no.'</td>';
+
+        $crit = array(
+            'category_cd' => $tenant->category_cd
+        );
+
+        $data_category = DB::connection('TWP')
+            ->table('mgr.sv_category')
+            ->where($crit)
+            ->get();
+
+        if (empty($data_category)) {
+            $list_hticket .= '<td>'.$tenant->category_cd.'</td>';
+        } else {
+            foreach ($data_category as $datacate) {
+                if ($datacate->descs == null) {
+                    $list_hticket .= '<td></td>';
+                } else {
+                    $list_hticket .= '<td>'.$datacate->descs.'</td>';
+                }
+            }
+        }
+
+        $list_hticket .= '<td>'.$tenant->work_requested.'</td>';
+        $list_hticket .= '<td>'.date("d M Y", strtotime($tenant->reported_date)).'</td>';
+        $list_hticket .= '<td>'.$tenant->serv_req_by.'</td>';
+        $list_hticket .= '<td>'.$tenant->lot_no.'</td>';
+
+        $data_status = $this->get_statusIFCA($tenant->status);
+
+        $list_hticket .= '<td>'.$billingType.'</td>';
+
+        $list_hticket .= '<td><span class="badge badge-sm badge-dim '.$data_status["color"].' d-none d-md-inline-flex">'
+            .$data_status["status"].
+            '</span></td>';
+
+        if ($tenant->status == 'R') {
+            $list_hticket .= '<td><button class="btn btn-block btn-warning btn-sm" onclick="location.href=\''.url('tenant/ticket').'/'.$tenant->id.'/edit\'"> Edit</button></td>';
+        } else {
+            $list_hticket .= '<td></td>'."\n";
+        }
+
+        $list_hticket .= '</tr>';
+
+        $i++;
+    }
+}
+
+        // Our Latest Overtime
+        $today = date('Y-m-d h:i:s');
+        $i = 1;
+        $list_hovertime = "";
+
+        $hovertime = DB::select("SELECT * from ot_trx where " . TenantScope::sqlTenantId('id_tenant') . " AND status NOT IN ('X','Y','Z')");
+        if (!empty($hovertime)) {
+            foreach ($hovertime as $overtime)
+            {
+                $list_hovertime .= '<tr class="odd">';
+                $list_hovertime .= '<td>'.$i.'</td>';
+                $list_hovertime .= '<td>'.$overtime->id.'</td>';
+                $list_hovertime .= '<td>'.date("d M Y", strtotime($overtime->date_created)) . '</td>';
+                $list_hovertime .= '<td>'.$overtime->lot_no.'</td>';
+                $list_hovertime .= '<td>'.$overtime->start_overtime.'</td>';
+                $list_hovertime .= '<td>'.$overtime->end_overtime . '</td>';
+
+                $data_status = $this->get_statusOT(
+                    $overtime->status,
+                    $overtime->start_overtime,
+                    $overtime->end_overtime
+                );
+                $list_hovertime .= '<td><span class="badge badge-sm badge-dim '.$data_status["color"].' d-none d-md-inline-flex">'.$data_status["status"]. '</span></td>';
+                if($overtime->start_overtime > $today && $overtime->status=='N') {
+                    $list_hovertime .= '<td><button class="btn btn-block btn-danger btn-sm" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
+                } else {
+                    $list_hovertime .= '<td><button class="btn btn-block btn-danger btn-sm disabled">Cancel</button></td>'."\n";
+                }
+                $list_hovertime .= '</tr>' . "\n";
+                $i++;
+            }
+        }
+        $dtnews = DB::select("SELECT * FROM newsfeed WHERE start_date <= CURDATE() AND end_date >= CURDATE() ORDER BY start_date DESC LIMIT 5;");
+        $content = array(
+            'combolot' => $cbLot,
+            'combometerid' => $cbMeterId,
+            'totalProforma' => $totalProforma,
+            'statusPembayaran' => $statusProforma,
+            'totalInvoice' => $totalInvoice,
+            'statusInvoice' => $statusInvoice,
+            'list_hticket' => $list_hticket,
+            'list_hovertime' => $list_hovertime,
+            'tenant_flag'=>$tenant_flag,
+            'dtnews'=>$dtnews
+        );
+        return view('tenant.dash.index', $content);
+    }
+
+    public function getGraph(Request $request)
+    {
+        if($_POST)
+        {
+            $tenant_no = Session::get('tenant_df');
+            
+            $lot_no = $request->lot_no;
+            $m = array(1=>'Jan',
+                2=>'Feb',
+                3=>'Mar',
+                4=>'Apr',
+                5=>'May',
+                6=>'Jun',
+                7=>'Jul',
+                8=>'Aug',
+                9=>'Sep',
+                10=>'Oct',
+                11=>'Nov',
+                12=>'Dec');
+            $idm = array();
+            $lm = array();
+            $lu = array();
+            $lh = array();
+
+            $business_no = Session::get('business_no');
+            $criteria = array(
+                'business_no' => $business_no, 
+                'tenant_no'   => $tenant_no
+            );
+
+            $dataTenancy = DB::table('pm_tenancy')
+                ->where($criteria)
+                ->get();
+            if (!empty($dataTenancy))
+            {
+                $entity = $dataTenancy[0]->entity_cd;
+                $project = $dataTenancy[0]->project_no;
+
+                $dataEUsage = $this->getEusage_by_lotno($entity,$project,$tenant_no,$lot_no);
+                if (!empty($dataEUsage))
+                {
+                    foreach ($dataEUsage as $graph) {
+                        $idm[] = $graph->meter_id;
+                        $lm[] = $m[$graph->Monthly].' '.$graph->Yearly ;
+                        $lu[] = $graph->usages;
+                        $lh[] = $graph->usage_highs;
+                    }
+                    
+                }
+                $aDs = array(
+                    array(
+                        'label'=>"Lewat Waktu Beban Puncak 22:00 - 18:00",
+                        'backgroundColor'=>"#48A497",
+                        'strokeColor'=>"#48A4D1",
+                        'pointColor'=>"#3b8bba",
+                        'pointStrokeColor'=>"rgba(60,141,188,1)",
+                        'pointHighlightFill'=>"#fff",
+                        'pointHighlightStroke'=>"rgba(60,141,188,1)",
+                        'data'=>$lu
+                    ),
+                    array(
+                        'label'=>"Waktu Beban Puncak 18:00 - 22:00",
+                        'backgroundColor'=>"rgba(73,188,170,0.4)",
+                        'strokeColor'=>"rgba(72,174,209,0.4)",
+                        'pointColor'=>"rgba(210, 214, 222, 1)",
+                        'pointStrokeColor'=>"#c1c7d1",
+                        'pointHighlightFill'=>"#fff",
+                        'pointHighlightStroke'=>"rgba(220,220,220,1)",
+                        'data'=>$lh
+                    )
+                );
+                $aRet = array('meterid'=>$idm, 'chartdt'=>array('labels'=>$lm,'datasets'=>$aDs));
+            } else {
+                $aRet = array();
+            }
+            echo json_encode($aRet);
+        }
+    }
+
+    public function getGraphMeterId(Request $request)
+    {
+        $tenant_no = Session::get('tenant_df');
+        $meteridcombo = $request->meteridcombo;
+        $yearcombo = $request->yearcombo;
+        $utility = $request->utility;
+        
+        $m = array(1=>'Jan',
+            2=>'Feb',
+            3=>'Mar',
+            4=>'Apr',
+            5=>'May',
+            6=>'Jun',
+            7=>'Jul',
+            8=>'Aug',
+            9=>'Sep',
+            10=>'Oct',
+            11=>'Nov',
+            12=>'Dec');
+        $idm = array();
+        $lm = array();
+        $lu = array();
+        
+
+        $business_no = Session::get('business_no');
+        $criteria = array(
+            'business_no' => $business_no, 
+            'tenant_no'   => $tenant_no
+        );
+
+        $dataTenancy = DB::table('pm_tenancy')
+            ->where($criteria)
+            ->get();
+        if (!empty($dataTenancy))
+        {
+            $entity = $dataTenancy[0]->entity_cd;
+            $project = $dataTenancy[0]->project_no;
+
+            $dataEUsage = $this->getEusagehis_by_lotmeter($entity,$tenant_no,$meteridcombo, $yearcombo, $utility);
+            
+            if (!empty($dataEUsage))
+            {
+                foreach ($dataEUsage as $graph) {
+                    $idm[] = $graph->meter_id;
+                    $lm[] = $m[$graph->Monthly].' '.$graph->Yearly ;
+                    $lu[] = $graph->usages;
+                }
+                
+            }
+            $aDs = array(
+                array(
+                    'label' => 'Monthly Usage',
+            
+                    // warna utama area & bar
+                    'backgroundColor' => '#D1BF8F',
+            
+                    // garis line chart
+                    'borderColor' => '#BDA870',
+            
+                    // titik line chart
+                    'pointBackgroundColor' => '#BDA870',
+            
+                    // border titik
+                    'pointBorderColor' => '#FFFFFF',
+            
+                    // hover
+                    'pointHoverBackgroundColor' => '#E5D6AB',
+                    'pointHoverBorderColor' => '#C7B582',
+            
+                    // border bar chart
+                    'borderWidth' => 2,
+            
+                    'pointRadius' => 5,
+                    'pointHoverRadius' => 7,
+            
+                    'fill' => true,
+            
+                    'data' => $lu
+                )
+            );
+            $aRet = array('meterid'=>$idm, 'chartdt'=>array('labels'=>$lm,'datasets'=>$aDs));
+        } else {
+            $aRet = array();
+        }
+        echo json_encode($aRet);
+    }
+
+    /**
+     * Combo unit (lot) untuk dashboard. Tenant biasa: unit miliknya; mode semua tenant:
+     * unit dari seluruh tenancy aktif, diberi label tenant_no-nya.
+     */
+    public function getLotNo($tenant_no=null)
+    {
+        $list_lot = '';
+        foreach (TenantScope::tenancies() as $tenancy) {
+            $crit1 = array(
+                'entity_cd'=>$tenancy->entity_cd,
+                'project_no'=>$tenancy->project_no,
+                'business_id'=>$tenancy->business_no,
+                'tenant_no'=>$tenancy->tenant_no
+            );
+
+            $tenant_lot = DB::connection('TWP')
+                ->table('mgr.v_tenant_lot')
+                ->where($crit1)
+                ->get();
+
+            foreach ($tenant_lot as $datalot) {
+                $label = TenantScope::all() ? $tenancy->tenant_no.' - '.$datalot->descs : $datalot->descs;
+                $list_lot.='<option value="'.$datalot->lot_no.'" >'.$label.'</option>';
+            }
+        }
+        return $list_lot;
+    }
+
+public function getEusage_by_lotno($entity="", $project="", $tenant_no="", $lotno="")
+    {
+        $sql = "SELECT
+            a.meter_id,
+            DAY(a.read_date) AS Daily,
+            MONTH(a.read_date) AS Monthly,
+            YEAR(a.read_date) AS Yearly,
+            a.usage AS usages,
+            a.usage_high AS usage_highs,
+            b.lot_no 
+            FROM
+            mgr.pm_meter_dtl a 
+            INNER JOIN
+                -- mgr.pm_lot_meter_new b 
+                mgr.pm_lot_meter b 
+                ON a.entity_cd = b.entity_cd
+                AND a.project_no = b.project_no 
+                AND a.meter_id = b.meter_id 
+            INNER JOIN
+                mgr.pl_project d 
+                ON a.entity_cd = d.entity_cd
+                AND a.project_no = d.project_no 
+            WHERE a.meter_type='E' AND a.entity_cd='$entity' and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
+
+        $query = DB::connection('TWP')->select($sql);
+        return $query;
+    }
+
+public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="", $year="", $utility = "")
+    {
+        $sql = "SELECT
+                a.meter_id,
+                DAY(a.read_date) AS Daily,
+                MONTH(a.read_date) AS Monthly,
+                YEAR(a.read_date) AS Yearly,
+                a.usage AS usages
+            FROM mgr.pm_meter_dtl_his a
+            WHERE a.entity_cd = '$entity'
+            AND " . TenantScope::sqlTenantNo('a.debtor_acct') . "
+            AND a.meter_id = '$meterId'
+            AND a.meter_cd LIKE '{$utility}%'
+            AND YEAR(a.read_date) = $year
+            ORDER BY a.read_date";
+        $query = DB::connection('TWP')->select($sql);
+
+        return $query;
+    }
+
+    public function get_proforma_by_tenant($entity="", $project="", $tenant_no="")
+    {
+        $query = DB::connection('TWP')
+                ->table('mgr.ar_bill')
+                ->where('entity_cd', $entity)
+                ->where('project_no', $project)
+                ->whereIn('debtor_acct', TenantScope::tenantNos())
+                ->orderBy('doc_date', 'desc')
+                ->get();
+        return $query;
+    }
+
+    public function get_invoice_by_tenant($entity="", $project="", $tenant_no="")
+    {
+        $query = DB::connection('TWP')
+                ->table('mgr.ar_ledger')
+                ->where('entity_cd', $entity)
+                ->where('project_no', $project)
+                ->whereIn('class', ['I', 'N'])
+                ->where('mbal_amt', '>', 0)
+                ->whereIn('debtor_acct', TenantScope::tenantNos())
+                ->get();
+        return $query;
+    }
+
+    function get_statusIFCA($statusid="")
+    {
+        $color = '';
+        $status = '';
+        switch ($statusid) {
+            case 'R':
+                $status = "Submit";
+                $color = "badge-outline-info";
+                break;
+            case 'O':
+                $status = "Open";
+                $color = "badge-outline-info";
+                break;
+            case 'A':
+                $status = "Accepted";
+                $color = "badge-outline-info";
+                break;
+            case 'S':
+                $status = "Survey";
+                $color = "badge-outline-info";
+                break;
+            case 'P':
+                $status = "Process";
+                $color = "badge-outline-info";
+                break;
+            case 'F':
+                $status = "Confirm";
+                $color = "badge-outline-info";
+                break;
+            case 'M':
+                $status = "Modify";
+                $color = "badge-outline-info";
+                break;
+            case 'Z':
+                $status = "Charged Approved";
+                $color = "badge-outline-warning";
+                break;
+            case 'Y':
+                $status = "Approve";
+                $color = "badge-outline-success";         
+                break;      
+            case 'C':
+                $status = "Close";
+                $color = "badge-outline-success";
+                break;
+            case 'X':
+                $status = "Cancel";
+                $color = "badge-outline-default";         
+                break;
+        }
+
+        if(!is_null($color)) {
+            $rst = array(
+                'color'=>$color,
+                'status'=>$status
+            );
+            return $rst;
+        } else {
+            return '';
+        }
+    }
+
+    function get_statusOT($statusid = "", $startOvertime = null, $endOvertime = null)
+    {
+        $now = date('Y-m-d H:i:s');
+
+        switch ($statusid) {
+
+            case 'N':
+                return [
+                    'color'  => 'badge-outline-info',
+                    'status' => 'Process'
+                ];
+
+            case 'A':
+
+                if ($now >= $startOvertime && $now <= $endOvertime) {
+                    return [
+                        'color'  => 'badge-outline-primary',
+                        'status' => 'Activated'
+                    ];
+                }
+
+                if ($now > $endOvertime) {
+                    return [
+                        'color'  => 'badge-outline-dark',
+                        'status' => 'Ended'
+                    ];
+                }
+
+                return [
+                    'color'  => 'badge-outline-success',
+                    'status' => 'Scheduled'
+                ];
+
+            case 'X':
+                return [
+                    'color'  => 'badge-outline-warning',
+                    'status' => 'Canceled'
+                ];
+
+            case 'Z':
+                return [
+                    'color'  => 'badge-outline-danger',
+                    'status' => 'Closed'
+                ];
+        }
+
+        return null;
+    }
+
+    function gen(Request $request)
+    {
+        $file = $request->chart;
+        $lot_no = $request->lot_no;
+        $up = 'data://'.substr($file, 5);
+        $bin = file_get_contents($up);
+        $target_dir = './storage/file_generate/chart/';
+        if (!is_dir($target_dir)) {
+            mkdir($target_dir);
+        }
+        $target_file = $target_dir . 'eu_'. Session::get('Tuser_id').'.png';
+
+        $na = 'eu_'.Session::get('Tuser_id').'.png';
+        file_put_contents($target_file, $bin);
+        echo url('tenant/dash/export/'.$na.'/'.$lot_no);
+    }
+
+    function export($nm = null, $lot_no=null)
+    {
+        if(!empty($nm) && !empty($lot_no))
+        {
+            $tenant_no = Session::get('tenant_df');
+            $business_no = Session::get('business_no');
+            $criteria = array(
+                'business_no' => $business_no, 
+                'tenant_no' => $tenant_no
+            );
+            $dtaTenancy = DB::table('pm_tenancy')->where($criteria)->get();
+            if(!empty($dtaTenancy))
+            {
+                $entity = $dtaTenancy[0]->entity_cd;
+                $project = $dtaTenancy[0]->project_no;
+                $dtaGra = $this->getEusage_by_lotno($entity,$project,$tenant_no,$lot_no);
+                if(!empty($dtaGra))
+                {
+                    $le = '';
+                    foreach ($dtaGra as $Eusage) {
+                        $mn = date('M', mktime(0,0,0,$Eusage->Monthly,10)). ' '. $Eusage->Yearly;
+                        $le.='<tr class="odd">';
+                        $le.='<td align="center">'.$mn.'</td>';
+                        $le.='<td align="center">'.number_format($Eusage->usages,2).'</td>';
+                        $le.='<td align="center">'.number_format($Eusage->usage_highs,2).'</td>';
+                        $le.='</tr>';
+                    }
+                    $name_file = 'Electric_Usage_'.$lot_no;
+                    $nama_gbr = $nm;
+
+                    $content = array(
+                        'image' => $nama_gbr,
+                        'cl' => $le
+                    );
+
+                    $pdf = PDF::loadView('tenant.export.elchart', $content)
+                        ->setOptions([
+                            'defaultFont' => 'sans-serif',
+                            'isPhpEnabled' => false,
+                            'isJavascriptEnabled' => true,
+                            'isRemoteEnabled' => true,
+                            'defaultPaperSize' => 'A4',
+                        ]);
+                    return $pdf->download($name_file.'.pdf');
+                }
+            }
+        }
+    }
+
+    public function cancelOT(Request $request)
+    {
+        $id = $request->id;
+        $msg = "";
+
+        $data_overtime = DB::table('ot_trx')
+            ->where('id', $id)
+            ->get();
+        if ($data_overtime) {
+            $crit = array('id' => $id);
+            $data = array('status' => 'X');
+
+            $query = DB::table('ot_trx')
+                ->where($crit)
+                ->update($data);
+            if ($query != "1") {
+                $msg = $query;
+                $st  = 'Fail';
+            } else {
+                $msg = "Data has been updated successfully";
+                $st  = 'OK';
+            }
+        }
+
+        $callback = array(
+            "pesan" => $msg,
+            "status" => $st
+        );
+        echo json_encode($callback);
+    }
+
+    public function getMeterIdByUtility(Request $request)
+    {
+        $tenant_no = Session::get('tenant_df');
+        $utility = $request->utility;
+
+        $business_no = Session::get('business_no');
+
+        $criteria = array(
+            'business_no' => $business_no,
+            'tenant_no'   => $tenant_no
+        );
+
+        $dataTenancy = DB::table('pm_tenancy')
+            ->where($criteria)
+            ->get();
+
+        if ($dataTenancy->isEmpty()) {
+            return response()->json([
+                'status' => false,
+                'html'   => ''
+            ]);
+        }
+
+        $entity = $dataTenancy[0]->entity_cd;
+
+        $meters = DB::connection('TWP')
+            ->table('mgr.pm_meter_dtl_his')
+            ->select('meter_id', 'lot_no', 'debtor_acct')
+            ->where('entity_cd', $entity)
+            ->whereIn('debtor_acct', TenantScope::tenantNos())
+            ->where('meter_cd', 'LIKE', $utility . '%')
+            ->distinct()
+            ->orderBy('debtor_acct')
+            ->orderBy('lot_no')
+            ->orderBy('meter_id')
+            ->get();
+
+        $html = '';
+
+        foreach ($meters as $meter) {
+            $prefix = TenantScope::all() ? $meter->debtor_acct . ' - ' : '';
+            $html .= '<option value="' . $meter->meter_id . '">'
+                . $prefix . $meter->lot_no . ' - ' . $meter->meter_id
+                . '</option>';
+        }
+
+        return response()->json([
+            'status' => true,
+            'html'   => $html
+        ]);
+    }
+}

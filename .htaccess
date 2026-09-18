@@ -1,0 +1,36 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Force HTTPS (sama seperti .htaccess lama di demo_twp)
+    RewriteCond %{HTTPS} !=on
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # URL project lama (/webadmin/..., /webtenant/...) selalu ke Laravel (route redirect ke "/"),
+    # walaupun folder lama dengan nama itu masih ada di server.
+    RewriteRule ^(webadmin|webtenant)(/.*)?$ index.php [L]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # File statis (assets/, images/, img/, public/, storage/) dilayani langsung oleh Apache.
+    # Sisanya (/admin/..., /tenant/..., /api/...) ke front controller Laravel.
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# Deny access to .env file
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
