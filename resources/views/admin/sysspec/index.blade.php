@@ -75,7 +75,7 @@
                                     <div class="col-6 col-sm-4">
                                         <img id="picturebox6" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image6; ?>" itemprop="thumbnail" alt="Image description">
                                         <input type="file" id="imglogin6" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(6,this,'tenant')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>(* Only Jpg, Png allowe)</p>
                                         <input type="hidden" name="namagambar" id="pathgambar6" value="<?php echo $image6; ?>">
                                         <input type="hidden" name="picname" id="picname6">
                                     </div>
