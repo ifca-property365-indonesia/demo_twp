@@ -22,3 +22,12 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# upload user (bukan bagian kode)
+/storage/file_ticket
+/storage/file_generate
+/img/user
+/images/user
+/images/newspromo
+/images/meterchart
+/images/slides
