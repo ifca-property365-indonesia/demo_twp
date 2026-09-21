@@ -18,7 +18,7 @@
             <!-- NEWS FEED -->
             <li class="nk-menu-item has-sub {{ request()->is('admin/news*') ? 'active current-page' : '' }}">
                 <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-list-thumb"></em></span><span class="nk-menu-text">News Feed</span>
+                    <span class="nk-menu-icon"><em class="icon ni ni-notice"></em></span><span class="nk-menu-text">News Feed</span>
                 </a>
                 <ul class="nk-menu-sub" style="{{ request()->is('admin/news*') ? 'display: block;' : '' }}">
                     <li class="nk-menu-item {{ request()->is('admin/news/form/*') ? 'active' : '' }}">
@@ -33,7 +33,7 @@
             <!-- ONLINE SURVEY BARU -->
             <li class="nk-menu-item has-sub {{ request()->is('admin/usersurvey*') ? 'active current-page' : '' }}">
                 <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-edit"></em></span><span class="nk-menu-text">Online Survey Baru</span>
+                    <span class="nk-menu-icon"><em class="icon ni ni-list-check"></em></span><span class="nk-menu-text">Online Survey</span>
                 </a>
                 <ul class="nk-menu-sub" style="{{ request()->is('admin/usersurvey*') ? 'display: block;' : '' }}">
                     <li class="nk-menu-item {{ (request()->fullUrl() == url('/admin/usersurvey') || request()->fullUrl() == url('/admin/usersurvey/')) ? 'active' : '' }}">
@@ -73,7 +73,7 @@
             @php $passwordOpen = request()->is('admin/account/reset*') || request()->is('admin/systemspec/defaultpass*'); @endphp
             <li class="nk-menu-item has-sub {{ $passwordOpen ? 'active current-page' : '' }}">
                 <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-account-setting"></em></span><span class="nk-menu-text">Password</span>
+                    <span class="nk-menu-icon"><em class="icon ni ni-lock-alt"></em></span><span class="nk-menu-text">Password</span>
                 </a>
                 <ul class="nk-menu-sub" style="{{ $passwordOpen ? 'display: block;' : '' }}">
                     <li class="nk-menu-item {{ request()->is('admin/account/reset*') ? 'active' : '' }}">

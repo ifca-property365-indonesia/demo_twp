@@ -37,13 +37,13 @@
                     @unless(session('Tflag') == 'O')
                     <li class="nk-menu-item">
                         <a href="{{ url('/tenant/proforma') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-report-profit"></em></span>
+                            <span class="nk-menu-icon"><em class="icon ni ni-file-text"></em></span>
                             <span class="nk-menu-text"> Proforma Invoice</span>
                         </a>
                     </li><!-- .nk-menu-item -->
                     <li class="nk-menu-item">
                         <a href="{{ url('/tenant/invoice') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-report-profit"></em></span>
+                            <span class="nk-menu-icon"><em class="icon ni ni-wallet"></em></span>
                             <span class="nk-menu-text"> Invoice Outstanding</span>
                         </a>
                     </li><!-- .nk-menu-item -->
@@ -66,19 +66,19 @@
                     </li><!-- .nk-menu-item -->
                     <li class="nk-menu-item">
                         <a href="{{ url('/tenant/news') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-template-fill"></em></span>
+                            <span class="nk-menu-icon"><em class="icon ni ni-notice"></em></span>
                             <span class="nk-menu-text"> News</span>
                         </a>
                     </li><!-- .nk-menu-item -->
                     <li class="nk-menu-item">
                         <a href="{{ url('/tenant/usersurvey/index') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-edit"></em></span>
+                            <span class="nk-menu-icon"><em class="icon ni ni-list-check"></em></span>
                             <span class="nk-menu-text"> Online Survey</span>
                         </a>
                     </li><!-- .nk-menu-item -->
                     <li class="nk-menu-item">
                         <a href="{{ url('/tenant/permit/index') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-edit"></em></span>
+                            <span class="nk-menu-icon"><em class="icon ni ni-file-check"></em></span>
                             <span class="nk-menu-text"> Letter Permit</span>
                         </a>
                     </li><!-- .nk-menu-item -->
