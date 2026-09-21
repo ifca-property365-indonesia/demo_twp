@@ -30,12 +30,12 @@ class TicketController extends Controller
             'entity_cd' => $data_tenancy[0]->entity_cd,
             'project_no' => $data_tenancy[0]->project_no
         );
-        $dataspec = DB::connection('TWP')
+        $dataspec = DB::connection('dblive')
             ->table('mgr.sv_spec')
             ->where($crit_spec)
             ->get();
 
-        $complain_no = DB::connection('TWP')
+        $complain_no = DB::connection('dblive')
             ->table('mgr.sv_spec')
             ->where($crit_spec)
             ->max('complain_seq_no');
@@ -76,7 +76,7 @@ class TicketController extends Controller
             'entity_cd' => $ent,
             'project_no' => $prj
         );
-        $data = DB::connection('TWP')
+        $data = DB::connection('dblive')
                     ->table('mgr.sv_spec')
                     ->where($where)
                     ->get();
@@ -90,7 +90,7 @@ class TicketController extends Controller
             'project_no' => $request->prj,
         ];
 
-        $data = DB::connection('TWP')
+        $data = DB::connection('dblive')
             ->table('mgr.sv_spec')
             ->where($where)
             ->first();
@@ -108,7 +108,7 @@ class TicketController extends Controller
             'entity_cd' => $ent,
             'year'  => date("Y")
         );
-        $data_cat = DB::connection('TWP')
+        $data_cat = DB::connection('dblive')
             ->table('mgr.cf_document_ctl_dtl')
             ->where($crit_cat)
             ->get();
@@ -149,7 +149,7 @@ class TicketController extends Controller
                 echo('<option></option>');
             } else {
                 $crit_cat = array('complain_type' => $ticket_type);
-                $data_cat = DB::connection('TWP')
+                $data_cat = DB::connection('dblive')
                     ->table('mgr.sv_category')
                     ->whereIn('category_cd', ['ENG', 'HS', 'OT'])
                     ->get();
@@ -168,7 +168,7 @@ class TicketController extends Controller
     public function getCatEdit($complain_type, $category_cd)
     {
         $crit_cat = array('complain_type' => $complain_type);
-        $data_cat = DB::connection('TWP')
+        $data_cat = DB::connection('dblive')
             ->table('mgr.sv_category')
             ->whereIn('category_cd', ['ENG', 'HS', 'OT'])
             ->get();
@@ -221,7 +221,7 @@ class TicketController extends Controller
     /** Unit (lot) milik satu tenancy dari SQL Server (pm_lot join pm_tenant_lot). */
     private function lotsOfTenancy($entity, $project, $tenant_no)
     {
-        return DB::connection('TWP')
+        return DB::connection('dblive')
             ->table('mgr.pm_lot AS l')
             ->join('mgr.pm_tenant_lot AS tl', function ($join) {
                 $join->on('l.entity_cd', '=', 'tl.entity_cd')
@@ -372,7 +372,7 @@ class TicketController extends Controller
             $webuser = 'TWP';
 
             $crit_spec = ['category_cd' => $category];
-            $dataspec = DB::connection('TWP')
+            $dataspec = DB::connection('dblive')
                 ->table('mgr.sv_category')
                 ->where($crit_spec)
                 ->whereIn('category_cd', ['ENG', 'HS', 'OT'])
@@ -386,7 +386,7 @@ class TicketController extends Controller
                 throw new \Exception("Tenant tidak ditemukan: $tenant_no");
             }
             
-            $dataopen = DB::connection('TWP')
+            $dataopen = DB::connection('dblive')
                 ->table('mgr.cf_document_ctl')
                 ->where(['entity_cd' => $entity])
                 ->get();
@@ -398,7 +398,7 @@ class TicketController extends Controller
             $next_doc_noSave = $dataopen[0]->next_doc_no;
             $Type_format1 = $dataopen[0]->type_format;
             
-            $dataopen2 = DB::connection('TWP')
+            $dataopen2 = DB::connection('dblive')
                 ->table('mgr.cf_document_format')
                 ->where(['rowId' => $next_doc_noSave, 'type_format' => $Type_format1])
                 ->get();
@@ -484,17 +484,17 @@ class TicketController extends Controller
                 'audit_date'      => date('d M Y H:i:s'),
             );
 
-            $checkdataServ1 = DB::connection('TWP')
+            $checkdataServ1 = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
                 ->where($critedit2)
                 ->get();
 
             if (count($checkdataServ1) == 0) {
-                DB::connection('TWP')
+                DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
                 ->insert($dataServ1);
             } else {
-                DB::connection('TWP')
+                DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
                 ->where($critedit2)
                 ->update($dataServ1);
@@ -521,13 +521,13 @@ class TicketController extends Controller
                 'audit_date'     => date('d M Y H:i:s')
             );
 
-            $checkdataServ2 = DB::connection('TWP')
+            $checkdataServ2 = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi_dt')
                 ->where($critedit2)
                 ->get();
             
             if (count($checkdataServ2) == 0) {
-                $query = DB::connection('TWP')
+                $query = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi_dt')
                 ->insert($dataServ2);
                 if ($query != "OK") {
@@ -538,7 +538,7 @@ class TicketController extends Controller
                     $st = 'OK';
                 }
             } else {
-                $query = DB::connection('TWP')
+                $query = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi_dt')
                 ->where($critedit2)
                 ->update($dataServ2);
@@ -562,7 +562,7 @@ class TicketController extends Controller
                 );
                 
 
-                DB::connection('TWP')
+                DB::connection('dblive')
                     ->table('mgr.sv_spec')
                     ->where($crit)
                     ->update($dataCompl);
@@ -575,7 +575,7 @@ class TicketController extends Controller
                     'year'  => date("Y")
                 );
 
-                DB::connection('TWP')
+                DB::connection('dblive')
                     ->table('mgr.cf_document_ctl_dtl')
                     ->where($crit2)
                     ->update($dataCompl2);
@@ -588,7 +588,7 @@ class TicketController extends Controller
                 'project_no'=>$project
             );
 
-            $dataspec = DB::connection('TWP')
+            $dataspec = DB::connection('dblive')
                 ->table('mgr.sv_spec')
                 ->where($crit_spec)
                 ->get();
@@ -607,7 +607,7 @@ class TicketController extends Controller
             $body.='TWP System<br>';
             
             $subj = 'Ticket number '.$number.' opened';
-            // DB::connection('TWP')->statement("exec mgr.x_send_mail_twp '$email','$subj','$body'");
+            // DB::connection('dblive')->statement("exec mgr.x_send_mail_twp '$email','$subj','$body'");
 
             $callback = array(
                 "pesan" => $msg,
@@ -636,7 +636,7 @@ class TicketController extends Controller
 
     public function getHargaItem()
     {
-        $data = DB::connection('TWP')
+        $data = DB::connection('dblive')
             ->table('mgr.sv_charge')
             ->get();
 
@@ -677,7 +677,7 @@ class TicketController extends Controller
 
     public function getHargaJasa()
     {
-        $data = DB::connection('TWP')
+        $data = DB::connection('dblive')
             ->table('mgr.sv_master')
             ->get();
 

@@ -10,6 +10,14 @@
         </div><!-- .nk-block-head -->
     	<div class="card card-preview">
     		<div class="card-inner">
+				<div class="card-title-group">
+					<div class="card-title">
+						<h6 class="title">
+							<span class="mr-2">Tenant Ticket</span>
+						</h6>
+					</div>
+				</div>
+				<br/>
     			<form class="form-horizontal" id="frm" enctype="multipart/form-data" method="POST" action="">
     				@csrf
 					<div class="col-md-12">
@@ -45,7 +53,7 @@
 	                    	<div class="col-6">
 	                    		<label class="col-xs-2 form-label">Floor <span class="text-danger">*</span></label>
 		                    	<div class="col-xs-10">
-		                        	<input type="text" class="form-control" value='<?php //echo $floor; ?>' name="floor" id="floor" readonly="readonly" />  
+		                        	<input type="text" class="form-control" value='' name="floor" id="floor" readonly="readonly" />  
 		                    	</div>
 	                    	</div>
 	                    </div>

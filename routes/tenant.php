@@ -25,6 +25,7 @@ use App\Http\Controllers\Tenant\OnlineSurveyController as OnlineSurvey;
 use App\Http\Controllers\Tenant\BillingOutstandingController as BillingOutstanding;
 use App\Http\Controllers\Tenant\InvoiceController as Invoice;
 use App\Http\Controllers\Tenant\UserSurveyController as UserSurvey;
+use App\Http\Controllers\Tenant\PermitController as Permit;
 
 // /tenant -> dashboard kalau sudah login, kalau belum ke halaman login "/"
 Route::get('/', [Login::class, 'index']);
@@ -95,4 +96,9 @@ Route::group(['middleware' => ['tenant-auth', 'revalidate']], function () {
 	// UserSurveyController
 	Route::get('/usersurvey/index', [UserSurvey::class, 'index']);
 	Route::post('/usersurvey/submit', [UserSurvey::class, 'submit']);
+
+	// PermitController
+	Route::get('/permit/index', [Permit::class, 'index']);
+	Route::post('/permit/workpermit', [Permit::class, 'workpermit']);
+	Route::post('/permit/permitofgoods', [Permit::class, 'permitofgoods']);
 });

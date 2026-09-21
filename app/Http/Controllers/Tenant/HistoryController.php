@@ -80,10 +80,10 @@ class HistoryController extends Controller
                     dt.complain_no DESC
             ";
 
-            $response = DB::connection('TWP')->select($sql);
+            $response = DB::connection('dblive')->select($sql);
 
             // Ambil master category dari database TWP
-            $categories = DB::connection('TWP')
+            $categories = DB::connection('dblive')
                 ->table('mgr.sv_category')
                 ->pluck('descs', 'category_cd');
 
@@ -249,7 +249,7 @@ class HistoryController extends Controller
 						GROUP BY pp.descs, ad.name, ad.address1, ad.address2, ad.address3, ad.post_cd, al.doc_no, al.due_date, al.descs, al.fdoc_amt, al.trx_mode, al.trx_type, al.entity_cd, al.project_no, al.debtor_acct, al.mcurr_cd, al.currency_cd, al.currency_rate, ars.age1, ars.age2, ars.age3, ars.age4, ars.age5, ars.age6, al.fbal_amt, al.old_ref_no, al.start_date,  al.end_date, al.doc_date, ac.credit_date
 						ORDER BY al.doc_date DESC";
 		            // 14 Sep 2021
-		        	$response = DB::connection('TWP')->select($sql);
+		        	$response = DB::connection('dblive')->select($sql);
 		            return Datatables::of($response)
 		                ->make(true);
 	            }
@@ -268,7 +268,7 @@ class HistoryController extends Controller
 						GROUP BY pp.descs, ad.name, ad.address1, ad.address2, ad.address3, ad.post_cd, al.doc_no, al.due_date, al.descs, al.fdoc_amt, al.trx_mode, al.trx_type, al.entity_cd, al.project_no, al.debtor_acct, al.mcurr_cd, al.currency_cd, al.currency_rate, ars.age1, ars.age2, ars.age3, ars.age4, ars.age5, ars.age6, al.fbal_amt, al.old_ref_no, al.start_date,  al.end_date, al.doc_date, ac.credit_date
 						ORDER BY al.doc_date DESC";
 		            // 14 Sep 2021
-		        	$response = DB::connection('TWP')->select($sql);
+		        	$response = DB::connection('dblive')->select($sql);
 		            return Datatables::of($response)
 		                ->make(true);
 	            }
@@ -321,7 +321,7 @@ class HistoryController extends Controller
 				AND al.doc_date >= '$start' AND al.doc_date <= '$end'
 				GROUP BY pp.descs, ad.name, ad.address1, ad.address2, ad.address3, ad.post_cd, al.doc_no, al.due_date, al.descs, al.fdoc_amt, al.trx_mode, al.trx_type, al.entity_cd, al.project_no, al.debtor_acct, al.mcurr_cd, al.currency_cd, al.currency_rate, ars.age1, ars.age2, ars.age3, ars.age4, ars.age5, ars.age6, al.fbal_amt, al.old_ref_no, al.start_date,  al.end_date, al.doc_date, ac.credit_date
 				ORDER BY al.doc_date DESC";
-	        $query = DB::connection('TWP')->select($sql);
+	        $query = DB::connection('dblive')->select($sql);
 	    }
 
         if (count($query) > 0)
@@ -359,7 +359,7 @@ class HistoryController extends Controller
             $start_date = $request->start_date;
             $end_date   = $request->end_date;
 
-            $query = DB::connection('TWP')
+            $query = DB::connection('dblive')
                 ->table('mgr.ar_ledger')
                 ->where('entity_cd', $entity)
                 ->where('project_no', $project)

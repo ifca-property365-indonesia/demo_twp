@@ -121,7 +121,7 @@ class DashController extends Controller
         $list_hticket = "";
         $i = 1;
 
-        $htenants = DB::connection('TWP')
+        $htenants = DB::connection('dblive')
     ->table('mgr.sv_entry_multi_dt as dt')
     ->leftJoin('mgr.sv_entry_multi as m', 'm.complain_no', '=', 'dt.complain_no')
     ->whereIn('m.debtor_acct', TenantScope::tenantNos())
@@ -141,7 +141,7 @@ if (!empty($htenants)) {
         // =========================
         $billingType = 'Non-Rechargeable';
 
-        $report = DB::connection('TWP')
+        $report = DB::connection('dblive')
             ->table('mgr.sv_entry_multi_dt')
             ->where('complain_no', $tenant->complain_no)
             ->whereIn('debtor_acct', TenantScope::tenantNos())
@@ -150,7 +150,7 @@ if (!empty($htenants)) {
 
         if ($report) {
 
-            $checkRecharge = DB::connection('TWP')
+            $checkRecharge = DB::connection('dblive')
                 ->table('mgr.sv_entry_dt')
                 ->where('report_no', $report->report_no)
                 ->first();
@@ -171,7 +171,7 @@ if (!empty($htenants)) {
             'category_cd' => $tenant->category_cd
         );
 
-        $data_category = DB::connection('TWP')
+        $data_category = DB::connection('dblive')
             ->table('mgr.sv_category')
             ->where($crit)
             ->get();
@@ -442,7 +442,7 @@ if (!empty($htenants)) {
                 'tenant_no'=>$tenancy->tenant_no
             );
 
-            $tenant_lot = DB::connection('TWP')
+            $tenant_lot = DB::connection('dblive')
                 ->table('mgr.v_tenant_lot')
                 ->where($crit1)
                 ->get();
@@ -479,7 +479,7 @@ public function getEusage_by_lotno($entity="", $project="", $tenant_no="", $lotn
                 AND a.project_no = d.project_no 
             WHERE a.meter_type='E' AND a.entity_cd='$entity' and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
 
-        $query = DB::connection('TWP')->select($sql);
+        $query = DB::connection('dblive')->select($sql);
         return $query;
     }
 
@@ -498,14 +498,14 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
             AND a.meter_cd LIKE '{$utility}%'
             AND YEAR(a.read_date) = $year
             ORDER BY a.read_date";
-        $query = DB::connection('TWP')->select($sql);
+        $query = DB::connection('dblive')->select($sql);
 
         return $query;
     }
 
     public function get_proforma_by_tenant($entity="", $project="", $tenant_no="")
     {
-        $query = DB::connection('TWP')
+        $query = DB::connection('dblive')
                 ->table('mgr.ar_bill')
                 ->where('entity_cd', $entity)
                 ->where('project_no', $project)
@@ -517,7 +517,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
 
     public function get_invoice_by_tenant($entity="", $project="", $tenant_no="")
     {
-        $query = DB::connection('TWP')
+        $query = DB::connection('dblive')
                 ->table('mgr.ar_ledger')
                 ->where('entity_cd', $entity)
                 ->where('project_no', $project)
@@ -761,7 +761,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
 
         $entity = $dataTenancy[0]->entity_cd;
 
-        $meters = DB::connection('TWP')
+        $meters = DB::connection('dblive')
             ->table('mgr.pm_meter_dtl_his')
             ->select('meter_id', 'lot_no', 'debtor_acct')
             ->where('entity_cd', $entity)

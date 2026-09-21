@@ -34,7 +34,7 @@ class InvoiceController extends Controller
             $entity  = $dataTenancy->entity_cd;
             $project = $dataTenancy->project_no;
 
-            $bill = DB::connection('TWP')
+            $bill = DB::connection('dblive')
                 ->table('mgr.ar_bill')
                 ->where('entity_cd', $entity)
                 ->where('project_no', $project)
@@ -45,7 +45,7 @@ class InvoiceController extends Controller
             $no = 1;
             $totalOutstanding = 0;
 
-            $debtor = DB::connection('TWP')
+            $debtor = DB::connection('dblive')
                 ->table('mgr.ar_debtor')
                 ->whereIn('debtor_acct', TenantScope::tenantNos())
                 ->first();
@@ -127,7 +127,7 @@ class InvoiceController extends Controller
             $entity  = $dataTenancy->entity_cd;
             $project = $dataTenancy->project_no;
 
-            $data = DB::connection('TWP')
+            $data = DB::connection('dblive')
                 ->table('mgr.ar_ledger')
                 ->where('entity_cd', $entity)
                 ->where('project_no', $project)

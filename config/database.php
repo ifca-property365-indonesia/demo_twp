@@ -94,7 +94,7 @@ return [
         // SQL Server jbc_live - nama koneksi yang dipakai kode tenant
         // ODBC Driver 18 mewajibkan sertifikat tepercaya; server memakai self-signed,
         // jadi default trust_server_certificate = true (override via DB_TRUST_SERVER_CERTIFICATE2).
-        'TWP' => [
+        'dblive' => [
             'driver' => 'sqlsrv',
             'url' => env('DATABASE_URL2'),
             'host' => env('DB_HOST2'),

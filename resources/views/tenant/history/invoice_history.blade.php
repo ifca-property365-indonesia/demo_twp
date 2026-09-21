@@ -27,7 +27,7 @@
                     <div class="card-title-group">
                         <div class="card-title">
                             <h6 class="title">
-                                <span class="mr-2">Invoice</span>
+                                <span class="mr-2">Invoice History</span>
                             </h6>
                         </div>
                     </div>

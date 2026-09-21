@@ -11,6 +11,14 @@
         <div class="nk-block">
         	<div class="row g-gs">
 	            <div class="col-sm-12">
+					<div class="card-title-group">
+						<div class="card-title">
+							<h6 class="title">
+								<span class="mr-2">Ticket History</span>
+							</h6>
+						</div>
+					</div>
+					<br/>
 	                <form class="form form-horizontal form-validate" id="form_search" method="POST" action="" novalidate="novalidate">
 	                	@csrf
 	                    <div class="row">

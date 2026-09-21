@@ -15,6 +15,14 @@
                 <!-- SEPARATE CARD FOR EACH SURVEY ID -->
                 <div class="card card-preview mb-4">
                     <div class="card-inner">
+                        <div class="card-title-group">
+                            <div class="card-title">
+                                <h6 class="title">
+                                    <span class="mr-2">Take Survey</span>
+                                </h6>
+                            </div>
+                        </div>
+                        <br/>
                         <form id="frm{{ $survey->id }}">
                             <input type="hidden" name="survey_id" value="{{ $survey->id }}">
                             <input type="hidden" name="email" value="{{ auth()->user()->email ?? 'user@domain.com' }}">
@@ -77,6 +85,14 @@
             <!-- Empty State -->
             <div class="card card-preview">
                 <div class="card-inner">
+                    <div class="card-title-group">
+                        <div class="card-title">
+                            <h6 class="title">
+                                <span class="mr-2">Take Survey</span>
+                            </h6>
+                        </div>
+                    </div>
+                    <br/>
                     <p class="card-text badge badge-gray mb-0">No Survey Available</p>
                 </div>
             </div>

@@ -24,6 +24,14 @@
         <div class="nk-block">
             <div class="card card-preview">
                 <div class="card-inner">
+                    <div class="card-title-group">
+                        <div class="card-title">
+                            <h6 class="title">
+                                <span class="mr-2">News Feed</span>
+                            </h6>
+                        </div>
+                    </div>
+                    <br/>
                     <?php
                         if (!empty($datanewsfeed))
                         {

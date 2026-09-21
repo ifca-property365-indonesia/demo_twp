@@ -119,7 +119,7 @@ class BillingOutstandingController extends Controller
                 $list_hticket .= '<td>'.$i.'</td>';
                 $list_hticket .= '<td>'.$tenant->complain_no.'</td>';
                 $crit = array('category_cd' => $tenant->category_cd);
-                $data_category = DB::connection('TWP')
+                $data_category = DB::connection('dblive')
                     ->table('mgr.sv_category')
                     ->where($crit)
                     ->get();
@@ -289,7 +289,7 @@ class BillingOutstandingController extends Controller
                 'tenant_no'=>$tenancy->tenant_no
             );
 
-            $tenant_lot = DB::connection('TWP')
+            $tenant_lot = DB::connection('dblive')
                 ->table('mgr.v_tenant_lot')
                 ->where($crit1)
                 ->get();
@@ -327,7 +327,7 @@ class BillingOutstandingController extends Controller
             WHERE a.meter_type='E' AND a.entity_cd='$entity' and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
 
         
-        $query = DB::connection('TWP')->select($sql);
+        $query = DB::connection('dblive')->select($sql);
         return $query;
     }
 
@@ -351,7 +351,7 @@ class BillingOutstandingController extends Controller
             WHERE al.class='I' AND " . TenantScope::sqlTenantNo('al.debtor_acct') . " AND al.doc_date <= getdate() AND fbal_amt > 0
             GROUP BY pp.descs, ad.name, ad.address1, ad.address2, ad.address3, ad.post_cd, al.doc_no, al.due_date, al.descs, al.fdoc_amt, al.trx_mode, al.trx_type, al.entity_cd, al.project_no, al.debtor_acct, al.mcurr_cd, al.currency_cd, al.currency_rate, ars.age1, ars.age2, ars.age3, ars.age4, ars.age5, ars.age6, al.fbal_amt, al.old_ref_no, al.start_date,  al.end_date, al.doc_date  
             HAVING al.fdoc_amt - isnull(sum(ac.trx_amt),0) > 0";
-        $query = DB::connection('TWP')->select($sql);
+        $query = DB::connection('dblive')->select($sql);
         return $query;
     }
 
