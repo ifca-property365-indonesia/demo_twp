@@ -1,120 +1,82 @@
 @extends('tenant.template.base')
-@section('content')
-<style>
-    form[id^="frm"] {
-        border: 1px solid #e5e5e5;
-        border-radius: 5px;
-        padding: 20px;
-        margin-bottom: 25px;
-    }
 
-    form[id^="frm"]:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-    }
-</style>
-	<div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">Take Survey</h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-        <div class="nk-block">
-            <div class="card card-preview">
-                <div class="card-inner">
-                	<?php
-                        if (!empty($dP))
-                        {
-                            echo $dP;
-                        }
-                        else {
-                        	echo "<p class='card-text badge badge-gray'>No Survey Available</p>";
-                        }
-                    ?>
+@section('title', 'Online Survey')
+
+@section('content')
+    <div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">Take Survey</h3>
+                </div>
+            </div>
+        </div>
+        <div class="page-block">
+            <div class="card">
+                <div class="card-body survey-forms">
+                    @if (!empty($dP))
+                        {!! $dP !!}
+                    @else
+                        <div class="text-center py-5 text-body-secondary">
+                            <i class="cil-task fs-1 d-block mb-2"></i>
+                            No survey available.
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
     </div>
-    <script type="text/javascript">
-        $(document).ready(function(){
-            $('input[type="radio"]').click(function() 
-            {
-                if ($(this).data("ada") == true) 
-                {
-                    $("#remarks").html("");
-                    $("#remarks").prop("disabled", false);
-                    $("#remarks").focus();
-                } else
-                {
-                    $("#remarks").html("");
-                    $("#remarks").prop("disabled", true);
-                }
-            });
-        });
+@endsection
 
-        function generateButton(publishId, questionId) {
-            var buttonId = 'btnSave' + publishId; // Generate button ID
-            var button = '<button type="button" id="' + buttonId + '" data-p="' + publishId + '" data-q="' + questionId + '" class="btn btn-primary">Submit</button>';
-            return button;
-        }
+@push('styles')
+<style>
+    .survey-forms form[id^="frm"] { border: 1px solid var(--cui-border-color); border-radius: .5rem; padding: 1.25rem; margin-bottom: 1.5rem; }
+    .survey-forms form[id^="frm"]:last-child { margin-bottom: 0; }
+</style>
+@endpush
 
-        $(document).on('click', '[id^="btnSave"]', function() {
-            var button = $(this);
-            var publishId = button.data('p');
-            event.preventDefault();
-            if (event.handled !== true) {
-                event.handled = true;
-                if ($('#frm' + publishId).valid())
-                {
-                    var datafrm = $('#frm' + publishId).serializeArray();
-                        datafrm.push(
-                            {name:"_token",value:"{{ csrf_token() }}"}
-                        );
-                    console.log(datafrm);
-                    $.ajax({
-                        url : "{{ url('/tenant/online_survey/save') }}",
-                        type:"POST",
-                        data: datafrm,
-                        dataType:"json",
-                        success:function(event, data)
-                        {
-                            if (event.status == 'OK')
-                            {
-                                Swal.fire({
-                                    title: "Information",
-                                    animation: true,
-                                    icon:"success",
-                                    text: event.pesan,
-                                    confirmButtonText: "OK"
-                                }).then(function(){
-                                    window.location.href="{{url('/tenant/online_survey')}}";
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Information",
-                                    animation: true,
-                                    icon:"error",
-                                    text: event.pesan,
-                                    confirmButtonText: "OK"
-                                });
-                            }
-                        },error: function(jqXHR, textStatus, errorThrown){
-                            Swal.fire({
-                                title: "Error",
-                                animation: true,
-                                icon:"error",
-                                text: textStatus+' Save : '+errorThrown,
-                                confirmButtonText: "OK",
-                            });
-                        }
-                    });
-                } else {
-                }
+@push('scripts')
+<script type="text/javascript">
+    $(function () {
+        $('input[type="radio"]').on('click', function () {
+            var $remarks = $(this).closest('.form-check').find('textarea[name="remarks"]');
+            if ($(this).data('ada') == true) {
+                $remarks.val('').prop('disabled', false).trigger('focus');
+            } else {
+                $remarks.val('').prop('disabled', true);
             }
         });
 
-  </script>
-@endsection
+        $(document).on('click', '[id^="btnSave"]', function (event) {
+            event.preventDefault();
+            var button = $(this);
+            var publishId = button.data('p');
+            var $form = $('#frm' + publishId);
+
+            if (!$form.valid()) {
+                return;
+            }
+
+            button.prop('disabled', true);
+
+            $.ajax({
+                url: "{{ url('/tenant/online_survey/save') }}",
+                type: 'POST',
+                data: $form.serializeArray(),
+                dataType: 'json'
+            }).done(function (res) {
+                if (res.status == 'OK') {
+                    Swal.fire({ title: 'Information', icon: 'success', text: res.pesan })
+                        .then(function () { window.location.href = "{{ url('/tenant/online_survey') }}"; });
+                } else {
+                    Swal.fire({ title: 'Information', icon: 'error', text: res.pesan });
+                    button.prop('disabled', false);
+                }
+            }).fail(function (xhr, textStatus, errorThrown) {
+                Swal.fire({ title: 'Error', icon: 'error', text: textStatus + ' : ' + errorThrown });
+                button.prop('disabled', false);
+            });
+        });
+    });
+</script>
+@endpush

@@ -1,23 +1,22 @@
 @extends('admin.template.layout2.base')
+@section('title', 'Reset Password')
+
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">Reset Password</h4>
+<div class="page-body">
+    <div class="mx-auto" style="max-width: 1100px;">
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Reset Password</h3>
+                        <div class="page-desc">Reset a user password to the default password.</div>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
+            <div class="card">
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered" id="tblresett" width="100%">
+                        <table class="table table-hover table-bordered w-100" id="tblresett">
                             <thead>
                             <tr>
                                 <th>No</th>
@@ -30,8 +29,8 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 
@@ -56,16 +55,9 @@
               { data: 'email', name: 'email' },
               { data: 'email', name: 'email' , 
                 render:function(data,type,row){
-                    return '<button onclick="resetpass(\''+data+'\',\''+row.name+'\')" class="btn btn-primary"> Reset </button>';
+                    return '<button onclick="resetpass(\''+data+'\',\''+row.name+'\')" class="btn btn-sm btn-primary"><i class="cil-reload"></i> Reset</button>';
               }},
           ],
-          dom: '<"toolbar group">frtip',
-          "responsive": {
-            details: {
-                type: 'column',
-                target: 8
-            }
-          }
       });
 
       tblreset.on('click', 'tr', function() {

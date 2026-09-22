@@ -1,141 +1,102 @@
 @extends('tenant.template.base')
-@section('content')
-	<div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title"><?php echo $jdl?></h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-    	<div class="card card-preview">
-    		<div class="card-inner">
-				<div class="card-title-group">
-					<div class="card-title">
-						<h6 class="title">
-							<span class="mr-2">Tenant Ticket</span>
-						</h6>
-					</div>
-				</div>
-				<br/>
-    			<form class="form-horizontal" id="frm" enctype="multipart/form-data" method="POST" action="">
-    				@csrf
-					<div class="col-md-12">
-	                    <div class="form-group row">
-	                    	<div class="col-6">
-	                    		<label class="col-xs-2 form-label">Ticket Type <span class="text-danger">*</span></label>
-			                    <div class="col-xs-10">
-			                        <select name="ticket_type" id="ticket_type" class="form-control select2" data-placeholder="Choose a Ticket Type">
-			                        	<option value=""></option>
-			                        	<option value="R">Request</option>
-			                        	<option value="C">Complain</option>
-			                        </select>
-			                    </div>
-	                    	</div>
-	                    	<div class="col-6">
-	                    		<label class="col-xs-2 form-label">Tenant <span class="text-danger">*</span></label>
-			                    <div class="col-xs-10">
-			                    	<select name="tenant_no" id="tenant_no" class="form-control select2" data-placeholder="Choose a Tenant">
-			                    		<?php echo $combo_tenant; ?>
-			                    	</select>  
-			                    </div>
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<div class="col-6">
-	                    		<label class="col-xs-2 form-label">Unit <span class="text-danger">*</span></label>
-		                    	<div class="col-xs-10">
-		                        	<select name="lot_no" id="lot_no" class="form-control select2" data-placeholder="Choose a Unit">
-		                        		<option value=""></option>
-		                        	</select>  
-		                    	</div>
-	                    	</div>
-	                    	<div class="col-6">
-	                    		<label class="col-xs-2 form-label">Floor <span class="text-danger">*</span></label>
-		                    	<div class="col-xs-10">
-		                        	<input type="text" class="form-control" value='' name="floor" id="floor" readonly="readonly" />  
-		                    	</div>
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Ticket Number </label>
-		                    <div class="col-10">
-		                        <input type="text" class="form-control" name="angka" id="angka" readonly="readonly" />
-		                    </div>
-		                    <div class="col-10">
-		                        <input type="text" class="form-control" name="pre" id="pre" readonly="readonly" hidden/>
-		                    </div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Location <span class="text-danger">*</span></label>
-	                    	<div class="col-10">
-	                        	<input type="text" class="form-control" maxlength="20" id="location" name="location" value="" />  
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Requested By <span class="text-danger">*</span></label>
-	                    	<div class="col-10">
-	                        	<input type="text" class="form-control" id="req_by" name="req_by" value="" />
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Contact No <span class="text-danger">*</span></label>
-	                    	<div class="col-10">
-	                        	<input type="text" class="form-control" maxlength="20" id="contact_no" name="contact_no" value="" />
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Category <span class="text-danger">*</span> </label>
-	                    	<div class="col-10">
-	                        	<select name="category" id="category" class="form-control select2" data-placeholder="Choose a Category" disabled>
-	                        		<option value=""></option>
-								</select>
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Description <span class="text-danger">*</span></label>
-	                    	<div class="col-10">
-	                    		<textarea class="form-control" rows="3" maxlength="255" placeholder="Complain Description" id="description" name="description"></textarea>
-	                    	</div>
-	                    </div>
-	                    <div class="form-group row">
-	                    	<label class="col-2 form-label">Picture </label>
-	                    	<div class="col-10">
-	                    		<div class="form-control-wrap">
-        							<div class="custom-file">
-        								<input type="file" id="ticket_image" name="ticket_image" class="custom-file-input" accept="image/*">
-        								<label class="custom-file-label" for="ticket_image" id="pictname">Choose File</label>
-        								<p style="color: red">(* Max Upload Size 2MB. Only JPG, JPEG, PNG, GIF allowed)</p>
-        							</div>
-        						</div>
-	                    	</div>
-	                    </div>
-	                    <div class="form-group">
-        					<div class="col-xs-4">
-        						<img src="" id="picturebox" class="img-responsive">
-        						<input type="hidden" class="form-control" name="picturepath" id="picturepath" value="https://i0.wp.com/www.winhelponline.com/blog/wp-content/uploads/2017/12/user.png?resize=256%2C256&quality=100&ssl=1" readonly><input type="hidden" class="form-control" name="picturename" id="picturename" readonly><input type="hidden" class="form-control" name="pictureattach" id="pictureattach" readonly>
-        					</div>
-			            </div>
-		            </div>
-		            <div style="text-align:right;margin-right: 50px;margin-top: 20px">
-        				<button type="button" id="btnSave" class="btn btn-primary">Submit</button>
-	                </div>
-		            <input type="hidden" name="entity" id="entity" />
-		            <input type="hidden" name="project" id="project" />
-		        </form>
-		    </div>
-		</div>
-    </div>
-	<div id="overlaySpinner" class="spinner-overlay">
-		<div class="spinner-box">
-			<div class="spinner"></div>
-			<div class="loading-text">
-				Processing, please wait...
-			</div>
-		</div>
-	</div>
-	
 
+@section('title', 'Ticket')
+
+@section('content')
+    <div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">{{ $jdl }}</h3>
+                    <div class="page-desc">Submit a request or complaint to building management.</div>
+                </div>
+                <div class="page-head-content">
+                    <a href="{{ url('/tenant/history/ticket') }}" class="btn btn-outline-secondary"><i class="cil-history"></i><span>Ticket History</span></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <form id="frm" method="POST" action="" novalidate autocomplete="off">
+                    @csrf
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="ticket_type">Ticket Type <span class="text-danger">*</span></label>
+                            <select name="ticket_type" id="ticket_type" class="form-control select2" data-placeholder="Choose a Ticket Type">
+                                <option value=""></option>
+                                <option value="R">Request</option>
+                                <option value="C">Complain</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="tenant_no">Tenant <span class="text-danger">*</span></label>
+                            <select name="tenant_no" id="tenant_no" class="form-control select2" data-placeholder="Choose a Tenant">
+                                {!! $combo_tenant !!}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="lot_no">Unit <span class="text-danger">*</span></label>
+                            <select name="lot_no" id="lot_no" class="form-control select2" data-placeholder="Choose a Unit">
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="floor">Floor <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="floor" id="floor" readonly>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="angka">Ticket Number</label>
+                            <input type="text" class="form-control" name="angka" id="angka" readonly>
+                            <input type="hidden" name="pre" id="pre">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="location">Location <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" maxlength="20" id="location" name="location">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="req_by">Requested By <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="req_by" name="req_by">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="contact_no">Contact No <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" maxlength="20" id="contact_no" name="contact_no">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="category">Category <span class="text-danger">*</span></label>
+                            <select name="category" id="category" class="form-control select2" data-placeholder="Choose a Category" disabled>
+                                <option value=""></option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label" for="description">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" rows="3" maxlength="255" placeholder="Describe the request / complaint" id="description" name="description"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="ticket_image">Picture</label>
+                            <input type="file" id="ticket_image" name="ticket_image" class="form-control" accept="image/*">
+                            <div class="form-note">Max 2 MB. JPG, JPEG, PNG or GIF.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <img src="" id="picturebox" class="img-fluid rounded border d-none" style="max-height: 180px;" alt="">
+                            <input type="hidden" name="picturepath" id="picturepath" value="">
+                            <input type="hidden" name="picturename" id="picturename">
+                            <input type="hidden" name="pictureattach" id="pictureattach">
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-send"></i><span>Submit</span></button>
+                    </div>
+                    <input type="hidden" name="entity" id="entity">
+                    <input type="hidden" name="project" id="project">
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@push('scripts')
     <script type="text/javascript">
     	$(document).ready(function(){
     		loaddata();
@@ -162,7 +123,7 @@
 									extend: 'pdf',
 									title: 'Harga Item',
 									className: 'btn btn-primary mb-2',
-									text: '<em class="icon ni ni-download"></em>&nbsp;Generate PDF',
+									text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
 
 									init: function(api, node, config) {
 										$(node).removeClass('dt-button');
@@ -179,7 +140,7 @@
 				});
 			}
 
-			$('#modalHargaItem').on('show.bs.modal', function () {
+			$('#modalHargaItem').on('show.coreui.modal', function () {
 
 				loadHargaItem();
 
@@ -207,7 +168,7 @@
 									extend: 'pdf',
 									title: 'Harga Item',
 									className: 'btn btn-primary mb-2',
-									text: '<em class="icon ni ni-download"></em>&nbsp;Generate PDF',
+									text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
 
 									init: function(api, node, config) {
 										$(node).removeClass('dt-button');
@@ -224,7 +185,7 @@
 				});
 			}
 
-			$('#modalHargaJasa').on('show.bs.modal', function () {
+			$('#modalHargaJasa').on('show.coreui.modal', function () {
 
 				loadHargaJasa();
 
@@ -307,7 +268,7 @@
 								icon: "success",
 								confirmButtonText: "OK"
 							});
-							$('#picturebox').attr('src', data.url);
+							$('#picturebox').attr('src', data.url).removeClass('d-none');
 							$('#picturepath').val(data.url)
 							$('#picturename').val(data.picname)
 							$('#pictureattach').val(data.pic_attached)
@@ -348,24 +309,13 @@
 					category: "Please select a category",
 			        description: "Please select a description",
 			    },
-			    errorElement: "span",
-			    highlight: function (element, errorClass, validClass) {
-			        $(element).addClass(errorClass);
-			        $(element).closest('.form-group')
-			            .removeClass('has-success')
-			            .addClass('has-error');
-			    },
-			    unhighlight: function (element, errorClass, validClass) {
-			        $(element).removeClass(errorClass);
-			        $(element).closest('.form-group')
-			            .removeClass('has-error')
-			            .addClass('has-success');
-			    },
+			    errorElement: "div",
+			    errorClass: "invalid-feedback",
+			    highlight: function (element) { $(element).addClass('is-invalid'); },
+			    unhighlight: function (element) { $(element).removeClass('is-invalid'); },
 			    errorPlacement: function (error, element) {
-			        if (element.parent('.input-group').length) {
-			            error.insertAfter(element.parent());
-			        } else if (element.hasClass('select2')) {
-			            error.insertAfter(element.next('span'));
+			        if (element.hasClass('select2')) {
+			            error.insertAfter(element.next('.select2-container'));
 			        } else {
 			            error.insertAfter(element);
 			        }
@@ -412,7 +362,7 @@
 							var elapsed = Date.now() - startTime;
 
 							// Minimal tampil 3 detik
-							var remaining = Math.max(0, 3000 - elapsed);
+							var remaining = Math.max(0, 800 - elapsed);
 
 							setTimeout(function() {
 
@@ -447,7 +397,7 @@
 						error: function(jqXHR, textStatus, errorThrown) {
 
 							var elapsed = Date.now() - startTime;
-							var remaining = Math.max(0, 3000 - elapsed);
+							var remaining = Math.max(0, 800 - elapsed);
 
 							setTimeout(function() {
 
@@ -495,7 +445,7 @@
 						$('#description').val(data[0].work_requested);
 
 						if (data[0].picture != "") {
-							$('#picturebox').attr("src", data[0].picture);
+							$('#picturebox').attr("src", data[0].picture).removeClass('d-none');
 							$('#picturepath').val(data[0].picture);
 						}
 
@@ -521,7 +471,7 @@
 
 							$.post(site_url, {
 								"_token": "{{ csrf_token() }}",
-								tenant_no: tenant_no
+								id_tenancy: tenant_no
 							}, function(data, status) {
 
 								$("#lot_no").empty().append(data);
@@ -584,4 +534,4 @@
 		    }
     	})
     </script>
-@endsection
+@endpush

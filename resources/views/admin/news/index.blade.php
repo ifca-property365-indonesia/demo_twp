@@ -1,23 +1,19 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">News and Promo</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">News and Promo</h3>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
+            <div class="card">
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered" id="tblgroup" width="100%">
+                        <table class="table table-hover table-bordered w-100" id="tblgroup">
                             <thead>
                             <tr>
                                 <th style="padding-right: 20px;padding-left: 10px;">No</th>
@@ -31,8 +27,8 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 
@@ -99,25 +95,19 @@
                     const today = new Date();
 
                     if (today > endDate) {
-                        return '<span class="badge badge-danger">Expired</span>';
+                        return '<span class="badge text-bg-danger">Expired</span>';
                     }
 
-                    return '<span class="badge badge-success">Active</span>';
+                    return '<span class="badge text-bg-success">Active</span>';
                 }
             }
           ],
-          dom: '<"toolbar group">frtip',
-          "responsive": {
-            details: {
-                type: 'column',
-                target: 8
-            }
-          }
+          dom: '<"toolbar group">frtip'
       });
       $("div.group").html(
-        '<button id="addgroup" class="btn btn-primary pull-up" style="margin-top: 5px">Add</button>&nbsp;'+
-        '<button id="editgroup" class="btn btn-info pull-up" style="margin-top: 5px">Edit</button>&nbsp;'+
-        '<button id="deletegroup" class="btn btn-danger pull-up" style="margin-top: 5px">Delete</button>&nbsp;'
+        '<button id="addgroup" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
+        '<button id="editgroup" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
+        '<button id="deletegroup" class="btn btn-sm btn-danger">Delete</button>&nbsp;'
 
       );
       tblgroupp.on('click', 'tr', function() {

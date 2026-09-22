@@ -22,17 +22,19 @@
     }
 </style>
 
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-        <div class="nk-block-head">
-            <div class="nk-block-head-content">
-                <h4 class="nk-block-title">Default Password</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+        <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Default Password</h3>
+                    </div>
+                </div>
             </div>
-        </div>
 
-        <div class="card card-preview">
-            <div class="card-inner">
+        <div class="card">
+            <div class="card-body">
                 <div class="container">
 
                     <div class="row g-4">

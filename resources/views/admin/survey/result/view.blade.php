@@ -1,16 +1,18 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-      <div class="nk-block nk-block-lg">
-        <div class="nk-block-head">
-          <div class="nk-block-head-content">
-            <h4 class="nk-block-title">Survey Result 
-            </h4>
-          </div>
-        </div>
-        <div class="card card-preview">
-            <div class="card-inner">
+<div class="page-body">
+    <div>
+      <div class="page-block">
+        <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Survey Result 
+            </h3>
+                    </div>
+                </div>
+            </div>
+        <div class="card">
+            <div class="card-body">
                 
                 <?php 
                     $jumlah[]='';
@@ -58,7 +60,7 @@
                                         <td width="75%">
                                             '.$key->line_no.'. '.$key->options.' <br>
 
-                                            <div class="progress progress-lg" style="margin-bottom:10px;">
+                                            <div class="progress" style="margin-bottom:10px;">
                                                 <div class="progress-bar progress-bar-striped" 
                                                     role="progressbar" 
                                                     style="width:'.$percent.'%">
@@ -67,7 +69,7 @@
 
                                             <strong>
         Responden: '.$key->jumlah.' orang 
-        <span class="badge badge-pill badge-info" style="margin-left:10px;">
+        <span class="badge rounded-pill text-bg-info" style="margin-left:10px;">
             '.$percent.'%
         </span>
       </strong><br>';

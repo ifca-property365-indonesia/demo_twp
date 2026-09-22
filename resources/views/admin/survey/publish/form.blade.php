@@ -1,45 +1,14 @@
 
-<style >
-    #signupForm label.error {
-    margin-left: 10px;
-    width: auto;
-    display: inline;
-  }
-  td {
-      height: 40px;
-    }
-  
-  #label_form label {
-      text-align: right;
-    }
-  
-  .marginSelect{
-    padding-left: 12px !important;
-    padding-bottom: 6px !important;
-    border-bottom-width: 1px !important;
-    padding-top: 3px !important;
-  
-  }
-  label {
-    text-align: right;
-  }
-  .has-error .select2-selection {
-    border: 1px solid #a94442;
-    border-radius: 4px;
-  }
-  </style>
-  
-  
-  <div class="ibox-content">
-    <form role="form" class="form-horizontal" enctype="multipart/form-data" id="form_publish" method="POST" >
-      <div class="form-group">
-        <label>Survey Title</label>
+<div>
+    <form role="form" enctype="multipart/form-data" id="form_publish" method="POST" >
+      <div class="mb-3">
+        <label class="form-label">Survey Title</label>
         <div class="col-12">
           <input type="text" class="form-control" name="txttitle" id="txttitle" placeholder="Input Survey Title">
         </div>
       </div>
-      <div class="form-group">
-        <label >Subject</label>
+      <div class="mb-3">
+        <label class="form-label">Subject</label>
         <div class="col-12">
           <select name="txtsubject[]" id="txtsubject" data-placeholder="Select Subject..." style="width: 100%;" class="select2 form-control" tabindex="2" multiple="multiple">
             <option value=""></option>
@@ -70,15 +39,10 @@
                       cek_date:"Expired Date can't be smaller than Publish Date"
                     }
                 },
-        errorElement: "span",
-        highlight: function (element, errorClass, validClass) {
-            $(element).addClass(errorClass); //.removeClass(errorClass);
-            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-          },
-          unhighlight: function (element, errorClass, validClass) {
-            $(element).removeClass(errorClass); //.addClass(validClass);
-            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
-          },
+        errorElement: "div",
+      errorClass: "invalid-feedback",
+      highlight: function (element) { $(element).addClass('is-invalid'); },
+      unhighlight: function (element) { $(element).removeClass('is-invalid'); },
           errorPlacement: function (error, element) {
             if (element.parent('.input-group').length) {
               error.insertAfter(element.parent());
@@ -183,7 +147,7 @@
     });
   }
       
-      $('#modal').one('hidden.bs.modal', function (e) {
+      $('#modal').one('hidden.coreui.modal', function (e) {
           $('div.modal-body').html("");
           $(this).removeData();
       });

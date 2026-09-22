@@ -1,34 +1,30 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">Question Entry</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Question Entry</h3>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
-                    <ul class="nav nav-tabs mt-n3">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-underline-border mb-3">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#t_draft"><em class="icon ni ni-edit"></em> &nbsp;Draft Survey</a>
+                            <a class="nav-link active" data-coreui-toggle="tab" href="#t_draft"><i class="cil-pencil"></i> &nbsp;Draft Survey</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#t_published"><em class="icon ni ni-list-check"></em> &nbsp;Published Survey</a>
+                            <a class="nav-link" data-coreui-toggle="tab" href="#t_published"><i class="cil-task"></i> &nbsp;Published Survey</a>
                         </li>
                     </ul>
                     <div class="tab-content">
                         <!-- TAB DRAFT -->
                         <div class="tab-pane active" id="t_draft">
                             <div class="table-responsive">
-                                <table class="table table-hover table-bordered" id="tbldraft" width="100%">
+                                <table class="table table-hover table-bordered w-100" id="tbldraft">
                                     <thead>
                                     <tr>
                                         <th>No.</th>          
@@ -43,7 +39,7 @@
                         <!-- TAB PUBLISHED -->
                         <div class="tab-pane" id="t_published">
                             <div class="table-responsive">
-                                <table class="table table-hover table-bordered" id="tblpublished" width="100%">
+                                <table class="table table-hover table-bordered w-100" id="tblpublished">
                                     <thead>
                                     <tr>
                                         <th>No.</th>          
@@ -59,8 +55,8 @@
                     </div>
                    
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 
@@ -93,8 +89,8 @@
                     render: function (data) { return FormatDateNew(data); }
                 },
                 {data: null, name: "action", searchable: false, orderable: false, render: function (data, type, row) { 
-                    var btnEdit = '<button type="button" class="btn btn-info btn-sm btn-edit-dates mr-1" data-id="' + row.id + '" data-title="' + row.title + '" data-publish="' + row.publish_date + '" data-expired="' + row.expired_date + '"><em class="icon ni ni-edit"></em> Edit</button>';
-                    var btnDelete = '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '"><em class="icon ni ni-trash"></em> Delete</button>';
+                    var btnEdit = '<button type="button" class="btn btn-info btn-sm btn-edit-dates me-1" data-id="' + row.id + '" data-title="' + row.title + '" data-publish="' + row.publish_date + '" data-expired="' + row.expired_date + '"><i class="cil-pencil"></i> Edit</button>';
+                    var btnDelete = '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '"><i class="cil-trash"></i> Delete</button>';
                     return btnEdit + btnDelete; 
                 }}
             ]
@@ -121,10 +117,10 @@
 
         // TOOLBAR BUTTONS UNTUK DRAFT
         $("div.tbldraft").html(
-            '<button id="addparam" class="btn btn-primary pull-up">Add</button>&nbsp;'+
-            '<button id="editparam" class="btn btn-info pull-up">Edit</button>&nbsp;'+
-            '<button id="deleteparam" class="btn btn-danger pull-up">Delete</button>&nbsp;'+
-            '<button id="publishparam" class="btn btn-secondary pull-up">Publish</button>&nbsp;'
+            '<button id="addparam" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
+            '<button id="editparam" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
+            '<button id="deleteparam" class="btn btn-sm btn-danger">Delete</button>&nbsp;'+
+            '<button id="publishparam" class="btn btn-sm btn-secondary">Publish</button>&nbsp;'
         );
 
         // ROW SELECTION (DRAFT)
@@ -142,7 +138,7 @@
             block(true,'#modalbodyxl');
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
             $('#modaltitlexl').addClass('white').html('Add New Survey');
-            $('.modal-footer').html('<button type="button" class="btn btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
             $('#modalbodyxl').html("");
             $('#modalbodyxl').load("{{ url('/admin/usersurvey/create') }}");
             $('#modalxl').data('id', 0);
@@ -164,7 +160,7 @@
             block(true, '#modalbodyxl');
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
             $('#modaltitlexl').addClass('white').html('Edit Survey');
-            $('.modal-footer').html('<button type="button" class="btn btn-primary" id="savefrmxl">Update</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Update</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
             $('#modalbodyxl').html("");
             $('#modalbodyxl').load("{{ url('/admin/usersurvey/edit') }}/" + survey_id);
             $('#modalxl').data('id', survey_id);
@@ -195,7 +191,7 @@
                 if (a.value == true) {
                     $('#modalbodyxl').html("");
                     $('#modalxl').modal({backdrop: 'static', keyboard: false});
-                    $('.modal-footer').html('<button type="button" class="btn btn-success" id="savefrm_publish">Confirm Publish</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+                    $('.modal-footer').html('<button type="button" class="btn btn-sm btn-success" id="savefrm_publish">Confirm Publish</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
                     $('#modaltitlexl').addClass('white').html('Publish Survey');
                     $('#modalbodyxl').load("{{ url('/admin/usersurvey/publish-form') }}/" + survey_id);
                     $('#modalxl').data('id', survey_id);
@@ -236,29 +232,29 @@
             var htmlForm = `
                 <form id="frmUpdateDates">
                     <input type="hidden" name="id" value="${id}">
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Survey Title</label>
                         <input type="text" class="form-control" value="${title}" readonly>
                     </div>
                     
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Publish Date</label>
                         <input type="date" class="form-control" name="publish_date" id="edit_publish_date" value="${publish_date}" ${isPublishDisabled ? 'disabled style="background-color: #e9ecef; cursor: not-allowed;"' : ''} required>
                         
                         ${isPublishDisabled ? `
-                            <div class="text-danger font-weight-bold mt-1" style="font-size: 12px;">
-                                <em class="icon ni ni-lock-alt"></em> The publish date is active/running today and can no longer be modified!
+                            <div class="text-danger fw-bold mt-1" style="font-size: 12px;">
+                                <i class="cil-lock-locked"></i> The publish date is active/running today and can no longer be modified!
                             </div>
                         ` : ''}
                     </div>
 
-                    <div class="form-group">
+                    <div class="mb-3">
                         <label class="form-label">Expired Date</label>
                         <input type="date" class="form-control" name="expired_date" id="edit_expired_date" value="${expired_date}" min="${todayStr}" required>
                         
                         <!-- RED NOTIF REAL-TIME EXPIRED DATE -->
-                        <div id="expired_date_error" class="text-danger font-weight-bold mt-1" style="display: none; font-size: 12px;">
-                            <em class="icon ni ni-alert-circle"></em> Expired date cannot be earlier than today (${todayStr})!
+                        <div id="expired_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
+                            <i class="cil-warning"></i> Expired date cannot be earlier than today (${todayStr})!
                         </div>
                     </div>
                 </form>
@@ -267,7 +263,7 @@
             $('#modalbodyxl').html(htmlForm);
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
             $('#modaltitlexl').addClass('white').html('Edit Published Survey Dates');
-            $('.modal-footer').html('<button type="button" class="btn btn-primary" id="btnSaveUpdatedDates">Update Dates</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="btnSaveUpdatedDates">Update Dates</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
             $('#modalxl').modal('show');
         });
 
@@ -360,14 +356,14 @@
             confirmButtonText: 'Yes, delete it!'
         }).then(function(result) {
             if (result.value == true) {
-                block(true, '.nk-content-body');
+                block(true, '.page-body');
                 $.ajax({
                     url : "{{ url('/admin/usersurvey/delete') }}",
                     type: "POST",
                     data: { id: id, _token: '{{ csrf_token() }}' },
                     dataType: "json",
                     success: function(event) {
-                        block(false, '.nk-content-body');
+                        block(false, '.page-body');
                         if (event.status == 'OK') {
                             Swal.fire("Information", event.message, "success");
                             tbldraft.ajax.reload(null, false); 
@@ -377,7 +373,7 @@
                         }
                     },                    
                     error: function(jqXHR, textStatus, errorThrown){        
-                        block(false, '.nk-content-body');
+                        block(false, '.page-body');
                         Swal.fire("Information", textStatus + ' : ' + errorThrown, "warning");
                     }
                 });

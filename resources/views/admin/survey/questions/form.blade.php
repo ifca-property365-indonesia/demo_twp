@@ -1,73 +1,19 @@
-
-<style >
-    #signupForm label.error {
-    margin-left: 10px;
-    width: auto;
-    display: inline;
-  }
-  td {
-      height: 40px;
-    }
+<div>
+    <form role="form" enctype="multipart/form-data" id="form_nup" method="POST" >
   
-  #label_form label {
-      text-align: right;
-    }
-  
-  .marginSelect{
-    padding-left: 12px !important;
-    padding-bottom: 6px !important;
-    border-bottom-width: 1px !important;
-    padding-top: 3px !important;
-  
-  }
-  label {
-    text-align: right;
-  }
-  .has-error .select2-selection {
-    border: 1px solid #a94442;
-    border-radius: 4px;
-  }
-  
-  </style>
-  <style>
-  /* width */
-  ::-webkit-scrollbar {
-    width: 10px;
-  }
-  
-  /* Track */
-  ::-webkit-scrollbar-track {
-    background: #f1f1f1; 
-  }
-   
-  /* Handle */
-  ::-webkit-scrollbar-thumb {
-    background: #888; 
-  }
-  
-  /* Handle on hover */
-  ::-webkit-scrollbar-thumb:hover {
-    background: #555; 
-  }
-  </style>
-  
-  
-  <div class="ibox-content">
-    <form role="form" class="form-horizontal" enctype="multipart/form-data" id="form_nup" method="POST" >
-  
-              <div class="form-group">
-                <label >Subject</label>
+              <div class="mb-3">
+                <label class="form-label">Subject</label>
                 <div class="col-12">
                   <input type="text" class="form-control" name="txtsubject" id="txtsubject" placeholder="Input Subject">
                 </div>
               </div>
-              <div class="form-group">
-                <label >Question</label>
+              <div class="mb-3">
+                <label class="form-label">Question</label>
                 <div class="col-12">
                   <input type="text" class="form-control" name="txtquestion" id="txtquestion" placeholder="Input Question">
                 </div>
               </div>      
-              <h6 class="form-section"> Add Option(s) <button class="btn btn-outline-success round btn-sm" style="padding: 0px;margin-left:5px" id="btnAdd" type="button"><em class="icon ni ni-plus" style="padding-left: 5px;padding-right: 5px;"></em></button></h6>
+              <h6 class="form-section"> Add Option(s) <button class="btn btn-outline-success round btn-sm" style="padding: 0px;margin-left:5px" id="btnAdd" type="button"><em class="cil-plus" style="padding-left: 5px;padding-right: 5px;"></em></button></h6>
             
               <div  style="overflow-y: auto; overflow-x: hidden; height: 150px; ">
                 <div id="options" >
@@ -91,7 +37,7 @@
       // Cari ID terbesar yang sudah ada
       var maxId = -1;
 
-      $('#options > .form-group').each(function () {
+      $('#options > .mb-3').each(function () {
 
           var id = $(this).attr('id');
 
@@ -108,20 +54,20 @@
       var i = maxId + 1;
 
       $('#options').append(`
-          <div class="form-group"
+          <div class="mb-3"
               id="option_div${i}"
               style="margin-bottom: 10px;">
 
               <div class="col-12">
 
-                  <label>
+                  <label class="form-label">
 
                       <button type="button"
                               class="btn btn-outline-danger round btn-sm"
                               style="padding: 2px;"
                               onclick="remove(${i})">
 
-                          <em class="icon ni ni-minus-sm"></em>
+                          <i class="cil-minus"></i>
 
                       </button>
 
@@ -141,17 +87,14 @@
                             placeholder="Input Option"
                             required>
 
-                      <label class="checkbox-inline">
-
-                          <input type="checkbox"
+                      <div class="form-check mt-2">
+                          <input type="checkbox" class="form-check-input"
                                 name="remark[]"
                                 id="remark${i}"
                                 value="1"
                                 onclick="checkremark(${i})">
-
-                          Need Remark
-
-                      </label>
+                          <label class="form-check-label" for="remark${i}">Need Remark</label>
+                      </div>
 
                   </div>
 
@@ -170,7 +113,7 @@
       `);
 
       $('#batas').val(
-          $('#options > .form-group').length
+          $('#options > .mb-3').length
       );
     });
   
@@ -181,15 +124,10 @@
           txtquestion: {required: true},
           txtopt_value1: {required: true},
         },
-        errorElement: "span",
-        highlight: function (element, errorClass, validClass) {
-            $(element).addClass(errorClass); //.removeClass(errorClass);
-            $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-          },
-          unhighlight: function (element, errorClass, validClass) {
-            $(element).removeClass(errorClass); //.addClass(validClass);
-            $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
-          },
+        errorElement: "div",
+      errorClass: "invalid-feedback",
+      highlight: function (element) { $(element).addClass('is-invalid'); },
+      unhighlight: function (element) { $(element).removeClass('is-invalid'); },
           errorPlacement: function (error, element) {
             if (element.parent('.input-group').length) {
               error.insertAfter(element.parent());
@@ -287,17 +225,17 @@
                   flagval = '0';
                 }
                 $("#options").append(
-    '<div class="form-group" id="option_div'+urut+'" style="margin-bottom: 10px;">' +
+    '<div class="mb-3" id="option_div'+urut+'" style="margin-bottom: 10px;">' +
         '<div class="col-12">' +
 
-            '<label>' +
+            '<label class="form-label">' +
 
                 '<button type="button" ' +
                         'class="btn btn-outline-danger round btn-sm" ' +
                         'style="padding: 2px;" ' +
                         'onclick="remove('+urut+')">' +
 
-                    '<em class="icon ni ni-minus-sm"></em>' +
+                    '<i class="cil-minus"></i>' +
 
                 '</button>' +
 
@@ -352,7 +290,7 @@
     }
   }
       
-  $('#modal').on('hidden.bs.modal', function (e) {
+  $('#modal').on('hidden.coreui.modal', function (e) {
       $('div.modal-body').html("");
       $(this).removeData();
   });
@@ -364,7 +302,7 @@
     $('#option_div' + no).remove();
 
     // Hitung ulang option yang tersisa
-    var total = $('#options > .form-group').length;
+    var total = $('#options > .mb-3').length;
 
     $('#batas').val(total);
 

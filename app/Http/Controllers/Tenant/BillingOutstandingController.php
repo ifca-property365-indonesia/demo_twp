@@ -142,10 +142,10 @@ class BillingOutstandingController extends Controller
                 $list_hticket .= '<td>'.$tenant->lot_no.'</td>';
 
                 $data_status = $this->get_statusIFCA($tenant->status);
-                $list_hticket .= '<td><span class="badge badge-sm badge-dim '.$data_status["color"].' d-none d-md-inline-flex">'.$data_status["status"]. '</span></td>';
+                $list_hticket .= '<td><span class="badge '.$data_status["color"].'">'.$data_status["status"]. '</span></td>';
 
                 if($tenant->status=='R') {
-                    $list_hticket .= '<td><button class="btn btn-block btn-warning btn-sm" onclick="location.href=\''. url('tenant/ticket').'/'.$tenant->id.'/'.'edit'.'\'"> Edit</button></td>';
+                    $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''. url('tenant/ticket').'/'.$tenant->id.'/'.'edit'.'\'"> Edit</button></td>';
                 } else {
                     $list_hticket .= '<td></td>'."\n";
                 }
@@ -172,11 +172,11 @@ class BillingOutstandingController extends Controller
                 $list_hovertime .= '<td>'.$overtime->end_overtime . '</td>';
 
                 $data_status = $this->get_statusOT($overtime->status);
-                $list_hovertime .= '<td><span class="badge badge-sm badge-dim '.$data_status["color"].' d-none d-md-inline-flex">'.$data_status["status"]. '</span></td>';
+                $list_hovertime .= '<td><span class="badge '.$data_status["color"].'">'.$data_status["status"]. '</span></td>';
                 if($overtime->start_overtime > $today && $overtime->status=='N') {
-                    $list_hovertime .= '<td><button class="btn btn-block btn-danger btn-sm" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
                 } else {
-                    $list_hovertime .= '<td><button class="btn btn-block btn-danger btn-sm disabled">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100 disabled">Cancel</button></td>'."\n";
                 }
                 $list_hovertime .= '</tr>' . "\n";
                 $i++;
@@ -362,7 +362,7 @@ class BillingOutstandingController extends Controller
         switch ($statusid) {
             case 'R':
                 $status = "Open";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'A':
             case 'S':
@@ -371,19 +371,19 @@ class BillingOutstandingController extends Controller
             case 'M':
             case 'Z':
                 $status = "Process";
-                $color = "badge-outline-warning";
+                $color = "badge-soft-warning";
                 break;
             case 'Y':
                 $status = "Approve";
-                $color = "badge-outline-success";         
+                $color = "badge-soft-success";         
                 break;      
             case 'C':
                 $status = "Close";
-                $color = "badge-outline-success";
+                $color = "badge-soft-success";
                 break;
             case 'X':
                 $status = "Cancel";
-                $color = "badge-outline-default";         
+                $color = "badge-soft-secondary";         
                 break;
         }
 
@@ -404,19 +404,19 @@ class BillingOutstandingController extends Controller
         $status = null;
         switch ($statusid) {
             case 'N':
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 $status ="Waiting to be activated";
                 break;
             case 'A':
-                $color = "badge-outline-success";
+                $color = "badge-soft-success";
                 $status ="Activated";
                 break;
             case 'X':
-                $color = "badge-outline-warning";
+                $color = "badge-soft-warning";
                 $status = "Canceled";
                 break;
             case 'Z':
-                $color = "badge-outline-danger";
+                $color = "badge-soft-danger";
                 $status = "Closed";
                 break;
         }

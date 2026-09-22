@@ -1,0 +1,181 @@
+/* ------------------------------------------------------------------
+ * Letter Permit (resources/views/tenant/permit/*)
+ * Dipakai di atas CoreUI 5 + assets/app/css/app.css.
+ * ------------------------------------------------------------------ */
+
+:root {
+    --pm-primary: #4f5bd5;
+    --pm-primary-soft: #eef0ff;
+    --pm-heading: var(--cui-emphasis-color, #1f2937);
+    --pm-text: var(--cui-body-color, #4b5563);
+    --pm-muted: var(--cui-secondary-color, #6b7280);
+    --pm-border: var(--cui-border-color, #dbdfea);
+    --pm-border-soft: #e9ecf3;
+    --pm-bg-soft: var(--cui-tertiary-bg, #f5f6fa);
+    --pm-danger: #e55353;
+    --pm-success: #2eb85c;
+    --pm-radius: .375rem;
+}
+
+/* ---------- page head ---------- */
+.permit-head .nk-block-des { margin-top: .25rem; }
+
+/* ---------- card & sections ---------- */
+.permit-card { border: 1px solid var(--pm-border); box-shadow: 0 1px 3px rgba(54, 74, 99, .06); }
+.permit-card .card-inner { padding: 1.5rem 1.5rem 1rem; }
+@media (min-width: 992px) { .permit-card .card-inner { padding: 2rem 2.25rem 1.25rem; } }
+
+.permit-section { margin-bottom: 1.75rem; }
+.permit-section[hidden] { display: none !important; }
+
+.permit-section__head {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    margin-bottom: 1.1rem;
+    padding-bottom: .6rem;
+    border-bottom: 1px solid var(--pm-border-soft);
+}
+.permit-section__num {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--pm-primary-soft);
+    color: var(--pm-primary);
+    font-size: .8rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.permit-section__title { margin: 0; font-size: .95rem; font-weight: 700; color: var(--pm-heading); letter-spacing: .01em; }
+.permit-section__hint { margin-left: auto; font-size: .78rem; color: var(--pm-muted); }
+
+/* ---------- form ---------- */
+.permit-form .form-label { font-size: .8rem; font-weight: 600; color: var(--pm-heading); margin-bottom: .35rem; }
+.permit-form .form-label .req { color: var(--pm-danger); margin-left: 2px; }
+.permit-form .form-group { margin-bottom: 1.1rem; }
+.permit-form .form-control[readonly] { background: var(--pm-bg-soft); color: var(--pm-text); }
+.permit-form .form-note { font-size: .75rem; color: var(--pm-muted); margin-top: .3rem; }
+.permit-form textarea.form-control { min-height: 84px; resize: vertical; }
+
+/* Pesan validasi inline (Bootstrap .is-invalid + .invalid-feedback) */
+.permit-form .is-invalid { border-color: var(--pm-danger) !important; }
+.permit-form .invalid-feedback { display: none; font-size: .75rem; margin-top: .3rem; }
+.permit-form .is-invalid ~ .invalid-feedback,
+.permit-form .is-invalid + .select2 ~ .invalid-feedback { display: block; }
+.permit-form .select2-container--default.is-invalid .select2-selection--single { border-color: var(--pm-danger); }
+
+/* Select2 tinggi mengikuti .form-control DashLite */
+.permit-form .select2-container { width: 100% !important; }
+
+/* ---------- permit number badge ---------- */
+.permit-no {
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    padding: .35rem .75rem;
+    border-radius: 999px;
+    background: var(--pm-primary-soft);
+    color: var(--pm-primary);
+    font-weight: 700;
+    font-size: .85rem;
+    letter-spacing: .03em;
+}
+.permit-no .icon { font-size: 1rem; }
+
+/* ---------- daftar pekerja / barang ---------- */
+.permit-lines { border: 1px solid var(--pm-border); border-radius: var(--pm-radius); overflow: hidden; }
+.permit-lines table { margin: 0; }
+.permit-lines thead th {
+    background: var(--pm-bg-soft);
+    color: var(--pm-heading);
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    border-bottom: 1px solid var(--pm-border);
+    padding: .6rem .85rem;
+    white-space: nowrap;
+}
+.permit-lines tbody td { padding: .5rem .85rem; vertical-align: middle; border-top: 1px solid var(--pm-border-soft); }
+.permit-lines tbody tr:first-child td { border-top: 0; }
+.permit-lines .line-no { width: 56px; text-align: center; color: var(--pm-muted); font-weight: 600; }
+.permit-lines .line-act { width: 64px; text-align: center; }
+.permit-lines .btn-del {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: var(--pm-danger);
+    background: transparent;
+    border: 1px solid transparent;
+}
+.permit-lines .btn-del:hover:not(:disabled) { background: #fdecea; border-color: #f7c4bf; }
+.permit-lines .btn-del:disabled { color: #c9d1de; cursor: not-allowed; }
+.permit-lines .form-control { border-color: transparent; background: transparent; padding-left: .25rem; }
+.permit-lines .form-control:focus { border-color: var(--pm-primary); background: #fff; }
+.permit-lines .form-control.is-invalid { border-color: var(--pm-danger); background: #fff; }
+.permit-lines__foot { padding: .6rem .85rem; background: #fff; border-top: 1px solid var(--pm-border-soft); }
+
+/* ---------- action bar ---------- */
+.permit-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: .5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--pm-border-soft);
+}
+.permit-actions .hint { margin-right: auto; font-size: .78rem; color: var(--pm-muted); }
+.permit-actions .btn { min-width: 120px; }
+
+/* ---------- history: filter + table ---------- */
+.permit-filter .form-label { font-size: .78rem; font-weight: 600; color: var(--pm-heading); }
+.permit-filter .form-group { margin-bottom: 0; }
+.permit-filter .btn { white-space: nowrap; }
+
+.permit-table thead th {
+    background: #1d2333;
+    color: #fff;
+    font-size: .75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    vertical-align: middle;
+    white-space: nowrap;
+    border-color: #2f4157;
+}
+.permit-table thead th.sorting:after,
+.permit-table thead th.sorting_asc:after,
+.permit-table thead th.sorting_desc:after { color: #fff; }
+.permit-table tbody td { vertical-align: middle; font-size: .82rem; }
+.permit-table td.col-note { max-width: 320px; white-space: normal; }
+.permit-table .permit-link { font-weight: 700; color: var(--pm-primary); }
+.permit-table .badge { font-size: .7rem; font-weight: 600; padding: .3em .6em; }
+.permit-table .nowrap { white-space: nowrap; }
+.permit-table .btn-print {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* DataTables (jquery.dataTables.css) di dalam card DashLite */
+.permit-table-wrap .dt-container .dt-search { margin-bottom: .75rem; }
+
+/* ---------- responsive ---------- */
+@media (max-width: 575.98px) {
+    .permit-actions { flex-direction: column-reverse; align-items: stretch; }
+    .permit-actions .hint { margin: 0; text-align: center; }
+    .permit-actions .btn { width: 100%; }
+    .permit-section__hint { display: none; }
+}

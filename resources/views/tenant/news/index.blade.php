@@ -1,112 +1,64 @@
 @extends('tenant.template.base')
+
+@section('title', 'News Feed')
+
 @section('content')
-<style>
-    .timeline-list .timeline-item {
-        border-bottom: 1px solid #e5e5e5;
-        padding-bottom: 25px;
-        margin-bottom: 25px;
-    }
-
-    .timeline-list .timeline-item:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
-        padding-bottom: 0;
-    }
-</style>
-	<div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">News Feed</h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-        <div class="nk-block">
-            <div class="card card-preview">
-                <div class="card-inner">
-                    <div class="card-title-group">
-                        <div class="card-title">
-                            <h6 class="title">
-                                <span class="mr-2">News Feed</span>
-                            </h6>
-                        </div>
-                    </div>
-                    <br/>
-                    <?php
-                        if (!empty($datanewsfeed))
-                        {
-                            $iconic = array(
-                                'bg-success',
-                                'bg-primary',
-                                'bg-warning',
-                                'bg-danger'
-                            );
-                            $bulan = array(
-                                1 => 'Januari',
-                                'Februari',
-                                'Maret',
-                                'April',
-                                'Mei',
-                                'Juni',
-                                'Juli',
-                                'Agustus',
-                                'September',
-                                'Oktober',
-                                'November',
-                                'Desember'
-                            );                        
-                    ?>
-                	<ul class="timeline-list">
-                        <?php
-                            foreach ($datanewsfeed as $newsfeed)
-                            {
-
-                            	echo '<li class="timeline-item" id="news-'.$newsfeed->id.'">';
-                            	echo '	<div class="timeline-status '.$iconic[$newsfeed->status].' is-outline"></div>';
-                            	echo '	<div class="timeline-data">
-	                            			<h6 class="timeline-title">'.$newsfeed->subject.'</h6>
-	                            			<div class="timeline-des">';
-                                                if (!empty($newsfeed->picture))
-                                                {
-	                            				   echo '
-                                <div style="
-                                    display:inline-block;
-                                    background:#111;
-                                    padding:1px;
-                                    border-radius:2px;
-                                ">
-                                    <img src="'.$newsfeed->picture.'" alt="" class="img-responsive">
-                                </div>';
-                                                }                                                   
-                                                if (!empty($newsfeed->youtube_link)) {
-                                                // Extract video ID from the YouTube URL
-                                                    $video_id = '';
-                                                    parse_str(parse_url($newsfeed->youtube_link, PHP_URL_QUERY), $video_id);
-                                                    
-                                                    // Construct the embed URL
-                                                    $embed_url = 'https://www.youtube.com/embed/' . $video_id['v'];
-
-                                                    // Output the iframe with the embed URL
-                                                    echo '<div class="embed-responsive-16by9">
-                                                            <iframe width="640" height="360" src="'.$embed_url.'"></iframe>
-                                                          </div>';
-                                                }
-                                        echo ''.$newsfeed->content.'';
-										echo '</div>';
-								echo '	</div>';
-                            	echo '</li>';
-                            }
-                        ?>
-                	</ul>
-                    <?php
-                        } else {
-                    ?>
-                    <p class='card-text badge badge-gray'>No Latest News</p>
-                    <?php
-                        }
-                    ?>
+    @php
+        $badges = ['success', 'primary', 'warning', 'danger'];
+        $youtubeId = function ($link) {
+            $q = [];
+            parse_str((string) parse_url($link, PHP_URL_QUERY), $q);
+            if (!empty($q['v'])) {
+                return $q['v'];
+            }
+            // format youtu.be/<id>
+            $path = trim((string) parse_url($link, PHP_URL_PATH), '/');
+            return $path !== '' ? basename($path) : '';
+        };
+    @endphp
+    <div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">News Feed</h3>
+                    <div class="page-desc">Latest news and announcements from building management.</div>
                 </div>
             </div>
+        </div>
+
+        <div class="page-block">
+            @if (!empty($datanewsfeed) && count($datanewsfeed) > 0)
+                <ul class="timeline-list">
+                    @foreach ($datanewsfeed as $newsfeed)
+                        <li class="timeline-item" id="news-{{ $newsfeed->id }}">
+                            <div class="timeline-status bg-{{ $badges[$newsfeed->status] ?? 'secondary' }}"></div>
+                            <div class="card timeline-card">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-3">{{ $newsfeed->subject }}</h5>
+                                    @if (!empty($newsfeed->picture))
+                                        <div class="mb-3">
+                                            <img src="{{ $newsfeed->picture }}" alt="" class="img-fluid rounded border">
+                                        </div>
+                                    @endif
+                                    @if (!empty($newsfeed->youtube_link) && $youtubeId($newsfeed->youtube_link) !== '')
+                                        <div class="ratio ratio-16x9 mb-3 rounded overflow-hidden">
+                                            <iframe src="https://www.youtube.com/embed/{{ $youtubeId($newsfeed->youtube_link) }}" title="{{ $newsfeed->subject }}" allowfullscreen></iframe>
+                                        </div>
+                                    @endif
+                                    <div class="news-content">{!! $newsfeed->content !!}</div>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            @else
+                <div class="card">
+                    <div class="card-body text-center py-5 text-body-secondary">
+                        <i class="cil-newspaper fs-1 d-block mb-2"></i>
+                        No latest news.
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 @endsection

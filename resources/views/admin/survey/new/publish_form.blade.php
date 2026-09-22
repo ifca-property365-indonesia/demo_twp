@@ -2,24 +2,24 @@
     @csrf
     <input type="hidden" name="survey_id" value="{{ $survey->id }}">
     
-    <div class="form-group">
-        <label>Survey Title</label>
+    <div class="mb-3">
+        <label class="form-label">Survey Title</label>
         <input type="text" class="form-control" value="{{ $survey->title }}" readonly>
     </div>
 
-    <div class="form-group">
-        <label>Publish Date <span class="text-danger">*</span></label>
+    <div class="mb-3">
+        <label class="form-label">Publish Date <span class="text-danger">*</span></label>
         <input type="date" name="publish_date" id="publish_date" class="form-control" required>
-        <div id="publish_date_error" class="text-danger font-weight-bold mt-1" style="display: none; font-size: 12px;">
-            <em class="icon ni ni-alert-circle"></em> Publish date cannot be earlier than today!
+        <div id="publish_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
+            <i class="cil-warning"></i> Publish date cannot be earlier than today!
         </div>
     </div>
 
-    <div class="form-group">
-        <label>Expired Date <span class="text-danger">*</span></label>
+    <div class="mb-3">
+        <label class="form-label">Expired Date <span class="text-danger">*</span></label>
         <input type="date" name="expired_date" id="expired_date" class="form-control" required>
-        <div id="expired_date_error" class="text-danger font-weight-bold mt-1" style="display: none; font-size: 12px;">
-            <em class="icon ni ni-alert-circle"></em> Expired date cannot be earlier than Publish date!
+        <div id="expired_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
+            <i class="cil-warning"></i> Expired date cannot be earlier than Publish date!
         </div>
     </div>
 </form>

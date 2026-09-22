@@ -1,1023 +1,412 @@
 @extends('tenant.template.base')
-@section('content')
-<style type="text/css">
-    .transbox {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 35%;
-        background: rgba(0,0,0,0.5);
-        padding-top: 50px;
-        padding-left: 50px;
-        padding-right:30px;
-    }
-    </style>
-    <div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">Dashboard</h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-        <div class="nk-block">
-            <?php if(!empty($dtnews)){ 
-                $no=1;?>
-            <div class="row">
-                <div class="col-12">
-                    <div id="carouselExCap" class="carousel slide" data-ride="carousel">
-                        <div class="carousel-inner text-light">
-                            <?php foreach ($dtnews as $key) {
-                                if($no==1){
-                                    $active = 'active';
-                                }else{
-                                    $active = '';
-                                }
-                                $string = strip_tags($key->content);
 
+@section('title', 'Dashboard')
+
+@push('styles')
+<style>
+    .news-carousel .carousel-item { cursor: pointer; }
+    .news-carousel .news-slide { position: relative; height: 300px; background: #0b0f19; display: flex; justify-content: flex-end; align-items: center; padding-right: 60px; overflow: hidden; }
+    .news-carousel .news-slide img { max-width: 100%; max-height: 300px; width: auto; height: auto; }
+    .news-carousel .transbox { position: absolute; top: 0; bottom: 0; left: 0; width: 38%; background: rgba(0, 0, 0, .55); padding: 40px 30px 30px 50px; color: #fff; }
+    .news-carousel .transbox h5 { color: #fff; font-weight: 700; }
+    .news-carousel .transbox p { font-size: .85rem; }
+    .news-carousel .read-more { float: right; text-decoration: underline; }
+    .chart-box { position: relative; height: 320px; }
+    .chart-tools .form-select, .chart-tools .select2-container { min-width: 150px; }
+    @media (max-width: 767.98px) {
+        .news-carousel .news-slide { padding-right: 0; justify-content: center; }
+        .news-carousel .transbox { width: 100%; padding: 20px; }
+        .chart-tools > * { width: 100% !important; }
+    }
+</style>
+@endpush
+
+@section('content')
+    <div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">Dashboard</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-block">
+            @if (!empty($dtnews))
+                <div id="carouselExCap" class="carousel slide news-carousel mb-4 rounded overflow-hidden" data-coreui-ride="carousel">
+                    <div class="carousel-inner">
+                        @foreach ($dtnews as $i => $key)
+                            @php
+                                $string = strip_tags($key->content);
+                                $cut = false;
                                 if (strlen($string) > 150) {
                                     $stringCut = substr($string, 0, 150);
                                     $endPoint = strrpos($stringCut, ' ');
-
-                                    $string = $endPoint
-                                        ? substr($stringCut, 0, $endPoint)
-                                        : $stringCut;
-
-                                    $string .= '... <span style="float:right;color:white;text-decoration:underline;">Read More</span>';
+                                    $string = $endPoint ? substr($stringCut, 0, $endPoint) : $stringCut;
+                                    $cut = true;
                                 }
-
-                                echo '<div class="carousel-item '.$active.'"
-                                    onclick="window.location.href=\''.url('/tenant/news#news-'.$key->id).'\'"
-                                    style="cursor:pointer;">
-                                        
-
-                                    <div style="height:300px; display:flex; justify-content:flex-end; align-items:center; background:#000; padding-right:80px;">
-                                        <img src="'.$key->picture.'"
-                                            style="max-width:100%; max-height:300px; width:auto; height:auto;">
-                                    </div>
-
+                            @endphp
+                            <div class="carousel-item {{ $i === 0 ? 'active' : '' }}" onclick="window.location.href='{{ url('/tenant/news#news-' . $key->id) }}'">
+                                <div class="news-slide">
+                                    @if (!empty($key->picture))
+                                        <img src="{{ $key->picture }}" alt="">
+                                    @endif
                                     <div class="transbox">
-                                        <h5 style="color:white!important">'.$key->subject.'</h5><br>
-                                        <p>'.$string.'</p>
+                                        <h5>{{ $key->subject }}</h5>
+                                        <p>{{ $string }}@if ($cut)... <span class="read-more">Read More</span>@endif</p>
                                     </div>
-                                </div>';
-                                    $no++;
-                            }?>
-                          
-                        </div>
-                        <a class="carousel-control-prev" href="#carouselExCap" role="button" data-slide="prev" style="justify-content: left!important;padding-left:10px">
-                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Previous</span>
-                        </a>
-                        <a class="carousel-control-next" href="#carouselExCap" role="button" data-slide="next" style="justify-content: right!important;padding-right:10px">
-                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            <span class="sr-only">Next</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <?php } ?><br>
-            <div class="row">
-                @php
-                    $colSize = session('Tflag') == 'O' ? 12 : 8;
-                @endphp
-
-                <div class="col-{{ $colSize }}">
-                    <div class="card card-bordered">
-                        <div class="card-inner">
-                            <div class="card-title-group">
-                                <div class="card-title">
-                                    <h6 class="title">
-                                        <span class="mr-2" id="utilityTitle">Monthly Utility Usage</span>
-                                    </h6>
                                 </div>
+                            </div>
+                        @endforeach
+                    </div>
+                    <button class="carousel-control-prev" type="button" data-coreui-target="#carouselExCap" data-coreui-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-coreui-target="#carouselExCap" data-coreui-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
+            @endif
 
-                                <div class="card-tools d-flex align-items-center" style="gap:10px;">
-                                    <select class="form-control" name="yearcombo" id="yearcombo" style="width:150px;">
-                                        <?php
-                                        $currentYear = date('Y');
-
-                                        for ($i = 0; $i < 5; $i++) {
-                                            $year = $currentYear - $i;
-                                            $selected = ($year == $currentYear) ? 'selected' : '';
-
-                                            echo "<option value='$year' $selected>$year</option>";
-                                        }
-                                        ?>
+            @php $isOperational = session('Tflag') == 'O'; @endphp
+            <div class="row g-3">
+                <div class="{{ $isOperational ? 'col-12' : 'col-lg-8' }}">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <div class="card-title-group">
+                                <h6 class="title" id="utilityTitle">Monthly Utility Usage</h6>
+                                <div class="card-tools chart-tools flex-wrap">
+                                    <select class="form-select form-select-sm" name="yearcombo" id="yearcombo" style="width: 110px;">
+                                        @for ($i = 0; $i < 5; $i++)
+                                            @php $year = date('Y') - $i; @endphp
+                                            <option value="{{ $year }}" {{ $i === 0 ? 'selected' : '' }}>{{ $year }}</option>
+                                        @endfor
                                     </select>
-
-                                    <select class="form-control" name="utilitycombo" id="utilitycombo" style="width:150px;">
+                                    <select class="form-select form-select-sm" name="utilitycombo" id="utilitycombo" style="width: 150px;">
                                         <option value="">-- Select Utility --</option>
                                         <option value="E">Electric</option>
                                         <option value="W">Water</option>
                                         <option value="G">Gas</option>
                                     </select>
-
-                                    <select class="select2 form-control"
-                                            name="meteridcombo"
-                                            id="meteridcombo"
-                                            style="width:300px;"
-                                            disabled>
+                                    <select class="select2 form-control" name="meteridcombo" id="meteridcombo" style="width: 260px;" disabled>
                                         <option value="">-- Select Meter ID --</option>
-                                        <?php echo $combometerid; ?>
+                                        {!! $combometerid !!}
                                     </select>
-                                    
                                 </div>
                             </div>
-                            <ul class="nav nav-tabs">
-                                <li class="nav-item">
-                                    <a class="nav-link active" data-toggle="tab" id="tab1" href="#tabItem1">Area</a>
-                                </li>
-                                <li class="nav-item">
-                                    <a class="nav-link" data-toggle="tab" id="tab2" href="#tabItem2">Bar</a>
-                                </li>
+                            <ul class="nav nav-underline-border mb-3" role="tablist">
+                                <li class="nav-item"><a class="nav-link active" data-coreui-toggle="tab" id="tab1" href="#tabItem1" role="tab">Area</a></li>
+                                <li class="nav-item"><a class="nav-link" data-coreui-toggle="tab" id="tab2" href="#tabItem2" role="tab">Bar</a></li>
                             </ul>
                             <div class="tab-content">
-                                <div class="tab-pane active" id="tabItem1">
-                                    <canvas id="areaChart"></canvas>
+                                <div class="tab-pane active" id="tabItem1" role="tabpanel">
+                                    <div class="chart-box"><canvas id="areaChart"></canvas></div>
                                 </div>
-                                <div class="tab-pane" id="tabItem2">
-                                    <canvas id="barChart"></canvas>
+                                <div class="tab-pane" id="tabItem2" role="tabpanel">
+                                    <div class="chart-box"><canvas id="barChart"></canvas></div>
                                 </div>
                                 <div class="mt-3" id="legendDiv"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                @unless(session('Tflag') == 'O')
-                <div class="col-4">
 
-                    {{-- CARD PERTAMA --}}
-                    <?php if(!$statusPembayaran) { ?>
-                    <div class="card card-bordered border-danger mb-3">
-                        <div class="card-inner">
-                            <div class="card-title-group">
-                                <div class="card-title">
-                                    <h6 class="title">
-                                        <span class="mr-2">IMPORTANT NOTIFICATION</span>
-                                    </h6>
-                                </div>
-                            </div>
-
-                            <a href="{{ url('/tenant/proforma') }}" class="badge badge-danger mt-3">
-                                You Have Proforma
-                            </a>
-
-                            <div class="mt-2">
-                                <strong>Total :</strong><br>
-                                {!! $totalProforma !!}
+                @unless ($isOperational)
+                <div class="col-lg-4">
+                    @if (!$statusPembayaran)
+                        <div class="card border-danger mb-3">
+                            <div class="card-body">
+                                <h6 class="title fw-bold text-danger"><i class="cil-warning"></i> Important Notification</h6>
+                                <a href="{{ url('/tenant/proforma') }}" class="badge text-bg-danger mt-2">You have Proforma</a>
+                                <div class="mt-2 small text-body-secondary">Total</div>
+                                <div class="fw-bold fs-5">{!! $totalProforma !!}</div>
                             </div>
                         </div>
-                    </div>
-                    <?php } else { ?>
-                    <div class="card card-bordered border-primary mb-3">
-                        <div class="card-inner">
-                            <div class="card-title-group">
-                                <div class="card-title">
-                                    <h6 class="title">
-                                        <span class="mr-2">PROFORMA NOTIFICATION</span>
-                                    </h6>
-                                </div>
-                            </div>
-
-                            <p class="card-text badge badge-primary mt-3">
-                                No Proforma
-                            </p>
-                        </div>
-                    </div>
-                    <?php } ?>
-
-                    {{-- CARD PERTAMA --}}
-                    <?php if(!$statusInvoice) { ?>
-                    <div class="card card-bordered border-danger mb-3">
-                        <div class="card-inner">
-                            <div class="card-title-group">
-                                <div class="card-title">
-                                    <h6 class="title">
-                                        <span class="mr-2">INVOICE NOTIFICATION</span>
-                                    </h6>
-                                </div>
-                            </div>
-
-                            <a href="{{ url('/tenant/invoice') }}" class="badge badge-danger mt-3">
-                                You Have Invoice
-                            </a>
-
-                            <div class="mt-2">
-                                <strong>Total :</strong><br>
-                                {!! $totalInvoice !!}
+                    @else
+                        <div class="card border-primary mb-3">
+                            <div class="card-body">
+                                <h6 class="title fw-bold">Proforma Notification</h6>
+                                <span class="badge text-bg-primary mt-2">No Proforma</span>
                             </div>
                         </div>
-                    </div>
-                    <?php } else { ?>
-                    <div class="card card-bordered border-primary mb-3">
-                        <div class="card-inner">
-                            <div class="card-title-group">
-                                <div class="card-title">
-                                    <h6 class="title">
-                                        <span class="mr-2">IMPORTANT NOTIFICATION</span>
-                                    </h6>
-                                </div>
+                    @endif
+
+                    @if (!$statusInvoice)
+                        <div class="card border-danger mb-3">
+                            <div class="card-body">
+                                <h6 class="title fw-bold text-danger"><i class="cil-warning"></i> Invoice Notification</h6>
+                                <a href="{{ url('/tenant/invoice') }}" class="badge text-bg-danger mt-2">You have Invoice</a>
+                                <div class="mt-2 small text-body-secondary">Total</div>
+                                <div class="fw-bold fs-5">{!! $totalInvoice !!}</div>
                             </div>
-
-                            <p class="card-text badge badge-primary mt-3">
-                                No Invoice
-                            </p>
                         </div>
-                    </div>
-                    <?php } ?>
-
+                    @else
+                        <div class="card border-primary mb-3">
+                            <div class="card-body">
+                                <h6 class="title fw-bold">Invoice Notification</h6>
+                                <span class="badge text-bg-primary mt-2">No Invoice</span>
+                            </div>
+                        </div>
+                    @endif
                 </div>
                 @endunless
             </div>
-            
-            <div class="card card-bordered mt-3">
-                <div class="card-inner">
+
+            <div class="card mt-3">
+                <div class="card-body">
                     <div class="card-title-group">
-                        <div class="card-title">
-                            <h6 class="title">
-                                <span class="mr-2">Our Latest Ticket</span>
-                            </h6>
-                        </div>
+                        <h6 class="title">Our Latest Ticket</h6>
+                        <a href="{{ url('/tenant/ticket') }}" class="btn btn-sm btn-primary"><i class="cil-plus"></i><span>New Ticket</span></a>
                     </div>
-                    <div class="table-responsive mt-3">
-                        <?php
-                            if(!empty($list_hticket)) {
-                        ?>
-                        <table id="tblTicket" class="table table-bordered table-striped" role="grid" aria-describedby="tblTicket_info">
-                            <thead style="background:#101924; color: #ffffff;">
-                                <tr role="row">
-                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
-                                    <th class="sorting text-center" style="width: 24px;">Ticket Number</th>
-                                    <th class="sorting text-center" style="width: 24px; vertical-align: middle;">Category</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-                                    <th class="sorting text-center" style="width: 100px;">Reported Date</th>
-                                    <th class="sorting text-center" style="width: 24px;">Request By</th>
-                                    <th class="sorting text-center" style="width: 80px;">Lot No</th>
-                                    <th class="sorting text-center" style="width: 10px;">Ticket Type</th>
-                                    <th class="sorting text-center" style="width: 10px;">Ticket Status</th>
-                                    <th class="text-center" style="width: 80px; vertical-align: middle;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php 
-                                    if (!empty($list_hticket))
-                                    { 
-                                        echo $list_hticket;
-                                    }  
-                                ?>
-                            </tbody>
-                        </table>
-                        <?php  
-                            } else {
-                                echo "<p class='card-text badge badge-gray'>Data Not Available</p>";
-                            }
-                        ?>
+                    <div class="table-responsive">
+                        @if (!empty($list_hticket))
+                            <table id="tblTicket" class="table table-bordered table-striped" role="grid" aria-describedby="tblTicket_info">
+                                <thead class="table-dark">
+                                    <tr role="row">
+                                        <th class="text-center" style="width: 48px;">No.</th>
+                                        <th class="text-center">Ticket Number</th>
+                                        <th class="text-center">Category</th>
+                                        <th class="text-center">Description</th>
+                                        <th class="text-center" style="width: 110px;">Reported Date</th>
+                                        <th class="text-center">Request By</th>
+                                        <th class="text-center" style="width: 80px;">Lot No</th>
+                                        <th class="text-center">Ticket Type</th>
+                                        <th class="text-center">Ticket Status</th>
+                                        <th class="text-center" style="width: 90px;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>{!! $list_hticket !!}</tbody>
+                            </table>
+                        @else
+                            <div class="text-center py-5 text-body-secondary">
+                                <i class="cil-tags fs-1 d-block mb-2"></i>
+                                No ticket yet.
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
-        </div><!-- .nk-block -->
+        </div>
     </div>
+@endsection
 
-    <script type="text/javascript">
-        function genPDF()
-        {
-            var meteridcombo = $("#meteridcombo").find(':selected').val();
+@push('scripts')
+<script type="text/javascript">
+    function genPDF() {
+        var meteridcombo = $('#meteridcombo').val();
+        var chart = ($('.nav-underline-border .active').text().trim() === 'Area')
+            ? document.getElementById('areaChart').toDataURL()
+            : document.getElementById('barChart').toDataURL();
 
-            var chart ='';
-            if ($('.nav-tabs .active').text() == 'Area')
-            {
-                chart = document.getElementById("areaChart").toDataURL();
-                
+        $.post("{{ url('tenant/dash/gen') }}", { meteridcombo: meteridcombo, chart: chart }, function (data, status) {
+            if (status == 'success') {
+                window.open(data);
             } else {
-                chart = document.getElementById("barChart").toDataURL();
+                Swal.fire({ title: 'Information', icon: 'error', text: 'Failed generating pdf file.' });
             }
+        });
+    }
 
-            var site_url = "{{ url('tenant/dash/gen') }}";
-            $.post(site_url,
-            {
-                "_token": "{{ csrf_token() }}",
-                meteridcombo,
-                chart
-            },
-            function (data, status)
-            {
-                if (status=='success'){
-                    window.open(data);
-                } else {
-                    Swal.fire({
-                        title: "Information",
-                        icon:"error",
-                        text: "Failed generating pdf file."
-                    });
-                }
-            })
-        };
+    function changeStatus(id) {
+        Swal.fire({
+            title: 'Cancel this Request Overtime?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'No'
+        }).then(function (a) {
+            if (!a.value) { return; }
+            $.ajax({
+                url: "{{ url('/tenant/dash/cancelOT') }}",
+                type: 'POST',
+                data: { id: id },
+                dataType: 'json'
+            }).done(function (res) {
+                Swal.fire({ title: 'Information', icon: res.status == 'OK' ? 'success' : 'error', text: res.pesan })
+                    .then(function () { if (res.status == 'OK') { window.location.reload(); } });
+            }).fail(function (xhr, textStatus, errorThrown) {
+                Swal.fire({ title: 'Error', icon: 'error', text: textStatus + ' : ' + errorThrown });
+            });
+        });
+    }
 
-        function changeStatus(id)
-        {
-            Swal.fire({
-                title: 'Cancel this Request Overtime?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#3085d6',
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes',
-                cancelButtonText: 'No',
-            }).then(function(a){
-                if (a.value==true)
-                {
-                    $.ajax({
-                        url : "{{ url('/tenant/dash/cancelOT') }}",
-                        type:"POST",
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            id: id,
-                        },
-                        dataType:"json",
-                        success:function(event, data)
-                        {
-                            if (event.status == 'OK')
-                            {
-                                Swal.fire({
-                                    title: "Information",
-                                    animation: true,
-                                    icon:"success",
-                                    text: event.pesan,
-                                    confirmButtonText: "OK"
-                                }).then(function(){
-                                    window.location.reload(true);
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Information",
-                                    animation: true,
-                                    icon:"error",
-                                    text: event.pesan,
-                                    confirmButtonText: "OK"
-                                });
-                            }
-                        },error: function(jqXHR, textStatus, errorThrown){
-                            Swal.fire({
-                                title: "Error",
-                                animation: true,
-                                icon:"error",
-                                text: textStatus+' Save : '+errorThrown,
-                                confirmButtonText: "OK",
-                            });
-                        }
-                    });
-                } else {
-                }
-            })
-        }
+    $(function () {
+        var URL_GRAPH = "{{ url('tenant/dash/getGraphMeterId') }}";
+        var URL_METER = "{{ url('tenant/dash/getMeterIdByUtility') }}";
+        var charts = { area: null, bar: null };
+        var MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        $(document).ready(function(){
-            
-
+        if ($('#tblTicket').length) {
             $('#tblTicket').DataTable({
                 paging: false,
-                dom: "Bfrtip",
-                buttons: [
-                    {
-                        extend: 'pdf',
-                        title: 'Our Latest Ticket',
-                        orientation: 'landscape',
-                        pageSize: 'A4',
-                        className: 'btn btn-primary mb-2',
-                        text: '<em class="icon ni ni-download"></em>&nbsp;Generate PDF',
-                        exportOptions: {
-                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8]
-                        },
-                        init: function(api, node, config) {
-                            $(node).removeClass('dt-button');
+                dom: 'Bfrtip',
+                buttons: [{
+                    extend: 'pdf',
+                    title: 'Our Latest Ticket',
+                    orientation: 'landscape',
+                    pageSize: 'A4',
+                    className: 'btn btn-primary mb-2',
+                    text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
+                    exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
+                    init: function (api, node) { $(node).removeClass('dt-button'); }
+                }]
+            });
+        }
+
+        $('.select2').select2();
+
+        function unitLabel() {
+            var u = $('#utilitycombo').val();
+            return u === 'W' ? ' m³' : (u === 'G' ? ' m³' : ' kWh');
+        }
+
+        function chartOptions(datas) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { position: 'bottom' },
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return (context.dataset.label ? context.dataset.label + ' : ' : 'Usage : ') +
+                                    Number(context.raw).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + unitLabel();
+                            },
+                            afterLabel: function (context) {
+                                return (datas.meterid && datas.meterid[context.dataIndex]) ? '(' + datas.meterid[context.dataIndex] + ')' : '';
+                            }
                         }
                     }
-                ]
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 });
+                            }
+                        }
+                    }
+                }
+            };
+        }
+
+        // Warna dataset mengikuti label tarif (WBP / LWBP)
+        function colorize(chartdt) {
+            (chartdt.datasets || []).forEach(function (ds, i) {
+                var palette = ['#4f5bd5', '#bda870', '#2eb85c', '#e55353'];
+                var base = palette[i % palette.length];
+                if (ds.label && ds.label.indexOf('22:00 - 18:00') >= 0) { base = '#bda870'; }
+                else if (ds.label && ds.label.indexOf('18:00 - 22:00') >= 0) { base = '#f9b115'; }
+                ds.borderColor = ds.borderColor || base;
+                ds.backgroundColor = ds.backgroundColor || base + '66';
+                ds.pointBackgroundColor = base;
+                ds.tension = 0.3;
+                ds.fill = true;
+            });
+            return chartdt;
+        }
+
+        function renderCharts(datas) {
+            var chartdt = colorize(datas.chartdt);
+
+            if (charts.area) { charts.area.destroy(); }
+            if (charts.bar) { charts.bar.destroy(); }
+
+            charts.area = new Chart(document.getElementById('areaChart').getContext('2d'), {
+                type: 'line', data: chartdt, options: chartOptions(datas)
+            });
+            charts.bar = new Chart(document.getElementById('barChart').getContext('2d'), {
+                type: 'bar', data: JSON.parse(JSON.stringify(chartdt)), options: chartOptions(datas)
             });
 
-            $('.select2').select2();
+            $('#legendDiv').empty();
+        }
 
-            var yearcombo = $(this).find('#yearcombo').val();
-            var meteridcombo = $(this).find('#meteridcombo').val();
-            
-            console.log(meteridcombo);
-            console.log(yearcombo);
+        function resetCharts() {
+            renderCharts({
+                meterid: [],
+                chartdt: { labels: MONTHS, datasets: [{ label: 'Monthly Usage', data: MONTHS.map(function () { return 0; }) }] }
+            });
+        }
+
+        function loadGraph() {
+            var meteridcombo = $('#meteridcombo').val();
+            var utility = $('#utilitycombo').val();
+
+            if (!meteridcombo || !utility) {
+                resetCharts();
+                return;
+            }
 
             $.ajax({
                 type: 'POST',
-                datatType: 'json',
-                url: "{{ url('tenant/dash/getGraphMeterId') }}",
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    meteridcombo: meteridcombo,
-                    yearcombo: yearcombo
-                },
-                success:function(data){
-                    var datas = JSON.parse(data);
-                    var aop = {
-                        showScale: true,
-                        scaleShowGridLines: true,
-                        scaleGridLineColor: "rgba(0,0,0,.05)",
-                        scaleGridLineWidth: 1,
-                        scaleShowHorizontalLines: true,
-                        scaleLabel: "<%= value%> kwh",
-                        scaleShowVerticalLines: true,
-                        bezierCurve: true,
-                        bezierCurveTension: 0.3,
-                        pointDot: false,
-                        pointDotRadius: 4,
-                        pointDotStrokeWidth:2,
-                        pointHitDetectionRadius: 20,
-                        datasetStroke: true,
-                        datasetStrokeWidth: 2,
-                        datasetFill: false,
-                        maintainAspectRatio: false,
-                        responsive: true
-                    };
-
-                    var bop = {
-                        scaleBeginAtZero: true,
-                        scaleShowGridLines: true,
-                        scaleGridLineColor: "rgba(0,0,0,.05)",
-                        scaleGridLineWidth: 1,
-                        scaleShowHorizontalLines: true,
-                        scaleShowVerticalLines: true,
-                        scaleLabel: "<%= value%> kwh",
-                        barShowStroke: true,
-                        barStrokeWidth: 2,
-                        barValueSpacing: 5,
-                        barDatasetSpacing: 1,
-                        responsive: true,
-                        maintainAspectRatio: false
-                    };
-
-                    // AREA CHART
-                    $("#areaChart").remove();
-                    $("#tabItem1").append('<canvas id="areaChart"></canvas>');
-                    var cta = document.getElementById("areaChart").getContext("2d");
-
-                    var ach = new Chart(cta, {
-                        type: 'line',
-                        data: datas.chartdt,
-                        options: {
-                            plugins: {
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return 'Usage : ' +
-                                                Number(context.raw).toLocaleString(
-                                                    'en-US',
-                                                    {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }
-                                                ) + ' kWh';
-                                        },
-                                        afterLabel: function(context) {
-                                            return '(' + datas.meterid[context.dataIndex] + ')';
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    ticks: {
-                                        callback: function(value) {
-                                            return Number(value).toLocaleString(
-                                                'en-US',
-                                                {
-                                                    minimumFractionDigits: 0,
-                                                    maximumFractionDigits: 0
-                                                }
-                                            );
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    // BAR CHART
-                    $("#barChart").remove();
-                    $("#tabItem2").append('<canvas id="barChart"></canvas>');
-                    var ctb = document.getElementById("barChart").getContext("2d");
-
-                    var bch = new Chart(ctb, {
-                        type: 'bar',
-                        data: datas.chartdt,
-                        options: {
-                            plugins: {
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return 'Usage : ' +
-                                                Number(context.raw).toLocaleString(
-                                                    'en-US',
-                                                    {
-                                                        minimumFractionDigits: 2,
-                                                        maximumFractionDigits: 2
-                                                    }
-                                                ) + ' kWh';
-                                        },
-                                        afterLabel: function(context) {
-                                            return '(' + datas.meterid[context.dataIndex] + ')';
-                                        }
-                                    }
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    ticks: {
-                                        callback: function(value) {
-                                            return Number(value).toLocaleString(
-                                                'en-US',
-                                                {
-                                                    minimumFractionDigits: 0,
-                                                    maximumFractionDigits: 0
-                                                }
-                                            );
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-
-                    // BUTTON
-                    $("#legendDiv").empty();
-                    
-                }
-            });
-            
-
-            $('#meteridcombo').change(function() {
-                var meteridcombo = $(this).val();
-                var yearcombo = $('#yearcombo').val();
-                var utility = $('#utilitycombo').val();
-
-                // Jangan load graph kalau belum ada meter
-                if (!meteridcombo || !utility) {
+                url: URL_GRAPH,
+                data: { meteridcombo: meteridcombo, yearcombo: $('#yearcombo').val(), utility: utility }
+            }).done(function (data) {
+                var datas = (typeof data === 'string') ? JSON.parse(data) : data;
+                if (!datas || !datas.chartdt) {
+                    resetCharts();
                     return;
                 }
-
-                $.ajax({
-                    type: 'POST',
-                    datatType: 'json',
-                    url: "{{ url('tenant/dash/getGraphMeterId') }}",
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        meteridcombo: meteridcombo,
-                        yearcombo: yearcombo,
-                        utility: utility
-                    },
-                    success:function(data){
-                        var datas = JSON.parse(data);
-
-                        var aop = {showScale: true, scaleShowGridLines: true, scaleGridLineColor: "rgba(0,0,0,.05)", scaleGridLineWidth: 1, scaleShowHorizontalLines: true, scaleLabel: "<%= value%> kwh", scaleShowVerticalLines: true, bezierCurve: true, bezierCurveTension: 0.3, pointDot: false, pointDotRadius: 4, pointDotStrokeWidth:2, pointHitDetectionRadius: 20, datasetStroke: true, datasetStrokeWidth: 2, datasetFill: false, maintainAspectRatio: false, responsive: true};
-
-                        var bop = {scaleBeginAtZero: true, scaleShowGridLines: true, scaleGridLineColor: "rgba(0,0,0,.05)", scaleGridLineWidth: 1, scaleShowHorizontalLines: true, scaleShowVerticalLines: true, scaleLabel: "<%= value%> kwh", barShowStroke: true, barStrokeWidth: 2, barValueSpacing: 5, barDatasetSpacing: 1, responsive: true, maintainAspectRatio: false };
-
-                        // AREA CHART
-                        $("#areaChart").remove();
-                        $("#tabItem1").append('<canvas id="areaChart"></canvas>');
-                        var cta = document.getElementById("areaChart").getContext("2d");
-
-                        var ach = new Chart(cta, {
-                            type: 'line',
-                            data: datas.chartdt,
-                            options: {
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return 'Usage : ' +
-                                                    Number(context.raw).toLocaleString(
-                                                        'en-US',
-                                                        {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2
-                                                        }
-                                                    ) + ' kWh';
-                                            },
-                                            afterLabel: function(context) {
-                                                return '(' + datas.meterid[context.dataIndex] + ')';
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        ticks: {
-                                            callback: function(value) {
-                                                return Number(value).toLocaleString(
-                                                    'en-US',
-                                                    {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0
-                                                    }
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        // BUTTON
-                        $("#legendDiv").empty();
-                        
-
-                        // BAR CHART
-                        $("#barChart").remove();
-                        $("#tabItem2").append('<canvas id="barChart"></canvas>');
-                        var ctb = document.getElementById("barChart").getContext("2d");
-
-                        var bch = new Chart(ctb, {
-                            type: 'bar',
-                            data: datas.chartdt,
-                            options: {
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return 'Usage : ' +
-                                                    Number(context.raw).toLocaleString(
-                                                        'en-US',
-                                                        {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2
-                                                        }
-                                                    ) + ' kWh';
-                                            },
-                                            afterLabel: function(context) {
-                                                return '(' + datas.meterid[context.dataIndex] + ')';
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        ticks: {
-                                            callback: function(value) {
-                                                return Number(value).toLocaleString(
-                                                    'en-US',
-                                                    {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0
-                                                    }
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        $("#legendDiv").empty();
-                        
-                    }
-                });
-            });
-
-            $('#yearcombo').change(function() {
-                var meteridcombo = $('#meteridcombo').val();
-                var yearcombo = $(this).val();
-                var utility = $('#utilitycombo').val();
-                if (!meteridcombo || !utility) {
-                    return;
-                }
-
-                $.ajax({
-                    type: 'POST',
-                    datatType: 'json',
-                    url: "{{ url('tenant/dash/getGraphMeterId') }}",
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        meteridcombo: meteridcombo,
-                        yearcombo: yearcombo,
-                        utility: utility
-                    },
-                    success:function(data){
-                        var datas = JSON.parse(data);
-
-                        var aop = {showScale: true, scaleShowGridLines: true, scaleGridLineColor: "rgba(0,0,0,.05)", scaleGridLineWidth: 1, scaleShowHorizontalLines: true, scaleLabel: "<%= value%> kwh", scaleShowVerticalLines: true, bezierCurve: true, bezierCurveTension: 0.3, pointDot: false, pointDotRadius: 4, pointDotStrokeWidth:2, pointHitDetectionRadius: 20, datasetStroke: true, datasetStrokeWidth: 2, datasetFill: false, maintainAspectRatio: false, responsive: true};
-
-                        var bop = {scaleBeginAtZero: true, scaleShowGridLines: true, scaleGridLineColor: "rgba(0,0,0,.05)", scaleGridLineWidth: 1, scaleShowHorizontalLines: true, scaleShowVerticalLines: true, scaleLabel: "<%= value%> kwh", barShowStroke: true, barStrokeWidth: 2, barValueSpacing: 5, barDatasetSpacing: 1, responsive: true, maintainAspectRatio: false };
-
-                        // AREA CHART
-                        $("#areaChart").remove();
-                        $("#tabItem1").append('<canvas id="areaChart"></canvas>');
-                        var cta = document.getElementById("areaChart").getContext("2d");
-
-                        var ach = new Chart(cta, {
-                            type: 'line',
-                            data: datas.chartdt,
-                            options: {
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return 'Usage : ' +
-                                                    Number(context.raw).toLocaleString(
-                                                        'en-US',
-                                                        {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2
-                                                        }
-                                                    ) + ' kWh';
-                                            },
-                                            afterLabel: function(context) {
-                                                return '(' + datas.meterid[context.dataIndex] + ')';
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        ticks: {
-                                            callback: function(value) {
-                                                return Number(value).toLocaleString(
-                                                    'en-US',
-                                                    {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0
-                                                    }
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        // BUTTON
-                        $("#legendDiv").empty();
-                        
-
-                        // BAR CHART
-                        $("#barChart").remove();
-                        $("#tabItem2").append('<canvas id="barChart"></canvas>');
-                        var ctb = document.getElementById("barChart").getContext("2d");
-
-                        var bch = new Chart(ctb, {
-                            type: 'bar',
-                            data: datas.chartdt,
-                            options: {
-                                plugins: {
-                                    tooltip: {
-                                        callbacks: {
-                                            label: function(context) {
-                                                return 'Usage : ' +
-                                                    Number(context.raw).toLocaleString(
-                                                        'en-US',
-                                                        {
-                                                            minimumFractionDigits: 2,
-                                                            maximumFractionDigits: 2
-                                                        }
-                                                    ) + ' kWh';
-                                            },
-                                            afterLabel: function(context) {
-                                                return '(' + datas.meterid[context.dataIndex] + ')';
-                                            }
-                                        }
-                                    }
-                                },
-                                scales: {
-                                    y: {
-                                        ticks: {
-                                            callback: function(value) {
-                                                return Number(value).toLocaleString(
-                                                    'en-US',
-                                                    {
-                                                        minimumFractionDigits: 0,
-                                                        maximumFractionDigits: 0
-                                                    }
-                                                );
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        });
-
-                        $("#legendDiv").empty();
-                        
-                    }
-                });
-            });
-
-            function resetCharts() {
-
-                // =========================
-                // RESET AREA CHART
-                // =========================
-                $("#areaChart").remove();
-                $("#tabItem1").append('<canvas id="areaChart"></canvas>');
-
-                var cta = document.getElementById("areaChart").getContext("2d");
-
-                new Chart(cta, {
-                    type: 'line',
-                    data: {
-                        labels: [
-                            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                        ],
-                        datasets: [
-                            {
-                                label: 'Monthly Usage',
-                                data: [
-                                    null, null, null, null,
-                                    null, null, null, null,
-                                    null, null, null, null
-                                ],
-                                fill: false,
-                                tension: 0.3,
-                                pointRadius: 0
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        pointDotRadius: 4,
-                        pointDotStrokeWidth:2,
-                        pointHitDetectionRadius: 20,
-                        datasetStroke: true,
-                        datasetStrokeWidth: 2,
-                        datasetFill: false,
-                        scaleLabel: "<%= value%> kwh",
-                        scaleShowVerticalLines: true,
-                        bezierCurve: true,
-                        bezierCurveTension: 0.3,
-                        pointDot: false,
-                        scaleShowGridLines: true,
-                        scaleGridLineColor: "rgba(0,0,0,.05)",
-                        scaleGridLineWidth: 1,
-                        scaleShowHorizontalLines: true,
-                        showScale: true,
-
-                        plugins: {
-                            legend: {
-                                display: true
-                            },
-                            tooltip: {
-                                enabled: false
-                            }
-                        },
-
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                min: 0,
-                                max: 1,
-                                ticks: {
-                                    stepSize: 0.1,
-                                    callback: function(value) {
-                                        return value;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // =========================
-                // RESET BAR CHART
-                // =========================
-                $("#barChart").remove();
-                $("#tabItem2").append('<canvas id="barChart"></canvas>');
-
-                var ctb = document.getElementById("barChart").getContext("2d");
-
-                new Chart(ctb, {
-                    type: 'bar',
-                    data: {
-                        labels: [
-                            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                            'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-                        ],
-                        datasets: [
-                            {
-                                label: 'Monthly Usage',
-                                data: [
-                                    null, null, null, null,
-                                    null, null, null, null,
-                                    null, null, null, null
-                                ]
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-
-                        plugins: {
-                            legend: {
-                                display: true
-                            },
-                            tooltip: {
-                                enabled: false
-                            }
-                        },
-
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                min: 0,
-                                max: 1,
-                                ticks: {
-                                    stepSize: 0.1,
-                                    callback: function(value) {
-                                        return value;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                });
-
-                // Hapus legend custom
-                $("#legendDiv").empty();
-            }
-
-            $('#utilitycombo').change(function() {
-                updateUtilityTitle();
-                var utility = $(this).val();
-                var $meter = $('#meteridcombo');
-
-                // TAMBAHKAN INI
+                renderCharts(datas);
+            }).fail(function (xhr) {
+                console.log(xhr.responseText);
                 resetCharts();
-
-                // Reset Meter ID
-                $meter.empty();
-                $meter.append('<option value="">-- Select Meter ID --</option>');
-
-                // Disable jika Utility belum dipilih
-                if (utility === '') {
-                    $meter.prop('disabled', true);
-                    $meter.trigger('change');
-                    return;
-                }
-
-                $.ajax({
-                    type: 'POST',
-                    url: "{{ url('tenant/dash/getMeterIdByUtility') }}",
-                    data: {
-                        "_token": "{{ csrf_token() }}",
-                        utility: utility
-                    },
-                    dataType: 'json',
-
-                    success: function(response) {
-
-                        if (response.status) {
-
-                            $meter.append(response.html);
-
-                            $meter.prop('disabled', false);
-
-                        } else {
-
-                            $meter.prop('disabled', true);
-
-                        }
-
-                        $meter.trigger('change');
-                    },
-
-                    error: function(xhr) {
-
-                        console.log(xhr.responseText);
-
-                        $meter.prop('disabled', true);
-                    }
-                });
-
             });
+        }
 
-            function updateUtilityTitle() {
+        function updateUtilityTitle() {
+            var utility = $('#utilitycombo').val();
+            var title = 'Monthly Utility Usage';
+            if (utility === 'E') { title = 'Monthly Electric Usage'; }
+            else if (utility === 'W') { title = 'Monthly Water Usage'; }
+            else if (utility === 'G') { title = 'Monthly Gas Usage'; }
+            $('#utilityTitle').text(title);
+        }
 
-                var utility = $('#utilitycombo').val();
+        $('#meteridcombo, #yearcombo').on('change', loadGraph);
 
-                var title = 'Monthly Utility Usage';
+        $('#utilitycombo').on('change', function () {
+            updateUtilityTitle();
+            var utility = $(this).val();
+            var $meter = $('#meteridcombo');
 
-                if (utility === 'E') {
-                    title = 'Monthly Electric Usage';
-                } 
-                else if (utility === 'W') {
-                    title = 'Monthly Water Usage';
-                } 
-                else if (utility === 'G') {
-                    title = 'Monthly Gas Usage';
-                }
+            resetCharts();
+            $meter.empty().append('<option value="">-- Select Meter ID --</option>');
 
-                $('#utilityTitle').text(title);
+            if (utility === '') {
+                $meter.prop('disabled', true).trigger('change');
+                return;
             }
-        })
 
-        
-    </script>
-@endsection
+            $.ajax({
+                type: 'POST',
+                url: URL_METER,
+                data: { utility: utility },
+                dataType: 'json'
+            }).done(function (response) {
+                if (response.status) {
+                    $meter.append(response.html).prop('disabled', false);
+                } else {
+                    $meter.prop('disabled', true);
+                }
+                $meter.trigger('change');
+            }).fail(function (xhr) {
+                console.log(xhr.responseText);
+                $meter.prop('disabled', true);
+            });
+        });
+
+        // Chart.js merender ulang saat tab Bar pertama kali ditampilkan
+        $('#tab2').on('shown.coreui.tab', function () {
+            if (charts.bar) { charts.bar.resize(); }
+        });
+
+        resetCharts();
+    });
+</script>
+@endpush

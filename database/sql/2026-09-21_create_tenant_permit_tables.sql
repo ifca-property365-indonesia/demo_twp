@@ -1,3 +1,8 @@
+-- CATATAN 2026-09-22: skrip ini TIDAK dipakai. Fitur Letter Permit (Tenant\PermitController)
+-- menyimpan langsung ke SQL Server: mgr.sv_entry_letter, mgr.permit_letter_hd/dtl,
+-- mgr.permit_goods_hd/dtl, mgr.sv_entry_letter_log, nomor dari mgr.sv_spec.letter_no.
+-- Tabel MySQL di bawah adalah rancangan awal dan boleh di-drop kalau sudah terlanjur dibuat.
+
 -- Tabel permit portal tenant (MySQL demo_twp).
 -- Work Permit  (permit_type W)   : tenant_work_permit  + tenant_work_permit_dtl (daftar pekerja)
 -- Permit of Goods (I = Entry, O = Exit) : tenant_permit_goods + tenant_permit_goods_dtl (daftar barang)

@@ -197,12 +197,12 @@ if (!empty($htenants)) {
 
         $list_hticket .= '<td>'.$billingType.'</td>';
 
-        $list_hticket .= '<td><span class="badge badge-sm badge-dim '.$data_status["color"].' d-none d-md-inline-flex">'
+        $list_hticket .= '<td><span class="badge '.$data_status["color"].'">'
             .$data_status["status"].
             '</span></td>';
 
         if ($tenant->status == 'R') {
-            $list_hticket .= '<td><button class="btn btn-block btn-warning btn-sm" onclick="location.href=\''.url('tenant/ticket').'/'.$tenant->id.'/edit\'"> Edit</button></td>';
+            $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''.url('tenant/ticket').'/'.$tenant->id.'/edit\'"> Edit</button></td>';
         } else {
             $list_hticket .= '<td></td>'."\n";
         }
@@ -235,11 +235,11 @@ if (!empty($htenants)) {
                     $overtime->start_overtime,
                     $overtime->end_overtime
                 );
-                $list_hovertime .= '<td><span class="badge badge-sm badge-dim '.$data_status["color"].' d-none d-md-inline-flex">'.$data_status["status"]. '</span></td>';
+                $list_hovertime .= '<td><span class="badge '.$data_status["color"].'">'.$data_status["status"]. '</span></td>';
                 if($overtime->start_overtime > $today && $overtime->status=='N') {
-                    $list_hovertime .= '<td><button class="btn btn-block btn-danger btn-sm" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
                 } else {
-                    $list_hovertime .= '<td><button class="btn btn-block btn-danger btn-sm disabled">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100 disabled">Cancel</button></td>'."\n";
                 }
                 $list_hovertime .= '</tr>' . "\n";
                 $i++;
@@ -535,47 +535,47 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
         switch ($statusid) {
             case 'R':
                 $status = "Submit";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'O':
                 $status = "Open";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'A':
                 $status = "Accepted";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'S':
                 $status = "Survey";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'P':
                 $status = "Process";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'F':
                 $status = "Confirm";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'M':
                 $status = "Modify";
-                $color = "badge-outline-info";
+                $color = "badge-soft-info";
                 break;
             case 'Z':
                 $status = "Charged Approved";
-                $color = "badge-outline-warning";
+                $color = "badge-soft-warning";
                 break;
             case 'Y':
                 $status = "Approve";
-                $color = "badge-outline-success";         
+                $color = "badge-soft-success";         
                 break;      
             case 'C':
                 $status = "Close";
-                $color = "badge-outline-success";
+                $color = "badge-soft-success";
                 break;
             case 'X':
                 $status = "Cancel";
-                $color = "badge-outline-default";         
+                $color = "badge-soft-secondary";         
                 break;
         }
 
@@ -598,7 +598,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
 
             case 'N':
                 return [
-                    'color'  => 'badge-outline-info',
+                    'color'  => 'badge-soft-info',
                     'status' => 'Process'
                 ];
 
@@ -606,32 +606,32 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
 
                 if ($now >= $startOvertime && $now <= $endOvertime) {
                     return [
-                        'color'  => 'badge-outline-primary',
+                        'color'  => 'badge-soft-primary',
                         'status' => 'Activated'
                     ];
                 }
 
                 if ($now > $endOvertime) {
                     return [
-                        'color'  => 'badge-outline-dark',
+                        'color'  => 'badge-soft-dark',
                         'status' => 'Ended'
                     ];
                 }
 
                 return [
-                    'color'  => 'badge-outline-success',
+                    'color'  => 'badge-soft-success',
                     'status' => 'Scheduled'
                 ];
 
             case 'X':
                 return [
-                    'color'  => 'badge-outline-warning',
+                    'color'  => 'badge-soft-warning',
                     'status' => 'Canceled'
                 ];
 
             case 'Z':
                 return [
-                    'color'  => 'badge-outline-danger',
+                    'color'  => 'badge-soft-danger',
                     'status' => 'Closed'
                 ];
         }

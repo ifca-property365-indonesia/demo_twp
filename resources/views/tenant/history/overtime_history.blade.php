@@ -1,66 +1,46 @@
 @extends('tenant.template.base')
 @section('content')
-	<div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">Overtime History</h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-        <div class="nk-block">
-        	<div class="row g-gs">
-	            <div class="col-sm-12">
-					<div class="card-title-group">
-						<div class="card-title">
-							<h6 class="title">
-								<span class="mr-2">Overtime History</span>
-							</h6>
-						</div>
-					</div>
-					<br/>
-	                <form class="form form-horizontal form-validate" id="form_search" method="POST" action="" novalidate="novalidate">
-	                	@csrf
-	                    <div class="row">
-	                        <div class="col-sm-2">
-	                            <label for="start" class=""> Start Date </label>
-	                        </div>
-	                        <div class="col-sm-3">
-	                            <div class="form-control-wrap">
-	                                <div class="form-icon form-icon-left">
-	                                    <em class="icon ni ni-calendar"></em>
-	                                </div>
-	                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="<?php $mydate=date("d/m/Y");echo "$mydate";?>" required>
-	                            </div>
-	                        </div>
-	                    </div>
+	<div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">Overtime History</h3>
+                </div><!-- .page-head-content -->
+            </div><!-- .page-head-row -->
+        </div><!-- .page-head -->
+        <div class="page-block">
+        	<div class="card mb-3">
+            <div class="card-body">
+                <form id="form_search" class="form-validate" method="POST" action="" novalidate>
+                @csrf
+                    <div class="row g-3 align-items-end">
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="start" class="form-label">Start Date</label>
+                            <div class="form-control-wrap">
+                                <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-lg-3">
+                            <label for="end" class="form-label">End Date</label>
+                            <div class="form-control-wrap">
+                                <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-sm-4 col-lg-2">
+                            <button type="submit" id="search" class="btn btn-primary w-100"><i class="cil-search"></i><span>Search</span></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-	                    <div class="row mt-2">
-	                        <div class="col-sm-2">
-	                            <label for="end" class="control-label"> End Date </label>
-	                        </div>
-	                        <div class="col-sm-3">
-	                            <div class="form-control-wrap">
-	                                <div class="form-icon form-icon-left">
-	                                    <em class="icon ni ni-calendar"></em>
-	                                </div>
-	                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="<?php $mydate=date("d/m/Y");echo "$mydate";?>" required>
-	                            </div>
-	                        </div>
-	                        <div class="col-sm-3">
-	                            <button type="submit" id="search" class="btn btn-info">
-	                                <em class="icon ni ni-search"></em>
-	                                <span>Search</span>
-	                            </button>
-	                        </div>
-	                    </div>
-	                </form>
-
-	                <div class="card card-bordered mt-3">
-	                	<div class="card-inner">
-	                		<div class="table-responsive mt-3">
+	                <div class="card">
+	                	<div class="card-body">
+	                		<div class="table-responsive">
 	                			<table id="tblOvertime" class="table table-bordered table-striped" role="grid" aria-describedby="tblOvertime_info">
-		                            <thead style="background:#101924; color: #ffffff;">
+		                            <thead class="table-dark">
 		                                <tr role="row">
 		                                    <th class="sorting_asc text-center" style="width: 40px; vertical-align: middle;">No.</th>
 		                                    <th class="sorting text-center" style="width: 80px; vertical-align: middle;">ID</th>
@@ -79,8 +59,6 @@
 	                		</div>
 	                	</div>
 	                </div>
-	            </div>
-	        </div>
         </div>
     </div>
 
@@ -141,21 +119,21 @@
 		                render: function (data, type, row) {
 		                    if (data=='N'){
 		                        status = 'Waiting to be activated';
-		                        color = 'badge-outline-info';
+		                        color = 'badge-soft-info';
 		                    }
 		                    else if (data=='A') {
 		                        status = "Activated";
-		                        color = 'badge-outline-success';
+		                        color = 'badge-soft-success';
 		                    }
 		                    else if (data=='X') {
 		                        status = "Canceled";
-		                        color = 'badge-outline-warning';
+		                        color = 'badge-soft-warning';
 		                    }
 		                    else {
 		                    	status = "Closed";
-		                        color = 'badge-outline-danger';
+		                        color = 'badge-soft-danger';
 		                    }
-		                    return '<span class="badge badge-sm badge-dim '+color+' d-none d-md-inline-flex">'+status+'</span>'
+		                    return '<span class="badge '+color+'">'+status+'</span>'
 		                }
 		            },
 		        ],
@@ -165,7 +143,7 @@
 		                extend: 'pdf',
 		                title: 'Overtime History',
 		                className: 'btn btn-primary mb-2',
-                        text: '<em class="icon ni ni-download"></em>&nbsp;Generate PDF',
+                        text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
                         init: function(api, node, config) {
                             $(node).removeClass('dt-button')
                         },

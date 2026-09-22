@@ -1,89 +1,77 @@
-<div class="nk-sidebar nk-sidebar-fixed is-dark " data-content="sidebarMenu" style="width: 250px;">
-    <div class="nk-sidebar-element nk-sidebar-head" style="width: 250px;height: 165px;">
-        <div class="nk-sidebar-brand">
-            <a href="https://carstensz.co.id/mall" class="logo-link nk-sidebar-logo" target="_blank" rel="noopener noreferrer">
-                <img class="logo-light logo-img"
-                    src="{{ url('/img/logoweb/carstensz-logo-new2.png') }}"
-                    alt="logo"
-                    style="max-height: 136px; margin-left: 10%;">
+@php
+    // Menu aktif mengikuti URL saat ini.
+    $isOperational = session('Tflag') == 'O';
+    $historyOpen = request()->is('tenant/history*');
+@endphp
+<div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
+    <div class="sidebar-header border-bottom">
+        <div class="sidebar-brand sidebar-brand-tenant">
+            <a href="https://carstensz.co.id/mall" target="_blank" rel="noopener noreferrer">
+                <img src="{{ url('/img/logoweb/carstensz-logo-new2.png') }}" alt="Carstensz">
             </a>
         </div>
-        <div class="nk-menu-trigger mr-n2">
-            <a href="#" class="nk-nav-toggle nk-quick-nav-icon d-xl-none" data-target="sidebarMenu"><em class="icon ni ni-arrow-left"></em></a>
-        </div>
-    </div><!-- .nk-sidebar-element -->
-    <div class="nk-sidebar-element">
-        <div class="nk-sidebar-content">
-            <div class="nk-sidebar-menu" data-simplebar>
-                <ul class="nk-menu">
-                    <li class="nk-menu-heading">
-                        <h6 class="overline-title text-primary-alt">Dashboard</h6>
-                    </li><!-- .nk-menu-heading -->
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/dash') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-dashboard"></em></span>
-                            <span class="nk-menu-text"> Dashboard</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                    <li class="nk-menu-heading">
-                        <h6 class="overline-title text-primary-alt">Menu</h6>
-                    </li><!-- .nk-menu-heading -->
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/ticket') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-ticket"></em></span>
-                            <span class="nk-menu-text"> Ticket</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                    @unless(session('Tflag') == 'O')
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/proforma') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-file-text"></em></span>
-                            <span class="nk-menu-text"> Proforma Invoice</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/invoice') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-wallet"></em></span>
-                            <span class="nk-menu-text"> Invoice Outstanding</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                    @endunless
-                    <li class="nk-menu-item has-sub">
-                        <a href="#" class="nk-menu-link nk-menu-toggle">
-                            <span class="nk-menu-icon"><em class="icon ni ni-histroy"></em></span>
-                            <span class="nk-menu-text">History</span>
-                        </a>
-                        <ul class="nk-menu-sub">
-                            <li class="nk-menu-item">
-                                <a href="{{ url('/tenant/history/ticket') }}" id="ht" class="nk-menu-link"><span class="nk-menu-text">Ticket</span></a>
-                            </li>
-                            @unless(session('Tflag') == 'O')
-                            <li class="nk-menu-item">
-                                <a href="{{ url('/tenant/history/invoice') }}" id="hb" class="nk-menu-link"><span class="nk-menu-text">Invoice</span></a>
-                            </li>
-                            @endunless
-                        </ul><!-- .nk-menu-sub -->
-                    </li><!-- .nk-menu-item -->
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/news') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-notice"></em></span>
-                            <span class="nk-menu-text"> News</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/usersurvey/index') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-list-check"></em></span>
-                            <span class="nk-menu-text"> Online Survey</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                    <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/permit/history') }}" class="nk-menu-link">
-                            <span class="nk-menu-icon"><em class="icon ni ni-file-check"></em></span>
-                            <span class="nk-menu-text"> Letter Permit</span>
-                        </a>
-                    </li><!-- .nk-menu-item -->
-                </ul><!-- .nk-menu -->
-            </div><!-- .nk-sidebar-menu -->
-        </div><!-- .nk-sidebar-content -->
-    </div><!-- .nk-sidebar-element -->
+        <button class="btn-close d-lg-none" type="button" data-coreui-theme="dark" aria-label="Close"
+                onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
+    </div>
+    <ul class="sidebar-nav" data-coreui="navigation">
+        <li class="nav-title">Dashboard</li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/dash*') ? 'active' : '' }}" href="{{ url('/tenant/dash') }}">
+                <i class="nav-icon cil-speedometer"></i> Dashboard
+            </a>
+        </li>
+
+        <li class="nav-title">Menu</li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/ticket*') ? 'active' : '' }}" href="{{ url('/tenant/ticket') }}">
+                <i class="nav-icon cil-tags"></i> Ticket
+            </a>
+        </li>
+        @unless($isOperational)
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/proforma*') ? 'active' : '' }}" href="{{ url('/tenant/proforma') }}">
+                <i class="nav-icon cil-description"></i> Proforma Invoice
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/invoice*') ? 'active' : '' }}" href="{{ url('/tenant/invoice') }}">
+                <i class="nav-icon cil-wallet"></i> Invoice Outstanding
+            </a>
+        </li>
+        @endunless
+        <li class="nav-group {{ $historyOpen ? 'show' : '' }}">
+            <a class="nav-link nav-group-toggle" href="#">
+                <i class="nav-icon cil-history"></i> History
+            </a>
+            <ul class="nav-group-items compact">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('tenant/history/ticket*') ? 'active' : '' }}" href="{{ url('/tenant/history/ticket') }}" id="ht">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Ticket
+                    </a>
+                </li>
+                @unless($isOperational)
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('tenant/history/invoice*') ? 'active' : '' }}" href="{{ url('/tenant/history/invoice') }}" id="hb">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Invoice
+                    </a>
+                </li>
+                @endunless
+            </ul>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/news*') ? 'active' : '' }}" href="{{ url('/tenant/news') }}">
+                <i class="nav-icon cil-newspaper"></i> News
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/usersurvey*') || request()->is('tenant/online_survey*') ? 'active' : '' }}" href="{{ url('/tenant/usersurvey/index') }}">
+                <i class="nav-icon cil-task"></i> Online Survey
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('tenant/permit*') ? 'active' : '' }}" href="{{ url('/tenant/permit/history') }}">
+                <i class="nav-icon cil-clipboard"></i> Letter Permit
+            </a>
+        </li>
+    </ul>
 </div>

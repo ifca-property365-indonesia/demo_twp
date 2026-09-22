@@ -1,112 +1,108 @@
-<div class="nk-sidebar is-capital" data-content="sidebarMenu">
-    <div class="nk-sidebar-inner" data-simplebar>
-        <ul class="nk-menu nk-menu-md">
-            <li class="nk-menu-heading">
-                <h6 class="overline-title text-primary-alt">Dashboards</h6>
-            </li>
-            <li class="nk-menu-item {{ request()->is('admin/dash*') ? 'active' : '' }}">
-                <a href="{{ url('/admin/dash') }}" class="nk-menu-link">
-                    <span class="nk-menu-icon"><em class="icon ni ni-dashboard"></em></span>
-                    <span class="nk-menu-text">Dashboard</span>
-                </a>
-            </li>
-
-            <li class="nk-menu-heading">
-                <h6 class="overline-title text-primary-alt">MENU</h6>
-            </li>
-            
-            <!-- NEWS FEED -->
-            <li class="nk-menu-item has-sub {{ request()->is('admin/news*') ? 'active current-page' : '' }}">
-                <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-notice"></em></span><span class="nk-menu-text">News Feed</span>
-                </a>
-                <ul class="nk-menu-sub" style="{{ request()->is('admin/news*') ? 'display: block;' : '' }}">
-                    <li class="nk-menu-item {{ request()->is('admin/news/form/*') ? 'active' : '' }}">
-                        <a href="{{ url('/admin/news/form/A') }}" class="nk-menu-link"><span class="nk-menu-text">Create News</span></a>
-                    </li>
-                    <li class="nk-menu-item {{ (request()->fullUrl() == url('/admin/news') || request()->fullUrl() == url('/admin/news/')) ? 'active' : '' }}">
-                        <a href="{{ url('/admin/news') }}" class="nk-menu-link"><span class="nk-menu-text">List News</span></a>
-                    </li>
-                </ul>                   
-            </li>
-
-            <!-- ONLINE SURVEY BARU -->
-            <li class="nk-menu-item has-sub {{ request()->is('admin/usersurvey*') ? 'active current-page' : '' }}">
-                <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-list-check"></em></span><span class="nk-menu-text">Online Survey</span>
-                </a>
-                <ul class="nk-menu-sub" style="{{ request()->is('admin/usersurvey*') ? 'display: block;' : '' }}">
-                    <li class="nk-menu-item {{ (request()->fullUrl() == url('/admin/usersurvey') || request()->fullUrl() == url('/admin/usersurvey/')) ? 'active' : '' }}">
-                        <a href="{{ url('/admin/usersurvey/') }}" class="nk-menu-link"><span class="nk-menu-text">Survey Questions</span></a>
-                    </li>
-                    <li class="nk-menu-item {{ request()->is('admin/usersurvey/results*') ? 'active' : '' }}">
-                        <a href="{{ url('/admin/usersurvey/results') }}" class="nk-menu-link"><span class="nk-menu-text">Survey Results</span></a>
-                    </li>
-                </ul>   
-            </li>
-            
-            @if(Session::get('Tsuname') == 'Admin Management')
-            <li class="nk-menu-item {{ request()->is('admin/management*') ? 'active' : '' }}">
-                <a href="{{ url('/admin/management') }}" class="nk-menu-link">
-                    <span class="nk-menu-icon"><em class="icon ni ni-bar-chart"></em></span>
-                    <span class="nk-menu-text">Graph Management</span>
-                </a>
-            </li>
-            @endif
-            
-            <!-- HISTORY -->
-            <li class="nk-menu-item has-sub {{ request()->is('admin/history*') ? 'active current-page' : '' }}">
-                <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-histroy"></em></span><span class="nk-menu-text">History</span>
-                </a>
-                <ul class="nk-menu-sub" style="{{ request()->is('admin/history*') ? 'display: block;' : '' }}">
-                    <li class="nk-menu-item {{ request()->is('admin/history/ticket*') ? 'active' : '' }}">
-                        <a href="{{ url('/admin/history/ticket') }}" class="nk-menu-link"><span class="nk-menu-text">Ticket</span></a>
-                    </li>
-                    <li class="nk-menu-item {{ request()->is('admin/history/users*') ? 'active' : '' }}">
-                        <a href="{{ url('/admin/history/users') }}" class="nk-menu-link"><span class="nk-menu-text">Log user</span></a>
-                    </li>
-                </ul>   
-            </li>
-            
-            <!-- PASSWORD -->
-            @php $passwordOpen = request()->is('admin/account/reset*') || request()->is('admin/systemspec/defaultpass*'); @endphp
-            <li class="nk-menu-item has-sub {{ $passwordOpen ? 'active current-page' : '' }}">
-                <a href="#" class="nk-menu-link nk-menu-toggle">
-                    <span class="nk-menu-icon"><em class="icon ni ni-lock-alt"></em></span><span class="nk-menu-text">Password</span>
-                </a>
-                <ul class="nk-menu-sub" style="{{ $passwordOpen ? 'display: block;' : '' }}">
-                    <li class="nk-menu-item {{ request()->is('admin/account/reset*') ? 'active' : '' }}">
-                        <a href="{{ url('/admin/account/reset') }}" class="nk-menu-link"><span class="nk-menu-text">Password Reset</span></a>
-                    </li>
-                    <li class="nk-menu-item {{ request()->is('admin/systemspec/defaultpass*') ? 'active' : '' }}">
-                        <a href="{{ url('/admin/systemspec/defaultpass') }}" class="nk-menu-link"><span class="nk-menu-text">Default Password</span></a>
-                    </li>
-                </ul>
-            </li>
-        </ul>
+@php
+    // Menu aktif mengikuti URL saat ini.
+    $newsOpen     = request()->is('admin/news*');
+    $surveyOpen   = request()->is('admin/usersurvey*');
+    $historyOpen  = request()->is('admin/history*');
+    $passwordOpen = request()->is('admin/account/reset*') || request()->is('admin/systemspec/defaultpass*');
+    $isExact = function ($path) {
+        return rtrim(request()->path(), '/') === trim($path, '/');
+    };
+@endphp
+<div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
+    <div class="sidebar-header border-bottom">
+        <div class="sidebar-brand">
+            <a href="{{ url('/admin/dash') }}" class="d-flex align-items-center gap-2 text-decoration-none text-white">
+                <img src="{{ url('/images/logoweb/logoweb.png') }}" alt="IFCA">
+                <span class="fw-bold">Web Admin</span>
+            </a>
+        </div>
+        <button class="btn-close d-lg-none" type="button" data-coreui-theme="dark" aria-label="Close"
+                onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
     </div>
+    <ul class="sidebar-nav" data-coreui="navigation">
+        <li class="nav-title">Dashboards</li>
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('admin/dash*') ? 'active' : '' }}" href="{{ url('/admin/dash') }}">
+                <i class="nav-icon cil-speedometer"></i> Dashboard
+            </a>
+        </li>
+
+        <li class="nav-title">Menu</li>
+
+        {{-- News feed --}}
+        <li class="nav-group {{ $newsOpen ? 'show' : '' }}">
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-newspaper"></i> News Feed</a>
+            <ul class="nav-group-items compact">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/news/form/*') ? 'active' : '' }}" href="{{ url('/admin/news/form/A') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Create News
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ $isExact('admin/news') ? 'active' : '' }}" href="{{ url('/admin/news') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> List News
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        {{-- Online survey --}}
+        <li class="nav-group {{ $surveyOpen ? 'show' : '' }}">
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-task"></i> Online Survey</a>
+            <ul class="nav-group-items compact">
+                <li class="nav-item">
+                    <a class="nav-link {{ $isExact('admin/usersurvey') ? 'active' : '' }}" href="{{ url('/admin/usersurvey/') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Survey Questions
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/usersurvey/results*') ? 'active' : '' }}" href="{{ url('/admin/usersurvey/results') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Survey Results
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        @if(Session::get('Tsuname') == 'Admin Management')
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('admin/management*') ? 'active' : '' }}" href="{{ url('/admin/management') }}">
+                <i class="nav-icon cil-bar-chart"></i> Graph Management
+            </a>
+        </li>
+        @endif
+
+        {{-- History --}}
+        <li class="nav-group {{ $historyOpen ? 'show' : '' }}">
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-history"></i> History</a>
+            <ul class="nav-group-items compact">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/history/ticket*') ? 'active' : '' }}" href="{{ url('/admin/history/ticket') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Ticket
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/history/users*') ? 'active' : '' }}" href="{{ url('/admin/history/users') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Log User
+                    </a>
+                </li>
+            </ul>
+        </li>
+
+        {{-- Password --}}
+        <li class="nav-group {{ $passwordOpen ? 'show' : '' }}">
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-lock-locked"></i> Password</a>
+            <ul class="nav-group-items compact">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/account/reset*') ? 'active' : '' }}" href="{{ url('/admin/account/reset') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Password Reset
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->is('admin/systemspec/defaultpass*') ? 'active' : '' }}" href="{{ url('/admin/systemspec/defaultpass') }}">
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Default Password
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
 </div>
-
-<!-- SCRIPT UNTUK MEMATIKAN BUG ACTIVE JS TEMPLATE -->
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    setTimeout(function() {
-        const currentUrl = window.location.href.split('?')[0].replace(/\/$/, "");
-
-        document.querySelectorAll('.nk-sidebar .nk-menu-item').forEach(function(item) {
-            const link = item.querySelector('a.nk-menu-link');
-            if (link) {
-                const href = link.getAttribute('href').replace(/\/$/, "");
-                
-                // Jika URL elemen tidak cocok presisi dengan URL browser, cabut class active
-                if (href && href !== '#' && href !== currentUrl) {
-                    item.classList.remove('active', 'current-page');
-                } else if (href === currentUrl) {
-                    item.classList.add('active');
-                }
-            }
-        });
-    }, 100); // Delay 100ms untuk memastikan JS bawaan template selesai mengeksekusi scriptnya terlebih dahulu
-});
-</script>

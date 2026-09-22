@@ -19,12 +19,17 @@ app/Http/Controllers/Tenant/*                     controller portal tenant (name
 app/Http/Middleware/AdminAuth, TenantAuth, RevalidateBackHistory
 app/Support/TenantScope.php                       cakupan data tenant (mode semua tenant untuk admin)
 app/Support/DefaultPassword.php                   password default dari tabel defaultpassword
+resources/views/layouts/app.blade.php             kerangka CoreUI bersama (sidebar/header diisi tiap portal)
+resources/views/layouts/auth.blade.php            kerangka halaman login
 resources/views/login.blade.php                   halaman login
 resources/views/partials/portal_switch.blade.php  menu "Pindah ke Admin/Tenant" di header
 resources/views/admin/**, resources/views/tenant/**
 routes/web.php  ->  routes/admin.php (prefix /admin), routes/tenant.php (prefix /tenant), routes/api.php (/api)
-assets/admin/, assets/tenant/                     aset yang berbeda per portal
-images/, img/, public/{image,lainnya,AssetsLogin} aset bersama
+assets/coreui/                                    CoreUI 5.9 + CoreUI Icons 3.1 (dist)
+assets/vendor/                                    jQuery, DataTables 2 (bs5), Select2, SweetAlert2, bootstrap-datepicker, Chart.js 4, Highcharts, CKEditor 5, pdfmake
+assets/app/css/app.css, assets/app/js/app.js      style & script bersama di atas CoreUI
+assets/pdf/                                       CSS lama khusus template PDF (dompdf)
+images/, img/, public/{image,lainnya/img}         aset bersama
 database/sql/*.sql                                skrip perubahan data (lihat bawah)
 ```
 
@@ -77,6 +82,31 @@ Menu admin **Password -> Default Password** (`/admin/systemspec/defaultpass`) me
 - pembuatan akun tenant baru lewat API sinkronisasi (`Admin\WsbangunController::business`, 2 tempat).
 
 Kalau tabel kosong, fallback `cartenz123` (nilai hardcode lama).
+
+## Letter Permit (portal tenant)
+
+Menu **Letter Permit** (`/tenant/permit/history`, form `/tenant/permit/add`), `Tenant\PermitController`,
+view `resources/views/tenant/permit/{index,history,print}.blade.php`, CSS `assets/app/css/permit.css`.
+
+- Tiga jenis permit: **Work Permit** (`W`), **Entry Permit of Goods** (`I`), **Exit Permit of Goods** (`O`).
+  Satu form: bagian Location / Schedule / Note sama untuk semua jenis; bagian detail dan daftar
+  (pekerja / barang) berganti mengikuti jenis. Field di bagian yang tersembunyi di-*disable*
+  sehingga tidak ikut terkirim.
+- Simpan lewat satu endpoint `POST /tenant/permit/save` (JSON). Validasi server mengembalikan
+  `errors` per field yang ditampilkan inline di form.
+- Semua data ke SQL Server (`dblive`): `mgr.sv_entry_letter` (header, `complain_type` = W/I/O,
+  `complain_no` = nomor permit), `mgr.permit_letter_hd/dtl` (Work Permit + pekerja),
+  `mgr.permit_goods_hd/dtl` (Permit of Goods + barang), `mgr.sv_entry_letter_log`.
+- Nomor permit dari `mgr.sv_spec.letter_no` per entity/project (`LP100001` -> `LP100002`). Diambil di
+  dalam transaksi dengan `lockForUpdate()` (updlock/holdlock) lalu dinaikkan, jadi dua request bersamaan
+  tidak pernah mendapat nomor yang sama. Nomor di form hanya pratinjau (`GET /tenant/permit/letterNo/{id}`).
+- Tanggal ke kolom `datetime` selalu `yyyymmdd`, audit_date `yyyy-mm-ddThh:mm:ss` (koneksi ODBC memakai
+  `DATEFORMAT dmy`, format lain salah baca).
+- History: DataTables server side (`GET /tenant/permit/historyTable`), filter nomor / jenis / status /
+  tanggal mulai; tombol Print -> `GET /tenant/permit/print/{doc_no}` (dompdf), hanya permit milik tenant
+  yang sedang login (`TenantScope`).
+- `database/sql/2026-09-21_create_tenant_permit_tables.sql` (tabel MySQL) **tidak dipakai**; ditinggalkan
+  sebagai catatan rancangan awal.
 
 ## Konfigurasi
 
@@ -145,3 +175,54 @@ Keadaan akhir lokal: `tenant` id 1 (IFCA), 2 (00050-A Aditya), 3 (00050-A Ilham)
    `GET /admin/account/forgot_password` dihapus; yang dilindungi middleware tetap.
 10. **Data**: `all_login` untuk admin@ifca sebagai tenant, penomoran ulang id, perbaikan `idforeign`
     management, remap `log_login` (lihat `database/sql/`).
+
+## Changelog 2026-09-22
+
+1. **Letter Permit** dirapikan: satu endpoint `POST /tenant/permit/save` (menggantikan `workpermit` &
+   `permitofgoods`), nomor permit diambil di dalam transaksi dengan lock baris `sv_spec` (bebas nomor dobel),
+   nama field form disatukan, nilai panjang dipotong sesuai lebar kolom SQL Server, pesan error SQL hanya
+   tampil saat `APP_DEBUG`. Endpoint mati `getTicketNew` di PermitController dihapus.
+2. **Tampilan permit** dibangun ulang (form bertahap 1-5, validasi inline, daftar pekerja/barang dengan
+   Enter untuk tambah baris, konfirmasi sebelum submit, filter + badge status di History) dengan CSS
+   terpisah `assets/app/css/permit.css`; PDF permit: label, checkbox jenis, status.
+3. **Template tenant**: jQuery tidak lagi dimuat dua kali (CDN + bundle), modal dipindah ke dalam `<body>`,
+   `@stack('styles')`/`@stack('scripts')` dan `@section('title')` tersedia untuk halaman;
+   header memakai query builder (bukan SQL string dengan email dari session) dan tidak error saat baris
+   `all_login` tidak ada; sidebar menandai menu aktif.
+4. **Bug**: form ticket mengirim `tenant_no` (bukan `id_tenancy`) ke `getLotNo` sehingga dropdown unit
+   kadang kosong; `getLotNo` sekarang memeriksa cakupan tenant dan tidak error untuk id tidak valid;
+   header `Cache-Control: nocache` -> `no-cache` di middleware `revalidate`.
+
+## Template CoreUI (migrasi 2026-09-22)
+
+Seluruh tampilan (login, portal admin, portal tenant) memakai **CoreUI 5.9** (Bootstrap 5.3) dan
+**CoreUI Icons Free**; DashLite 2.2 (Bootstrap 4) dan AdminLTE halaman login dihapus (`assets/admin`,
+`assets/tenant`, `public/AssetsLogin`, `public/lainnya/{bootstrap,dist,plugins}`).
+
+- Semua aset lokal (tanpa build step) di `assets/coreui`, `assets/vendor`, `assets/app`. Versi: jQuery 3.7.1,
+  jQuery Validation 1.21, DataTables 2.3.4 + Buttons 3.2.5 (integrasi bs5), Select2 4.0.13 + tema bootstrap-5,
+  SweetAlert2 11, bootstrap-datepicker 1.10, moment 2.30, Chart.js 4.5, Highcharts 12.4, CKEditor 5 41 (classic),
+  pdfmake 0.2 + JSZip.
+- Layout: `layouts/app.blade.php` (kerangka: head + script, `wrapper`, footer, modal bersama
+  `#modal/#modalsm/#modallg/#modalxl`, `#overlaySpinner`). `tenant/template/base` & `admin/template/layout2/base`
+  hanya mengisi section `sidebar` dan `header`. Halaman: `@section('title')`, `@push('styles')`,
+  `@push('head-scripts')`, `@push('scripts')`.
+- Script dimuat di `<head>` (seperti sebelumnya) karena banyak halaman memakai jQuery langsung di dalam
+  `@section('content')`. CoreUI mendaftarkan plugin jQuery, jadi `$('#modal').modal('show')` tetap jalan;
+  event modal memakai `.coreui.modal`, atribut `data-coreui-toggle/dismiss/target`.
+- `assets/app/js/app.js`: header CSRF AJAX, default Select2 (tema bs5, lebar 100%, `dropdownParent` otomatis di
+  dalam modal), inisialisasi `.date-picker` (juga untuk isi modal yang dimuat AJAX), helper global lama
+  `block()`, `FormatDateNew()`, `FormatDateTimeNew()`.
+- Kelas pengganti DashLite (didefinisikan di `app.css`): `page-head / page-head-row / page-head-content /
+  page-title / page-desc / page-block`, `card-title-group`, `form-control-wrap + form-icon`, `badge-soft-*`,
+  `table-dark` untuk thead gelap, `.toolbar` untuk tombol DataTables lama (`dom: '<"toolbar group">frtip'`).
+- Ikon: `ni ni-*` -> `cil-*` (peta di scratch conversion; mis. calendar, cloud-download, search, plus, trash, x,
+  lock-locked, task, history, pencil, warning, user, swap-horizontal, account-logout, reload, newspaper, menu,
+  clipboard, speedometer, wallet, people, tags, send, print, info, filter, description, building, bar-chart).
+- Dashboard: Chart.js 1.x (`new Chart(ctx).Bar`) di dashboard admin ditulis ulang ke Chart.js 4; grafik
+  tenant (4 salinan kode) disatukan ke `renderCharts()`. Halaman tenant `/tenant/oustanding` dan admin
+  `/admin/history/overtime` sudah error SQL sebelum migrasi (kolom `mcurr_cd` / view `mgr.v_overtime_history`
+  tidak ada) dan tidak ada di menu; view-nya tetap dikonversi.
+- Perbaikan yang ikut: form ticket tenant tidak lagi menimpa dropdown unit (parameter `id_tenancy`), tombol
+  Generate PDF di History admin dipulihkan (kirim `debtor_acct`), survey tenant tidak lagi bergantung
+  jQuery Validate (`checkValidity()`), field password profil bertipe `password`.

@@ -75,7 +75,7 @@ class AccountController extends Controller
                     $msg = "The file " . basename($_FILES["userfile"]["name"]) . " has been uploaded.";
                     $psn = "OK";
                     $descs = "/images/user/" . $picname;
-                    $url = url('/admin') . $descs;
+                    $url = url('images/user/' . $picname);
                 } else {
                     $msg = "Sorry, there was an error uploading your file.";
                     $psn = "Failed";

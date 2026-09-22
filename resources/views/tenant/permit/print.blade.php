@@ -5,7 +5,7 @@
     <title>{{ $header->complain_no }}</title>
     <style type="text/css">
         @page { margin: 18px 20px; }
-        body { font-family: "Helvetica", Arial, sans-serif; font-size: 10px; color: #1f3d5c; margin: 0; }
+        body { font-family: "DejaVu Sans", Helvetica, Arial, sans-serif; font-size: 9.5px; color: #1f3d5c; margin: 0; }
         table { width: 100%; border-collapse: collapse; }
         td, th { vertical-align: top; }
         .sheet { border: 1px solid #1f3d5c; }
@@ -39,7 +39,6 @@
         $value = trim((string) $value);
         return $value === '' ? '-' : $value;
     };
-    $type = $header->complain_type;
 @endphp
 
 <table class="sheet">
@@ -74,7 +73,7 @@
                                 <td class="val">: {{ $txt($tenant->name ?? $header->debtor_acct) }}</td>
                             </tr>
                             <tr>
-                                <td class="lbl">Tower/LantaiUnit</td>
+                                <td class="lbl">Tower / Floor / Unit</td>
                                 <td class="val">: {{ $txt($detail->tower ?? '') }} / {{ $txt($detail->floor ?? $header->floor) }} / {{ $txt($detail->unit ?? $header->lot_no) }}</td>
                             </tr>
                             <tr>
@@ -122,18 +121,12 @@
                     <td class="pad" style="width: 50%;">
                         <div class="lbl bold" style="margin-bottom: 8px;">Type of Permit :</div>
                         <table class="row-line">
-                            <tr>
-                                <td style="width: 20px;"><span class="box">{{ $type === 'W' ? 'X' : '' }}</span></td>
-                                <td class="lbl">Work Permit</td>
-                            </tr>
-                            <tr>
-                                <td><span class="box">{{ $type === 'I' ? 'X' : '' }}</span></td>
-                                <td class="lbl">Entry Permit of Goods</td>
-                            </tr>
-                            <tr>
-                                <td><span class="box">{{ $type === 'O' ? 'X' : '' }}</span></td>
-                                <td class="lbl">Exit Permit of Goods</td>
-                            </tr>
+                            @foreach ($types as $code => $label)
+                                <tr>
+                                    <td style="width: 20px;"><span class="box">{{ $type === $code ? 'X' : '' }}</span></td>
+                                    <td class="lbl">{{ $label }}</td>
+                                </tr>
+                            @endforeach
                         </table>
                     </td>
                     <td class="pad last" style="width: 50%;">
@@ -208,30 +201,16 @@
                     <td class="pad center" style="width: 33%;">
                         <div class="lbl bold" style="margin-bottom: 14px;">Permit Start</div>
                         <div class="val">Date : {{ $fdate($header->start_date) }}</div>
-                        <div class="val">Time : {{ $txt($header->start_time) }}</div>
+                        @if ($type === 'W')<div class="val">Time : {{ $txt($header->start_time) }}</div>@endif
                     </td>
                     <td class="pad center" style="width: 33%;">
                         <div class="lbl bold" style="margin-bottom: 14px;">Permit End</div>
                         <div class="val">Date : {{ $fdate($header->end_date) }}</div>
-                        <div class="val">Time : {{ $txt($header->end_time) }}</div>
+                        @if ($type === 'W')<div class="val">Time : {{ $txt($header->end_time) }}</div>@endif
                     </td>
                     <td class="pad center last">
                         <div class="lbl bold" style="margin-bottom: 14px;">Status</div>
-                        <div class="val">
-                            @switch(trim((string) $header->status))
-                                @case('R') Open @break
-                                @case('A') Accepted @break
-                                @case('S') Survey @break
-                                @case('P') Process @break
-                                @case('F') Confirm @break
-                                @case('M') Modify @break
-                                @case('Z') Charged Approved @break
-                                @case('Y') Approved @break
-                                @case('C') Closed @break
-                                @case('X') Cancel @break
-                                @default {{ $txt($header->status) }}
-                            @endswitch
-                        </div>
+                        <div class="val">{{ $status_label }}</div>
                     </td>
                 </tr>
             </table>

@@ -1,46 +1,24 @@
 @extends('tenant.template.base')
 @section('content')
-<style type="text/css">
-    .transbox {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 35%;
-        background: rgba(0,0,0,0.5);
-        padding-top: 50px;
-        padding-left: 50px;
-        padding-right:30px;
-    }
-    </style>
-    <div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">Dashboard</h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-        <div class="nk-block">
-            <div class="card card-bordered mt-3">
-                <div class="card-inner">
-                    <div class="card-title-group">
-                        <div class="card-title">
-                            <h6 class="title">
-                                <span class="mr-2">Proforma Invoice</span>
-                            </h6>
-                        </div>
-                    </div>
+<div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">Proforma Invoice</h3>
+                </div><!-- .page-head-content -->
+            </div><!-- .page-head-row -->
+        </div><!-- .page-head -->
+        <div class="page-block">
+            <div class="card">
+                <div class="card-body">
 
-                    <div class="mt-2">
-                        <strong>Tenant No:</strong> {{ $tenant_no }}
-                    </div>
-                    <div class="table-responsive mt-3">
+                    <div class="mb-3"><span class="badge badge-soft-primary fs-6">Tenant No: {{ $tenant_no }}</span></div>
+                    <div class="table-responsive">
                         <?php
                             if(!empty($list_bill)) {
                         ?>
                         <table id="tblBilling" class="table table-bordered table-striped" role="grid" aria-describedby="tblBilling_info">
-                            <thead style="background:#101924; color: #ffffff;">
+                            <thead class="table-dark">
                                 <tr role='row'>
                                     <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
                                     <th class="sorting text-center" style="width: 24px;">Document Number</th>
@@ -63,13 +41,13 @@
                         </table>
                         <?php  
                             } else {
-                                echo "<p class='card-text badge badge-gray'>Data Not Available</p>";
+                                echo "<div class='text-center py-5 text-body-secondary'><i class='cil-wallet fs-1 d-block mb-2'></i>Data not available.</div>";
                             }
                         ?>
                     </div>
                 </div>
             </div>
-        </div><!-- .nk-block -->
+        </div><!-- .page-block -->
     </div>
     <script type="text/javascript">
         var totalOutstanding = {{ $totalOutstanding ?? 0 }};
@@ -84,7 +62,7 @@
                         orientation: 'landscape',
                         pageSize: 'A4',
                         className: 'btn btn-primary mb-2',
-                        text: '<em class="icon ni ni-download"></em>&nbsp;Generate PDF',
+                        text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
 
                         customize: function (doc) {
 

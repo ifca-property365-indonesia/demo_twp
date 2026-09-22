@@ -1,126 +1,61 @@
 @extends('admin.template.layout2.base')
+
+@section('title', 'Graph Management')
+
+@push('head-scripts')
+    <script src="{{ url('assets/vendor/highcharts/highcharts.js') }}"></script>
+@endpush
+
 @section('content')
-<style type="text/css">
-    .dataTables_filter{
-        padding-bottom: 10px!important;
-    }
-    .table-responsive{
-        overflow-x:none!important;
-    }
-</style>
-
-<div class="nk-content-body">
-    <div class="nk-block-head nk-block-head-sm">
-        <div class="nk-block-between">
-            <div class="nk-block-head-content">
-                <h3 class="nk-block-title page-title">Dashboard Administrator</h3>
-                <div class="nk-block-des text-soft">
-                    <p>Welcome to Tenant Web Portal.</p>
-                </div>
-            </div><!-- .nk-block-head-content -->
-        </div><!-- .nk-block-between -->
-    </div><!-- .nk-block-head -->
-    <div class="nk-block">
-        <div class="row g-gs">
-            <div class="card card-preview col-12">
-                <div class="card-inner" style="padding-top:10px">
-                    <h5 class="card-title" style="border-bottom: solid 2px #dbdfea;padding-bottom:25px;margin-bottom: 20px;">
-                        Aging AP Graphic
-                    </h5>
-                    <div class="card">
-                        <div class="card-body">
-                            <div style="height:500px">
-                                <div id="apChart" style="height:500px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <br>
-                </div>
-            </div><!-- .card-preview -->
-        </div><!-- .row -->
-    </div><!-- .nk-block -->
-    <br><br>
-    <div class="nk-block">
-        <div class="row g-gs">
-            <div class="card card-preview col-12">
-                <div class="card-inner" style="padding-top:10px">
-                    <h5 class="card-title" style="border-bottom: solid 2px #dbdfea;padding-bottom:25px;margin-bottom: 20px;">
-                        Aging AR Graphic
-                    </h5>
-                    <div class="card">
-                        <div class="card-body">
-                            <div style="height:500px">
-                                <div id="arChart" style="height:500px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <br>
-                </div>
-            </div><!-- .card-preview -->
-        </div><!-- .row -->
-    </div><!-- .nk-block -->
-    <br><br>
-    <div class="nk-block">
-        <div class="row g-gs">
-            <div class="card card-preview col-12">
-                <div class="card-inner" style="padding-top:10px">
-                    
-                    <div class="d-flex justify-content-between align-items-center" style="border-bottom: solid 2px #dbdfea; padding-bottom:15px; margin-bottom: 20px;">
-                        <h5 class="card-title mb-0">
-                            REVENUE
-                        </h5>
-                        <div style="width: 150px;">
-                            <select id="yearFilterRevenue" class="form-control form-select">
-                                </select>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-body">
-                            <div id="revenueChart" style="height:400px;"></div>
-                            <br>
-                            <div id="dataTableContainerRevenue" style="width: 100%; margin-top: -15px; padding-bottom: 10px;"></div>
-                        </div>
-                    </div>
-                    <br>
-                </div>
+<div class="page-body">
+    <div class="page-head">
+        <div class="page-head-row">
+            <div class="page-head-content">
+                <h3 class="page-title">Graph Management</h3>
+                <div class="page-desc"><p>Aging AP / AR, revenue and expense overview.</p></div>
             </div>
         </div>
     </div>
-    <br><br>
-    <div class="nk-block">
-        <div class="row g-gs">
-            <div class="card card-preview col-12">
-                <div class="card-inner" style="padding-top:10px">
-                    
-                    <div class="d-flex justify-content-between align-items-center" style="border-bottom: solid 2px #dbdfea; padding-bottom:15px; margin-bottom: 20px;">
-                        <h5 class="card-title mb-0">
-                            EXPENSE
-                        </h5>
-                        <div style="width: 150px;">
-                            <select id="yearFilterExpense" class="form-control form-select">
-                                </select>
-                        </div>
-                    </div>
 
-                    <div class="card">
-                        <div class="card-body">
-                            <div id="expenseChart" style="height:400px;"></div>
-                            <br>
-                            <div id="dataTableContainerExpense" style="width: 100%; margin-top: -15px; padding-bottom: 10px;"></div>
-                        </div>
-                    </div>
-                    <br>
-                </div>
-            </div>
+    <div class="card mb-4">
+        <div class="card-header fw-bold">Aging AP Graphic</div>
+        <div class="card-body">
+            <div id="apChart" style="height: 460px;"></div>
         </div>
     </div>
-    <br><br>
-    
+
+    <div class="card mb-4">
+        <div class="card-header fw-bold">Aging AR Graphic</div>
+        <div class="card-body">
+            <div id="arChart" style="height: 460px;"></div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Revenue</span>
+            <select id="yearFilterRevenue" class="form-select form-select-sm" style="width: 140px;"></select>
+        </div>
+        <div class="card-body">
+            <div id="revenueChart" style="height: 400px;"></div>
+            <div id="dataTableContainerRevenue" class="table-responsive mt-2"></div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <span class="fw-bold">Expense</span>
+            <select id="yearFilterExpense" class="form-select form-select-sm" style="width: 140px;"></select>
+        </div>
+        <div class="card-body">
+            <div id="expenseChart" style="height: 400px;"></div>
+            <div id="dataTableContainerExpense" class="table-responsive mt-2"></div>
+        </div>
+    </div>
 </div>
-<script src="<?php echo e(url('assets/admin/js/Chart.min.js')); ?>" type="text/javascript"></script>
-<script src="https://code.highcharts.com/highcharts.js"></script>
+@endsection
 
+@push('scripts')
 <script>
 
 $(document).ready(function () {
@@ -708,4 +643,4 @@ function loadExpenseChart(year) {
 }
 
 </script>
-@endsection
+@endpush

@@ -1,23 +1,19 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">Survey Results</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Survey Results</h3>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
+            <div class="card">
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered" id="tblpublished" width="100%">
+                        <table class="table table-hover table-bordered w-100" id="tblpublished">
                             <thead>
                                 <tr>
                                     <th>No.</th>          
@@ -30,8 +26,8 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 <script type="text/javascript">
@@ -87,7 +83,7 @@
           
         });
         $("div.tblpublished").html(
-            '<button id="btnresult" class="btn btn-primary pull-up">Result</button>&nbsp;'
+            '<button id="btnresult" class="btn btn-sm btn-primary">Result</button>&nbsp;'
         );
         tblpublishedd.on('click', 'tr', function() {
             if ($(this).hasClass('selected')) {

@@ -187,35 +187,30 @@ class TicketController extends Controller
         }
     }
 
+    /**
+     * Daftar <option> unit milik satu tenancy (dipakai form ticket dan form permit).
+     * Tenancy harus masuk cakupan TenantScope; kalau tidak, atau id tidak ada, hanya option kosong.
+     */
     public function getLotNo(Request $request)
     {
-        if($_POST)
-        {
-            $id_tenancy = $request->id_tenancy;
-            if (is_null($id_tenancy) || !isset($id_tenancy)) {
-                echo('<option></option>');
-            } else {
-                $data_tenancy = DB::table('pm_tenancy')
-                    ->where('id', $id_tenancy)
-                    ->get();
+        $tenancy = DB::table('pm_tenancy')->where('id', (int) $request->id_tenancy)->first();
 
-                $entity = $data_tenancy[0]->entity_cd;
-                $project = $data_tenancy[0]->project_no;
-                $tenant_no = $data_tenancy[0]->tenant_no;
+        if (!$tenancy || !in_array((string) $tenancy->tenant_no, TenantScope::tenantNos(), true)) {
+            return response('<option></option>');
+        }
 
-                $tenant_lot = $this->lotsOfTenancy($entity, $project, $tenant_no);
+        $tenant_lot = $this->lotsOfTenancy($tenancy->entity_cd, $tenancy->project_no, $tenancy->tenant_no);
 
-                if (!$tenant_lot->isEmpty()) {
-                    $list_lot = '<option></option>';
-                    foreach ($tenant_lot as $datalot) {
-                        $list_lot .= '<option data-level="' . $datalot->level_no . '" value="' . $datalot->lot_no . '">' . $datalot->lot_no . '</option>';
-                    }
-                    echo $list_lot;
-                } else {
-                    echo '<option value="">No lot available</option>';
-                }
-            }
-        }      
+        if ($tenant_lot->isEmpty()) {
+            return response('<option value="">No lot available</option>');
+        }
+
+        $list_lot = '<option></option>';
+        foreach ($tenant_lot as $datalot) {
+            $list_lot .= '<option data-level="' . e($datalot->level_no) . '" value="' . e($datalot->lot_no) . '">' . e($datalot->lot_no) . '</option>';
+        }
+
+        return response($list_lot);
     }
 
     /** Unit (lot) milik satu tenancy dari SQL Server (pm_lot join pm_tenant_lot). */

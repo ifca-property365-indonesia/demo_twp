@@ -1,317 +1,304 @@
+{{-- Dimuat ke dalam #modal (header admin -> View Profile). --}}
+<style>
+    .avatar-preview { width: 150px; height: 150px; border-radius: 50%; object-fit: cover; border: 3px solid var(--cui-border-color); background: #fff; }
+    .crop-box { width: 100%; max-width: 260px; aspect-ratio: 1 / 1; margin: 0 auto; background: #111; border-radius: .5rem; overflow: hidden; }
+    .crop-box img { display: block; max-width: 100%; }
+    .crop-box .cropper-view-box, .crop-box .cropper-face { border-radius: 50%; }
+    .crop-box .cropper-view-box { outline: 2px solid #fff; box-shadow: 0 0 0 9999px rgba(0, 0, 0, .55); }
+    .crop-zoom { width: 100%; max-width: 260px; margin: .75rem auto 0; }
+    .crop-zoom input { width: 100%; }
+    .profile-changed { box-shadow: 0 0 0 3px rgba(79, 91, 213, .35); }
+</style>
 
-        <div class="row">
-            <div class="col-md-6">
-                    <ul class="nav nav-tabs mt-n3">
-                        <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" id="baseVerticalLeft2-tab1" href="#tabVerticalLeft21" aria-controls="tabVerticalLeft21" aria-selected="true"><em class="icon ni ni-user"></em><span>Personal</span></a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" id="baseVerticalLeft2-tab2" href="#tabVerticalLeft22" aria-controls="tabVerticalLeft22" aria-selected="false"><em class="icon ni ni-lock-alt"></em><span>Password</span></a>
-                        </li>
-                    </ul>
-                
-                    <div class="row p-2">
-                        <div class="form-group">
-                            <label class="form-label" for="coname">Picture Profile</label><br>
-                            <img id="picturebox" class="img-thumbnail mb-2 img-fluid w-90 pictured" src="https://i0.wp.com/www.winhelponline.com/blog/wp-content/uploads/2017/12/user.png?resize=256%2C256&quality=100&ssl=1" itemprop="thumbnail" alt="Image description">
-                                <input type="file" id="userfile" name="userfile" accept="image/x-png,image/gif,image/jpeg"/>
-                                <p>(* Only Jpg, Png allowed. Max 300kb)</p>
-                            <input type="hidden" name="image" id="image" value="https://i0.wp.com/www.winhelponline.com/blog/wp-content/uploads/2017/12/user.png?resize=256%2C256&quality=100&ssl=1">
-                            <input type="hidden" name="labelimage" id="labelimage">
-                        </div>
-                    </div>
+<div class="row g-4">
+    <div class="col-md-5">
+        {{-- Tahap 1: preview foto --}}
+        <div class="text-center" id="avatarStage">
+            <img id="picturebox" class="avatar-preview mb-3 pictured" src="{{ url('/images/User/defaultuser.png') }}" alt="Profile picture">
+            <div class="mb-2">
+                <label for="userfile" class="btn btn-outline-primary btn-sm"><i class="cil-cloud-upload"></i><span>Change Picture</span></label>
+                <input type="file" id="userfile" name="userfile" class="d-none" accept="image/png,image/jpeg,image/gif">
             </div>
-            
-            <div class="col-md-6">
-                <div class="tab-content col-md-12">
-                    <div role="tabpanel" class="tab-pane active" id="tabVerticalLeft21" aria-expanded="true" aria-labelledby="baseVerticalLeft2-tab1">
-                        <form id ="frmEditor" class="form-horizontal" method="post" action="" enctype="multipart/form-data">
-                            {{ csrf_field() }}
-                        <h4> Personal Information</h4>
-                        <div class="form-group">
-                            <label for="name" class="form-label">Name <FONT COLOR="RED">*</FONT></label>
-                            <div class="col-md-12">
-                            <input type="text" class="form-control" id="name" name="name" />
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email <FONT COLOR="RED">*</FONT></label>
-                            <div class="col-md-12">
-                            <input type="text" class="form-control" id="email" name="email" readonly/>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="handphone" class="form-label">Handphone <FONT COLOR="RED">*</FONT></label>
-                            <div class="col-md-12">
-                                <input type="text" class="form-control" id="handphone" name="handphone" />
-                                Format: 6221995500 | 021995500
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" id="btnSave" class="btn btn-primary">Save</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                        </div>
-                        </form>
-                    </div>
-                
-                    <div class="tab-pane" id="tabVerticalLeft22" aria-labelledby="baseVerticalLeft2-tab2">
-                        <h4>Change Password</h4>
-                        <form id ="frmchangepass" class="form-horizontal" method="post" action="">
-                            <div class="form-group">
-                                <label for="password" class="form-label">New Password <FONT COLOR="RED">*</FONT></label>
-                                <div class="col-md-12">
-                                    <input type="text" class="form-control" id="password1" name="password1" required />
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label for="password" class="form-label">Confirm Password <FONT COLOR="RED">*</FONT></label>
-                                <div class="col-md-12">
-                                    <input type="text" class="form-control" id="password2" name="password2" required />
-                                </div>
-                            </div>
-                            <div class="modal-footer">
-                                <button type="button" id="btnSavepass" class="btn btn-primary">Change</button>
-                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Back</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
+            <div class="form-note">JPG, PNG or GIF, max 5 MB.</div>
+            <div class="form-note text-primary d-none" id="pictureHint"><i class="cil-info"></i> New picture applied &mdash; click <strong>Save</strong> to keep it.</div>
+            <input type="hidden" name="image" id="image" value="">
+            <input type="hidden" name="labelimage" id="labelimage">
         </div>
 
-<script type="text/javascript">
-    var isFile=false;
-    var jqXHRData;
-    loaddata();
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-    $(document).ready(function(){
-        $.validator.addMethod("confirmpass", function (value, element) {
-                var isSuccess = false;
-                var newpassword = $('#password1').val();
-                var confpassword = $('#password2').val();
+        {{-- Tahap 2: geser / zoom foto di dalam frame --}}
+        <div class="text-center d-none" id="cropStage">
+            <div class="crop-box"><img id="cropImage" src="" alt=""></div>
+            <div class="crop-zoom">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="cil-minus"></i>
+                    <input type="range" id="cropZoom" min="1" max="4" step="0.01" value="1" class="form-range">
+                    <i class="cil-plus"></i>
+                </div>
+            </div>
+            <div class="form-note mt-2">Drag the picture to position it inside the frame; use the slider or mouse wheel to zoom.</div>
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <button type="button" class="btn btn-sm btn-secondary" id="btnCropCancel">Cancel</button>
+                <button type="button" class="btn btn-sm btn-primary" id="btnCropApply"><i class="cil-check"></i><span>Use Photo</span></button>
+            </div>
+        </div>
+    </div>
 
-                if(newpassword == confpassword){
-                   isSuccess=true;
+    <div class="col-md-7">
+        <ul class="nav nav-underline-border mb-3" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-coreui-toggle="tab" href="#tabPersonal" role="tab"><i class="cil-user"></i> Personal</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-coreui-toggle="tab" href="#tabPassword" role="tab"><i class="cil-lock-locked"></i> Password</a>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <div class="tab-pane active" id="tabPersonal" role="tabpanel">
+                <form id="frmEditor" method="post" action="" novalidate>
+                    @csrf
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="name" name="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="text" class="form-control" id="email" name="email" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="handphone" class="form-label">Handphone <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="handphone" name="handphone">
+                        <div class="form-note">Format: 6221995500 | 021995500</div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Back</button>
+                        <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-save"></i><span>Save</span></button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="tab-pane" id="tabPassword" role="tabpanel">
+                <form id="frmchangepass" method="post" action="" novalidate>
+                    @csrf
+                    <div class="mb-3">
+                        <label for="password1" class="form-label">New Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password1" name="password1" required autocomplete="new-password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password2" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="password2" name="password2" required autocomplete="new-password">
+                    </div>
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Back</button>
+                        <button type="button" id="btnSavepass" class="btn btn-primary"><i class="cil-lock-locked"></i><span>Change</span></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+(function ($) {
+    var validateOpts = {
+        ignore: '',
+        errorElement: 'div',
+        errorClass: 'invalid-feedback',
+        highlight: function (el) { $(el).addClass('is-invalid'); },
+        unhighlight: function (el) { $(el).removeClass('is-invalid'); },
+        errorPlacement: function (error, element) { error.insertAfter(element); }
+    };
+
+    $.validator.addMethod('confirmpass', function () {
+        return $('#password1').val() === $('#password2').val();
+    }, 'Password does not match');
+
+    $('#frmEditor').validate($.extend({}, validateOpts, {
+        rules: { name: { required: true }, handphone: { required: true } }
+    }));
+
+    $('#frmchangepass').validate($.extend({}, validateOpts, {
+        rules: { password1: { required: true }, password2: { required: true, confirmpass: true } }
+    }));
+
+    // ------------------------------------------------------------------
+    // Foto profil: pilih file -> geser/zoom di frame -> "Use Photo" -> preview
+    // langsung berubah (belum tersimpan sampai klik Save)
+    // ------------------------------------------------------------------
+    var cropper = null;
+    var baseZoom = 1;
+
+    function showStage(crop) {
+        $('#cropStage').toggleClass('d-none', !crop);
+        $('#avatarStage').toggleClass('d-none', crop);
+    }
+
+    function destroyCropper() {
+        if (cropper) { cropper.destroy(); cropper = null; }
+        $('#cropImage').attr('src', '');
+        $('#userfile').val('');
+        showStage(false);
+    }
+
+    $('#userfile').on('change', function () {
+        var file = this.files[0];
+        if (!file) { return; }
+        if (!/^image\/(png|jpe?g|gif)$/i.test(file.type)) {
+            Swal.fire({ title: 'Information', text: 'Only JPG, PNG or GIF files are allowed.', icon: 'warning' });
+            this.value = '';
+            return;
+        }
+        if (file.size > 5000000) {
+            Swal.fire({ title: 'Information', text: 'Maximum file size is 5 MB.', icon: 'warning' });
+            this.value = '';
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            if (cropper) { cropper.destroy(); cropper = null; }
+            $('#cropImage').attr('src', e.target.result);
+            showStage(true);
+
+            cropper = new Cropper(document.getElementById('cropImage'), {
+                aspectRatio: 1,
+                viewMode: 3,
+                dragMode: 'move',
+                autoCropArea: 1,
+                cropBoxMovable: false,
+                cropBoxResizable: false,
+                toggleDragModeOnDblclick: false,
+                guides: false,
+                center: false,
+                highlight: false,
+                background: false,
+                responsive: true,
+                ready: function () {
+                    // frame = seluruh kotak; zoom slider relatif terhadap ukuran awal
+                    var c = cropper.getContainerData();
+                    cropper.setCropBoxData({ left: 0, top: 0, width: c.width, height: c.height });
+                    baseZoom = cropper.getCanvasData().width / cropper.getImageData().naturalWidth;
+                    $('#cropZoom').val(1);
+                },
+                zoom: function (e) {
+                    var factor = e.detail.ratio / baseZoom;
+                    if (factor < 1) { e.preventDefault(); $('#cropZoom').val(1); return; }
+                    if (factor > 4) { e.preventDefault(); $('#cropZoom').val(4); return; }
+                    $('#cropZoom').val(factor.toFixed(2));
                 }
-                
-                return isSuccess;
-        });
-        $("#frmEditor").validate({
-            ignore:"",
-            rules: {
-                name: {
-                    required: true
-                },
-                handphone:{
-                    required:true
-                },
-            },
-            messages: {
-                errorElement: "span",
-                highlight: function (element, errorClass, validClass) {
-                    $(element).addClass(errorClass); //.removeClass(errorClass);
-                    $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-                },
-                unhighlight: function (element, errorClass, validClass) {
-                    $(element).removeClass(errorClass); //.addClass(validClass);
-                    $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
-                },
-                errorPlacement: function (error, element) {
-                    if (element.parent('.input-group').length) {
-                        error.insertAfter(element.parent());
-                    } else if (element.hasClass('select2')){
-                        error.insertAfter(element.next('span'));
-                    } else {
-                        error.insertAfter(element);
-                    }
+            });
+        };
+        reader.readAsDataURL(file);
+    });
+
+    $('#cropZoom').on('input', function () {
+        if (cropper) { cropper.zoomTo(baseZoom * parseFloat(this.value)); }
+    });
+
+    $('#btnCropCancel').on('click', destroyCropper);
+
+    $('#btnCropApply').on('click', function () {
+        if (!cropper) { return; }
+        var $btn = $(this).prop('disabled', true);
+        var canvas = cropper.getCroppedCanvas({ width: 400, height: 400, imageSmoothingEnabled: true, imageSmoothingQuality: 'high' });
+        var previewUrl = canvas.toDataURL('image/png');
+
+        canvas.toBlob(function (blob) {
+            var data = new FormData();
+            data.append('userfile', blob, 'profile_' + Date.now() + '.png');
+
+            $.ajax({
+                url: "{{ url('admin/account/savepic') }}",
+                type: 'POST',
+                data: data,
+                processData: false,
+                contentType: false,
+                dataType: 'json'
+            }).done(function (res) {
+                if (res.status == 'OK') {
+                    // preview langsung berubah, disimpan ke profil saat klik Save
+                    $('#picturebox').attr('src', previewUrl).addClass('profile-changed');
+                    $('#image').val(res.url);
+                    $('#labelimage').val(res.picname);
+                    $('#pictureHint').removeClass('d-none');
+                    destroyCropper();
+                } else {
+                    Swal.fire({ title: 'Error', text: res.pesan, icon: 'error' });
                 }
+            }).fail(function (xhr, textStatus, errorThrown) {
+                Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
+            }).always(function () {
+                $btn.prop('disabled', false);
+            });
+        }, 'image/png');
+    });
+
+    // ------------------------------------------------------------------
+    // Simpan profil
+    // ------------------------------------------------------------------
+    $('#btnSave').on('click', function () {
+        if (!$('#frmEditor').valid()) { return; }
+
+        var dataform = $('#frmEditor').serializeArray();
+        dataform.push({ name: 'isFile', value: false }, { name: 'labelimage', value: $('#labelimage').val() });
+
+        $.ajax({
+            url: "{{ url('admin/account/updateprofile') }}",
+            type: 'POST',
+            data: dataform,
+            dataType: 'json'
+        }).done(function (res) {
+            if (res.status === 'OK') {
+                // header ikut berubah tanpa reload
+                $('.header .user-name, .dropdown-menu-user .user-card .lead-text').text($('#name').val());
+                $('.header .user-avatar img').attr('src', $('#picturebox').attr('src'));
+                $('#picturebox').removeClass('profile-changed');
+                $('#pictureHint').addClass('d-none');
             }
-        });
-        $("#frmchangepass").validate({
-            ignore:"",
-            rules: {
-                password1: {
-                    required: true//,
-                    // confirmpass:true
-                },
-                password2:{
-                    required:true,
-                    confirmpass:true
-                },
-            },
-           
-            messages: {
-                password2: {confirmpass: "Password is not valid"},
-                errorElement: "span",
-                highlight: function (element, errorClass, validClass) {
-                    $(element).addClass(errorClass); //.removeClass(errorClass);
-                    $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-                },
-                unhighlight: function (element, errorClass, validClass) {
-                    $(element).removeClass(errorClass); //.addClass(validClass);
-                    $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
-                },
-                errorPlacement: function (error, element) {
-                    if (element.parent('.input-group').length) {
-                        error.insertAfter(element.parent());
-                    } else if (element.hasClass('select2')){
-                        error.insertAfter(element.next('span'));
-                    } else {
-                        error.insertAfter(element);
-                    }
-                }
-            }
+            Swal.fire({ title: 'Information', text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
+                .then(function () { if (res.status === 'OK') { $('#modal').modal('hide'); } });
+        }).fail(function (xhr, textStatus, errorThrown) {
+            Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
         });
     });
-        
-        $('#userfile').change(function(event) {
-            event.preventDefault();
-            event.handled = true;
-            $.ajax({
-            url : "{{url('admin/account/savepic')}}",
-            type:"POST",
-            data: function () {
-                var data = new FormData();
-                data.append("userfile", $("#userfile").get(0).files[0]);
-                return data;
-            }(),
-            processData: false,
-            contentType: false,
-            dataType:"json",
-            success:function(data, status){
-                if(data.status == "OK"){
-                    $('#picturebox').attr('src', data.url);
-                    $('#image').val(data.url)
-                    $('#labelimage').val(data.picname)
-                } else {
-                Swal.fire({
-                    title: "Error",
-                    text: data.pesan,
-                    icon: "error",
-                    confirmButtonText: "OK"
-                });
-                }
-            },
-                error: function(jqXHR, textStatus, errorThrown){
-                Swal.fire('error',textStatus+' Save : '+errorThrown);
-            }
-            });
+
+    $('#btnSavepass').on('click', function () {
+        if (!$('#frmchangepass').valid()) { return; }
+
+        var dataform = $('#frmchangepass').serializeArray();
+        dataform.push({ name: 'email', value: $('#email').val() }, { name: 'password', value: $('#password2').val() });
+
+        $.ajax({
+            url: "{{ url('admin/account/changepass') }}",
+            type: 'POST',
+            data: dataform,
+            dataType: 'json'
+        }).done(function (res) {
+            Swal.fire({ title: 'Information', text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
+                .then(function () { if (res.status === 'OK') { $('#modal').modal('hide'); } });
+        }).fail(function (xhr, textStatus, errorThrown) {
+            Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
         });
+    });
 
-        $('#btnSave').click(function(){
-            var labelimage = $('#labelimage').val()
-            if($('#frmEditor').valid()){
-            var dataform = $('#frmEditor').serializeArray();
-            dataform.push({name:"isFile",value:isFile},
-                          {name:"labelimage",value:labelimage},
-                        );
-            var obj = new Object();
-            obj.isFile = isFile;
-                if(isFile){
-                    if(jqXHRData){
-                        jqXHRData.formData = dataform;
-                        jqXHRData.submit();
-                    }
-                } else {
-                    var site_url = "{{ url('admin/account/updateprofile') }}";
-                    $.ajax({
-                        url: site_url,
-                        type: "POST",
-                        data: dataform,
-                        dataType: "json",
-                        success: function(data, status){
-                            if(status=='success'){
-                                Swal.fire({
-                                    title: "Information",
-                                    text: data.pesan,
-                                    icon: "success",
-                                    confirmButtonText: "OK"
-                                }).then(function(){
-                                    $('#modal').modal('hide');
-                                });
+    // Bersihkan cropper kalau modal ditutup
+    $('#modal').one('hidden.coreui.modal', destroyCropper);
 
-                                // location.reload();
-                            } else {
-                                Swal.fire({
-                                    title: "Error",
-                                    text: data.pesan,
-                                    icon: "error",
-                                    confirmButtonText: "OK"
-                                });
-                            }
-                        },
-                        error: function(jqXHR, textStatus, errorThrown){
-                            Swal.fire('error',textStatus+' Save : '+errorThrown);
-                        }
-                    });
-                }
+    // Isi data profil
+    (function () {
+        var id = $('#modal').data('Id');
+        if (!id) { return; }
+        $.getJSON("{{ url('admin/account/getbyemail') }}/" + id, function (data) {
+            if (!data || !data.length) { return; }
+            $('#name').val(data[0].name);
+            $('#handphone').val(data[0].handphone);
+            $('#email').val(data[0].email);
+            $('#image').val(data[0].pict);
+            $('#labelimage').val(data[0].pict);
+            if (data[0].pict) {
+                $('.pictured').attr('src', data[0].pict);
             }
         });
-
-        $('#btnSavepass').click(function(){
-            if($('#frmchangepass').valid()){
-                var dataform = $('#frmchangepass').serializeArray();
-                var email = $('#email').val();
-                var password = $('#password2').val();
-                var confpass  = $('#password1').val();
-                if(password != confpass){
-                    Swal.fire('Information', 'Password mismatch','error');
-                    return;
-                }
-                dataform.push({name:"email",value:email},{name:"password",value:password})
-                var site_url = "{{ url('admin/account/changepass') }}";
-                $.ajax({
-                    url: site_url,
-                    type: "POST",
-                    data: dataform,
-                    dataType: "json",
-                    success: function(data, status){
-                        if(status=='success'){
-                            Swal.fire({
-                                title: "Information",
-                                text: data.pesan,
-                                icon: "success",
-                                confirmButtonText: "OK"
-                            }).then(function(){
-                                $('#modal').modal('hide');
-                            })
-                        } else {
-                            Swal.fire({
-                                title: "Error",
-                                text: data.pesan,
-                                icon: "error",
-                                confirmButtonText: "OK"
-                            });
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown){
-                        Swal.fire('error',textStatus+' Save : '+errorThrown);
-                    }
-                });
-            }
-        });
-
-    function loaddata(){
-        var Id = $('#modal').data('Id');
-        if (Id.length > 0) {
-            $.getJSON("{{ url('admin/account/getbyemail') }}" + "/" + Id, function (data) {
-                $("#name").val(data[0].name);
-                $("#handphone").val(data[0].handphone);
-                $("#email").val(data[0].email);
-                $('#image').val(data[0].pict);
-                $('#labelimage').val(data[0].pict);
-                var url = data[0].pict;
-                if(url != "" || url != null)
-                {
-                    var filename = url.substring(url.lastIndexOf('/')+1);
-                    $('#labelimage').text(filename);
-                    $('.pictured').attr("src",url);
-                }
-            });
-        }
-    }
+    })();
+})(jQuery);
 </script>

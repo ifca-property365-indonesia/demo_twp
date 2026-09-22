@@ -1,19 +1,19 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<div class="nk-content-body">
-    <div class="nk-block-head nk-block-head-sm">
-        <div class="nk-block-between">
-            <div class="nk-block-head-content">
-                <h3 class="nk-block-title page-title">Survey Results</h3>
+<div class="page-body">
+    <div class="page-head">
+        <div class="page-head-row">
+            <div class="page-head-content">
+                <h3 class="page-title">Survey Results</h3>
             </div>
         </div>
     </div>
 
-    <div class="nk-block">
+    <div class="page-block">
         @if(count($surveys) > 0)
             @foreach($surveys as $survey)
-                <div class="card card-preview mb-4">
-                    <div class="card-inner">
+                <div class="card mb-4">
+                    <div class="card-body">
                         <h4 class="survey-title text-primary mb-1">{{ $survey->title }}</h4>
                         <div class="sub-text mb-3">
                             Total Respondents: <strong class="text-dark">{{ $survey->totalRespondents }}</strong> People &nbsp;|&nbsp; 
@@ -34,7 +34,7 @@
                                                         <span class="sub-text fw-bold">{{ $opt->option_text }}</span>
                                                     </div>
                                                     <div class="col-sm-7 col-9">
-                                                        <div class="progress progress-lg bg-light" style="height: 1.2rem; border-radius: 4px; position: relative;">
+                                                        <div class="progress bg-light" style="height: 1.2rem; border-radius: 4px; position: relative;">
                                                             <div class="progress-bar bg-primary" 
                                                                  role="progressbar" 
                                                                  style="width: {{ $opt->percentage }}%;" 
@@ -54,15 +54,15 @@
                                                             @endif
                                                         </div>
                                                     </div>
-                                                    <div class="col-sm-2 col-3 text-right">
+                                                    <div class="col-sm-2 col-3 text-end">
                                                         <!-- VOTE COUNT BADGE -->
-                                                        <span class="badge badge-dim badge-secondary btn-show-voters" 
+                                                        <span class="badge badge-soft-secondary btn-show-voters" 
                                                             style="cursor: pointer;" 
                                                             data-optid="{{ $opt->id }}" 
                                                             data-opttext="{{ $opt->option_text }}" 
                                                             data-surveytitle="{{ $survey->title }}" 
                                                             title="Click to view voter list">
-                                                            <em class="icon ni ni-users"></em> {{ $opt->count }} Votes
+                                                            <i class="cil-people"></i> {{ $opt->count }} Votes
                                                         </span>
                                                     </div>
                                                 </div>
@@ -72,7 +72,7 @@
                                         <!-- QUESTIONNAIRE VIEW (ANSWER LIST WITH DATATABLE PAGINATION) -->
                                         <div class="table-responsive mt-3">
                                             <table class="table table-striped table-bordered table-sm mb-0 tbl-essay-answers" width="100%">
-                                                <thead class="thead-light">
+                                                <thead class="table-light">
                                                     <tr>
                                                         <th width="25%">Respondent</th>
                                                         <th>Questionnaire Answer</th>
@@ -82,7 +82,7 @@
                                                 <tbody>
                                                     @forelse($q->answers as $ans)
                                                         <tr>
-                                                            <td class="font-weight-bold" style="font-size: 12px;">{{ $ans->email }}</td>
+                                                            <td class="fw-bold" style="font-size: 12px;">{{ $ans->email }}</td>
                                                             <td style="white-space: pre-wrap; font-size: 13px;">{{ $ans->essay_answer }}</td>
                                                             <td style="font-size: 12px;">{{ date('d M Y, H:i', strtotime($ans->created_at)) }}</td>
                                                         </tr>
@@ -110,9 +110,9 @@
             </div>
 
         @else
-            <div class="card card-preview">
-                <div class="card-inner">
-                    <p class="card-text badge badge-gray mb-0">No Survey Available</p>
+            <div class="card">
+                <div class="card-body">
+                    <p class="card-text badge badge-soft-secondary mb-0">No Survey Available</p>
                 </div>
             </div>
         @endif
@@ -143,8 +143,8 @@
                     "autoWidth": false,
                     "language": {
                         "paginate": {
-                            "previous": "<i class='icon ni ni-chevron-left'></i>",
-                            "next": "<i class='icon ni ni-chevron-right'></i>"
+                            "previous": "<i class='cil-chevron-left'></i>",
+                            "next": "<i class='cil-chevron-right'></i>"
                         },
                         "zeroRecords": "No answers found",
                         "info": "Showing _START_ - _END_ of _TOTAL_ answers",
@@ -163,7 +163,7 @@
             $('#modaltitlexl').html('Voter List for Option: <span class="text-primary">' + optionText + '</span> in survey <span class="text-primary">' + surveyTitle + '</span>');
             
             $('#modalbodyxl').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading respondent list...</p></div>');
-            $('.modal-footer').html('<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
             
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
             $('#modalxl').modal('show');
@@ -178,7 +178,7 @@
                     
                     if (response && response.status === 'OK') {
                         var html = '<div class="table-responsive"><table class="table table-bordered table-striped table-sm" id="tblModalVoters" width="100%">';
-                        html += '<thead class="thead-light"><tr><th width="8%">No.</th><th width="25%">Respondent Email</th><th>Remarks</th><th width="22%">Voting Time</th></tr></thead><tbody>';
+                        html += '<thead class="table-light"><tr><th width="8%">No.</th><th width="25%">Respondent Email</th><th>Remarks</th><th width="22%">Voting Time</th></tr></thead><tbody>';
 
                         // Cek dengan aman apakah data ada
                         var hasData = response.data && response.data.length > 0;
@@ -190,7 +190,7 @@
 
                                 html += '<tr>';
                                 html += '<td class="text-center">' + (index + 1) + '</td>';
-                                html += '<td class="font-weight-bold" style="font-size: 13px;">' + (val.email || '-') + '</td>';
+                                html += '<td class="fw-bold" style="font-size: 13px;">' + (val.email || '-') + '</td>';
                                 html += '<td style="font-size: 13px;">' + remarksText + '</td>';
                                 html += '<td style="font-size: 12px;">' + (val.created_at || '-') + '</td>';
                                 html += '</tr>';
@@ -212,8 +212,8 @@
                                 "autoWidth": false,
                                 "language": {
                                     "paginate": {
-                                        "previous": "<i class='icon ni ni-chevron-left'></i>",
-                                        "next": "<i class='icon ni ni-chevron-right'></i>"
+                                        "previous": "<i class='cil-chevron-left'></i>",
+                                        "next": "<i class='cil-chevron-right'></i>"
                                     },
                                     "zeroRecords": "No voters found",
                                     "info": "Showing _START_ - _END_ of _TOTAL_ respondents",

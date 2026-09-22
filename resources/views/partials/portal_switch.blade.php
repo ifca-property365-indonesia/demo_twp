@@ -14,14 +14,12 @@
     }
 @endphp
 @if ($switchAdmin || count($switchTenants) > 0)
-<div class="dropdown-inner">
-    <ul class="link-list">
-        @if ($switchAdmin)
-        <li><a href="{{ url('/switch/admin') }}"><em class="icon ni ni-swap"></em><span>Pindah ke Admin</span></a></li>
-        @endif
-        @foreach ($switchTenants as $t)
-        <li><a href="{{ url('/switch/tenant/'.$t['id']) }}"><em class="icon ni ni-swap"></em><span>Pindah ke Tenant: {{ $t['name'] }}</span></a></li>
-        @endforeach
-    </ul>
-</div>
+    <div class="dropdown-header bg-body-tertiary fw-semibold text-body-secondary small">Switch portal</div>
+    @if ($switchAdmin)
+        <a class="dropdown-item" href="{{ url('/switch/admin') }}"><i class="cil-swap-horizontal"></i> Pindah ke Admin</a>
+    @endif
+    @foreach ($switchTenants as $t)
+        <a class="dropdown-item" href="{{ url('/switch/tenant/'.$t['id']) }}"><i class="cil-swap-horizontal"></i> Pindah ke Tenant: {{ $t['name'] }}</a>
+    @endforeach
+    <div class="dropdown-divider"></div>
 @endif

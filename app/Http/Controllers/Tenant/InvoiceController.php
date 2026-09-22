@@ -72,7 +72,7 @@ class InvoiceController extends Controller
                     <a href="' . $pdfUrl . '"
                     target="_blank"
                     class="btn btn-sm btn-success">
-                        <em class="icon ni ni-file-pdf"></em>
+                        <i class="cil-file"></i>
                         PDF
                     </a>
                 ';
@@ -85,15 +85,15 @@ class InvoiceController extends Controller
                         <td>'.date('d F Y', strtotime($row->due_date)).'</td>
                         <td>'.$row->descs.'</td>
                         <td>'.date('F Y', strtotime($row->trx_date)).'</td>
-                        <td class="text-right">'.number_format($outstanding, 2).'</td>
+                        <td class="text-end">'.number_format($outstanding, 2).'</td>
                         <td class="text-center">'.$check.'</td>
                     </tr>';
             }
 
             $footer_bill = '
                 <tr style="font-weight:bold;background:#f5f6fa">
-                    <td colspan="6" class="text-right">TOTAL</td>
-                    <td class="text-right">'.number_format($totalOutstanding,2).'</td>
+                    <td colspan="6" class="text-end">TOTAL</td>
+                    <td class="text-end">'.number_format($totalOutstanding,2).'</td>
                 </tr>';
         }
 
@@ -150,14 +150,14 @@ class InvoiceController extends Controller
                         <td>'.date('d F Y', strtotime($row->void_date)).'</td>
                         <td>'.$row->descs.'</td>
                         <td>'.date('F Y', strtotime($row->trx_date)).'</td>
-                        <td class="text-right">'.number_format($row->fdoc_amt, 2).'</td>
+                        <td class="text-end">'.number_format($row->fdoc_amt, 2).'</td>
                     </tr>';
             }
 
             $footer_bill = '
                 <tr style="font-weight:bold;background:#f5f6fa">
-                    <td colspan="6" class="text-right">TOTAL</td>
-                    <td class="text-right">'.number_format($totalOutstanding,2).'</td>
+                    <td colspan="6" class="text-end">TOTAL</td>
+                    <td class="text-end">'.number_format($totalOutstanding,2).'</td>
                 </tr>';
         }
 

@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <title>IFCA Software</title>
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <link href="{{ url('assets/admin/css/exportpdf/bootstrap.min.css');}}" rel="stylesheet" type="text/css" />
-    <link href="{{ url('assets/admin/css/exportpdf/skin-yellow.min.css'); }}" rel="stylesheet" type="text/css" />
-    <link href="{{ url('assets/admin/css/exportpdf/AdminLTE.min.css'); }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/pdf/bootstrap.min.css');}}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/pdf/skin-yellow.min.css'); }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/pdf/AdminLTE.min.css'); }}" rel="stylesheet" type="text/css" />
   <style type="text/css">.boxx{position: relative;width: 16px;height: 16px;border-radius: 3px;}
     .footer{position: fixed; bottom: 0px; text-align: center;}
     thead:before, thead:after { display: none; }tbody:before, tbody:after { display: none; }</style>

@@ -1,55 +1,26 @@
-<style >
-    #signupForm label.error {
-    margin-left: 10px;
-    width: auto;
-    display: inline;
-  }
-  td {
-      height: 40px;
-    }
-  
-  #label_form label {
-      text-align: right;
-    }
-  
-  .marginSelect{
-    padding-left: 12px !important;
-    padding-bottom: 6px !important;
-    border-bottom-width: 1px !important;
-    padding-top: 3px !important;
-  
-  }
-  label {
-    text-align: right;
-  }
-  .has-error .select2-selection {
-    border: 1px solid #a94442;
-    border-radius: 4px;
-  }
-  </style>
-  <div class="ibox-content">
-    <form role="form" class="form-horizontal" enctype="multipart/form-data" id="form_publish" method="POST" >
-      <div class="form-group">
-        <label>Survey Title</label>
+<div>
+    <form role="form" enctype="multipart/form-data" id="form_publish" method="POST" >
+      <div class="mb-3">
+        <label class="form-label">Survey Title</label>
         <div class="col-12">
           <input type="text" class="form-control" name="txttitle" id="txttitle" placeholder="Input Subject" readonly>
         </div>
       </div>
-      <div class="form-group" >
+      <div class="mb-3" >
         <label class="form-label">Publish Date</label>
-        <div class="form-control-wrap" style="padding:0 14px">
+        <div class="form-control-wrap">
             <div class="form-icon form-icon-left">
-                <em class="icon ni ni-calendar"></em>
+                <i class="cil-calendar"></i>
             </div>
             <input type="text" id="txtPublish" name="txtPublish" placeholder="Publish Date" class="form-control date-picker" data-date-format="dd/mm/yyyy" >
         </div>
         
       </div>
-      <div class="form-group">
+      <div class="mb-3">
         <label class="form-label">Expired Date</label>
-        <div class="form-control-wrap" style="padding:0 14px">
+        <div class="form-control-wrap">
             <div class="form-icon form-icon-left">
-                <em class="icon ni ni-calendar"></em>
+                <i class="cil-calendar"></i>
             </div>
             <input type="text" id="txtExpired" name="txtExpired" placeholder="Expired Date" class="form-control date-picker" data-date-format="dd/mm/yyyy" >
         </div>
@@ -80,15 +51,10 @@ function loaddata(){
                     cek_date:"Expired Date can't be smaller than Publish Date"
                   }
               },
-      errorElement: "span",
-      highlight: function (element, errorClass, validClass) {
-          $(element).addClass(errorClass); //.removeClass(errorClass);
-          $(element).closest('.form-group').removeClass('has-success').addClass('has-error');
-        },
-        unhighlight: function (element, errorClass, validClass) {
-          $(element).removeClass(errorClass); //.addClass(validClass);
-          $(element).closest('.form-group').removeClass('has-error').addClass('has-success');
-        },
+      errorElement: "div",
+      errorClass: "invalid-feedback",
+      highlight: function (element) { $(element).addClass('is-invalid'); },
+      unhighlight: function (element) { $(element).removeClass('is-invalid'); },
         errorPlacement: function (error, element) {
           if (element.parent('.input-group').length) {
             error.insertAfter(element.parent());

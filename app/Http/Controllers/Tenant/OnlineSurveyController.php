@@ -41,7 +41,7 @@ class OnlineSurveyController extends Controller
                 }
 
                 // ✅ Kalau belum isi → tampilkan
-                $lsP .= '<label class="control-label">'.$publish->title.'</label>';
+                $lsP .= '<h5 class="fw-bold text-primary border-bottom pb-2 mb-3">'.e($publish->title).'</h5>';
 
                 $dataSur = DB::table('pm_survey_hd')
                     ->where('publish_id', $publish->id)
@@ -53,7 +53,7 @@ class OnlineSurveyController extends Controller
 
                     foreach ($dataSur as $k => $survey) {
 
-                        $lsP .= '<div class="form-group col-sm-10">'.$survey->content;
+                        $lsP .= '<div class="mb-4"><div class="form-label fs-6">'.$survey->content.'</div>';
                         $lsP .= '<input type="hidden" name="s[]" value="'.$survey->id.'">';
 
                         $dataOpt = DB::table('pm_survey_dt')
@@ -64,12 +64,12 @@ class OnlineSurveyController extends Controller
                         {
                             foreach ($dataOpt as $option) {
 
-                                $lsP .= '<div class="radio col-sm-10"><label>';
-                                $lsP .= '<input type="radio" name="oR['.$k.']" data-ada="true" value="'.$option->line_no.'"/> ';
-                                $lsP .= ' '.$option->options.'</label>';
+                                $lsP .= '<div class="form-check mb-2"><label class="form-check-label">';
+                                $lsP .= '<input type="radio" class="form-check-input" name="oR['.$k.']" data-ada="true" value="'.$option->line_no.'"/> ';
+                                $lsP .= ' '.e($option->options).'</label>';
 
                                 if ($option->flag_remark == 1) {
-                                    $lsP .= '<textarea class="form-control col-sm-10" rows="3" name="remarks"></textarea>';
+                                    $lsP .= '<textarea class="form-control form-control-sm mt-2" rows="2" name="remarks" placeholder="Remarks"></textarea>';
                                 }
 
                                 $lsP .= '</div>';
@@ -82,7 +82,7 @@ class OnlineSurveyController extends Controller
                     $lsP .= '<input name="id" type="hidden" value="'.$publish->id.'"/>';
                     $lsP .= '<input name="q" type="hidden" value="'.$k.'"/>';
 
-                    $lsP .= '<div style="text-align:right;margin-right: 50px;margin-top: 20px">';
+                    $lsP .= '<div class="text-end mt-3">';
                     $lsP .= '<button type="button" id="btnSave'.$publish->id.'" data-p="'.$publish->id.'" data-q="'.$k.'" class="btn btn-primary">Submit</button>';
                     $lsP .= '</div></form>';
                 }

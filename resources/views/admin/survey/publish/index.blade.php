@@ -1,33 +1,29 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">Publish Survey</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Publish Survey</h3>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
-                    <ul class="nav nav-tabs mt-n3">
+            <div class="card">
+                <div class="card-body">
+                    <ul class="nav nav-underline-border mb-3">
                         <li class="nav-item">
-                            <a class="nav-link active" data-toggle="tab" href="#t_new"><em class="icon ni ni-edit"></em> &nbsp;New Survey</a>
+                            <a class="nav-link active" data-coreui-toggle="tab" href="#t_new"><i class="cil-pencil"></i> &nbsp;New Survey</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-toggle="tab" href="#t_published"><em class="icon ni ni-list-check"></em> &nbsp; Published Survey</a>
+                            <a class="nav-link" data-coreui-toggle="tab" href="#t_published"><i class="cil-task"></i> &nbsp; Published Survey</a>
                         </li>
                     </ul>
                     <div class="tab-content">
                         <div class="tab-pane active" id="t_new">
                             <div class="table-responsive">
-                                <table class="table table-hover table-bordered" id="tblsurveyy" width="100%">
+                                <table class="table table-hover table-bordered w-100" id="tblsurveyy">
                                     <thead>
                                     <tr>
                                         <th>No.</th>          
@@ -40,7 +36,7 @@
                         </div>
                         <div class="tab-pane" id="t_published">
                             <div class="table-responsive">
-                                <table class="table table-hover table-bordered" id="tblpublished" width="100%">
+                                <table class="table table-hover table-bordered w-100" id="tblpublished">
                                     <thead>
                                     <tr>
                                         <th>No.</th>          
@@ -57,8 +53,8 @@
                     </div>
                    
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 <script type="text/javascript">
@@ -109,7 +105,7 @@
                 render: function (data, type, row) {
                     return FormatDateNew(data);
                 }},
-               { data: null, name: "action", searchable: false, orderable: false, render: function (data, type, row) { return '<button type="button" class="btn btn-danger btn-sm btn-delete-published" ' + 'data-id="' + row.publish_id + '">' + '<em class="icon ni ni-trash"></em> Delete' + '</button>'; } }
+               { data: null, name: "action", searchable: false, orderable: false, render: function (data, type, row) { return '<button type="button" class="btn btn-danger btn-sm btn-delete-published" ' + 'data-id="' + row.publish_id + '">' + '<i class="cil-trash"></i> Delete' + '</button>'; } }
             ]
           
         });
@@ -156,10 +152,10 @@
           
         });
         $("div.tblsurvey").html(
-            '<button id="addparam" class="btn btn-primary pull-up">Add</button>&nbsp;'+
-            '<button id="editparam" class="btn btn-info pull-up">Edit</button>&nbsp;'+
-            '<button id="deleteparam" class="btn btn-danger pull-up">Delete</button>&nbsp;'+
-            '<button id="publishparam" class="btn btn-secondary pull-up">Publish</button>&nbsp;'
+            '<button id="addparam" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
+            '<button id="editparam" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
+            '<button id="deleteparam" class="btn btn-sm btn-danger">Delete</button>&nbsp;'+
+            '<button id="publishparam" class="btn btn-sm btn-secondary">Publish</button>&nbsp;'
         );
         tblsurvey.on('click', 'tr', function() {
             if ($(this).hasClass('selected')) {
@@ -198,7 +194,7 @@
                 $('#modalxl').modal({backdrop: 'static', keyboard: false});
                 $('#modaltitlexl').addClass('white');
                 $('#modaltitlexl').html('Add New Survey');
-                $('.modal-footer').html('<button type="button" class="btn btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+                $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
                 $('#modalbodyxl').html("");
                 $('#modalbodyxl').load("{{ url('/admin/survey/publish/form') }}");
                 
@@ -224,7 +220,7 @@
             $('#modaltitlexl').addClass('white');
             $('#modaltitlexl').html('Edit Survey');
             $('.modal-footer').html("");
-            $('.modal-footer').html('<button type="button" class="btn btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
             $('#modalbodyxl').load("{{ url('/admin/survey/publish/form') }}");
             $('#modalxl').data('id', publish_id);
             $('#modalxl').data('form', 'edit');
@@ -255,7 +251,7 @@
                         $('#modalbodyxl').html("");
                         $('#modalxl').modal({backdrop: 'static', keyboard: false})  
                         $('.modal-footer').html("");
-                        $('.modal-footer').html('<button type="button" class="btn btn-danger" id="savefrm_publish">Publish</button><button type="button" class="btn grey btn-secondary" data-dismiss="modal">Close</button>');
+                        $('.modal-footer').html('<button type="button" class="btn btn-sm btn-danger" id="savefrm_publish">Publish</button><button type="button" class="btn grey btn-secondary" data-coreui-dismiss="modal">Close</button>');
                         $('#modaltitlexl').addClass('white');
                         $('#modaltitlexl').html('Publish Survey');
                         $('#modalbodyxl').load("{{ url('/admin/survey/publish/add') }}");
@@ -266,17 +262,17 @@
                         $('#modalxl').modal('show');
             
                     }else{
-                        block(false,'.nk-content-body');
+                        block(false,'.page-body');
                     }
                 });
 
         });
         $('#deleteparam').click(function(){
-            block(true,'.nk-content-body');
+            block(true,'.page-body');
             var rows = tblsurvey.rows('.selected').indexes();
             if (rows.length < 1) {
                 Swal.fire("Information",'Please select a row',"warning");
-                block(false,'.nk-content-body');
+                block(false,'.page-body');
                 return;
                 
             } 
@@ -295,7 +291,7 @@
                     if (a.value==true) {
                         Delete(publish_id);
                     }else{
-                        block(false,'.nk-content-body');
+                        block(false,'.page-body');
                     }
                 });
         });   
@@ -310,7 +306,7 @@
             data: { publish_id: publish_id},
             dataType:"json",
             success:function(event, data){
-                block(false,'.nk-content-body');
+                block(false,'.page-body');
                 tblsurvey.ajax.reload(null,true); 
                 if(event.status =='OK'){
                     Swal.fire("Information",event.pesan,"success");
@@ -321,7 +317,7 @@
             },                    
             error: function(jqXHR, textStatus, errorThrown){        
                 Swal.fire("Information",textStatus+' Save : '+errorThrown,"warning");
-                block(false,'.nk-content-body');
+                block(false,'.page-body');
             }
         });
     }
@@ -341,7 +337,7 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
 
         if (result.value == true) {
 
-            block(true, '.nk-content-body');
+            block(true, '.page-body');
 
             $.ajax({
                 url: "{{ url('/admin/survey/publish/delete') }}",
@@ -352,7 +348,7 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
                 dataType: "json",
                 success: function(event) {
 
-                    block(false, '.nk-content-body');
+                    block(false, '.page-body');
 
                     if (event.status == 'OK') {
 
@@ -375,7 +371,7 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
 
-                    block(false, '.nk-content-body');
+                    block(false, '.page-body');
 
                     Swal.fire(
                         "Information",

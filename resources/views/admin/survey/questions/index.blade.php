@@ -1,23 +1,19 @@
 @extends('admin.template.layout2.base')
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">Question Template Entry</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Question Template Entry</h3>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
+            <div class="card">
+                <div class="card-body">
                     <div class="table-responsive">
-                        <table class="table table-hover table-bordered" id="tblgroup" width="100%">
+                        <table class="table table-hover table-bordered w-100" id="tblgroup">
                             <thead>
                             <tr>
                                 <th>No.</th>
@@ -30,8 +26,8 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 
@@ -72,18 +68,12 @@
             },
             {data: "tmpsurvey_id",name:"tmpsurvey_id", visible:false},
           ],
-          dom: '<"toolbar group">frtip',
-          "responsive": {
-            details: {
-                type: 'column',
-                target: 8
-            }
-          }
+          dom: '<"toolbar group">frtip'
       });
       $("div.group").html(
-        '<button id="addgroup" class="btn btn-primary pull-up" style="margin-top: 5px">Add</button>&nbsp;'+
-        '<button id="editgroup" class="btn btn-info pull-up" style="margin-top: 5px">Edit</button>&nbsp;'+
-        '<button id="deletegroup" class="btn btn-danger pull-up" style="margin-top: 5px">Delete</button>&nbsp;'
+        '<button id="addgroup" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
+        '<button id="editgroup" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
+        '<button id="deletegroup" class="btn btn-sm btn-danger">Delete</button>&nbsp;'
 
       );
       tblgroupp.on('click', 'tr', function() {
@@ -131,7 +121,7 @@
             }
             var data = tblgroupp.rows(rows).data();
             var id = data[0].tmpsurvey_id;
-            block(true,'.nk-content-body');
+            block(true,'.page-body');
             Swal.fire({
                 title: 'Are you sure?',
                 text: 'You won\'t be able to revert this!',
@@ -146,7 +136,7 @@
                     Delete(id);
                     
                 }else{
-                    block(false,'.nk-content-body');
+                    block(false,'.page-body');
                 }
             })
         })
@@ -161,11 +151,11 @@
             success:function(event, data){
                 Swal.fire("Information",event.pesan,"success");
                 tblgroupp.ajax.reload(null,true);
-                block(false,'.nk-content-body');
+                block(false,'.page-body');
             },
             error: function(jqXHR, textStatus, errorThrown){
                 Swal.fire("Information",textStatus+' delete : '+errorThrown,"warning");
-                block(false,'.nk-content-body');
+                block(false,'.page-body');
             }
         });
     }

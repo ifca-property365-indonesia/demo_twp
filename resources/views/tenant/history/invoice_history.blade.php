@@ -1,88 +1,44 @@
 @extends('tenant.template.base')
 @section('content')
-<style type="text/css">
-    .transbox {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 35%;
-        background: rgba(0,0,0,0.5);
-        padding-top: 50px;
-        padding-left: 50px;
-        padding-right:30px;
-    }
-    </style>
-    <div class="nk-content-body">
-        <div class="nk-block-head nk-block-head-sm">
-            <div class="nk-block-between">
-                <div class="nk-block-head-content">
-                    <h3 class="nk-block-title page-title">Dashboard</h3>
-                </div><!-- .nk-block-head-content -->
-            </div><!-- .nk-block-between -->
-        </div><!-- .nk-block-head -->
-        <div class="nk-block">
-            <div class="card card-bordered mt-3">
-                <div class="card-inner">
-                    <div class="card-title-group">
-                        <div class="card-title">
-                            <h6 class="title">
-                                <span class="mr-2">Invoice History</span>
-                            </h6>
-                        </div>
-                    </div>
-                    <br/>
-                    <div class="row">
-                        <div class="col-sm-2">
-                            <label for="start" class=""> Start Date (Doc Date)  </label>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="form-control-wrap">
-                                <div class="form-icon form-icon-left">
-                                    <em class="icon ni ni-calendar"></em>
+<div class="page-body">
+        <div class="page-head">
+            <div class="page-head-row">
+                <div class="page-head-content">
+                    <h3 class="page-title">Invoice History</h3>
+                </div><!-- .page-head-content -->
+            </div><!-- .page-head-row -->
+        </div><!-- .page-head -->
+        <div class="page-block">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <form id="form_search" method="POST" action="" novalidate>
+                        <div class="row g-3 align-items-end">
+                            <div class="col-sm-6 col-lg-3">
+                                <label for="start_date" class="form-label">Start Date (Doc Date)</label>
+                                <div class="form-control-wrap">
+                                    <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                    <input type="text" id="start_date" name="start_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y', strtotime('-3 months', strtotime(date('Y-m-01')))) }}" required autocomplete="off">
                                 </div>
-                                <input type="text" 
-                                    id="start_date" 
-                                    name="start_date" 
-                                    class="form-control date-picker" 
-                                    data-date-format="dd/mm/yyyy" 
-                                    value="{{ date('d/m/Y', strtotime('-3 months', strtotime(date('Y-m-01')))) }}" 
-                                    required
-                                >
+                            </div>
+                            <div class="col-sm-6 col-lg-3">
+                                <label for="end_date" class="form-label">End Date (Doc Date)</label>
+                                <div class="form-control-wrap">
+                                    <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                    <input type="text" id="end_date" name="end_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="col-sm-4 col-lg-2">
+                                <button type="submit" id="btnSearch" class="btn btn-primary w-100"><i class="cil-search"></i><span>Search</span></button>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="row mt-2">
-                        <div class="col-sm-2">
-                            <label for="end" class="control-label"> End Date (Doc Date)  </label>
-                        </div>
-                        <div class="col-sm-3">
-                            <div class="form-control-wrap">
-                                <div class="form-icon form-icon-left">
-                                    <em class="icon ni ni-calendar"></em>
-                                </div>
-                                <input type="text"
-                                    id="end_date"
-                                    name="end_date"
-                                    class="form-control date-picker"
-                                    data-date-format="dd/mm/yyyy"
-                                    value="{{ date('d/m/Y') }}"
-                                    required
-                                >
-                            </div>
-                        </div>
-                        <div class="col-sm-3">
-                            <button type="submit" id="btnSearch" class="btn btn-primary">
-                                <em class="icon ni ni-search"></em>
-                                <span>Search</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="table-responsive mt-3">
+                    </form>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="table-responsive">
                         <table id="tblBilling" class="table table-bordered table-striped" role="grid" aria-describedby="tblBilling_info">
-                            <thead style="background:#101924; color: #ffffff;">
+                            <thead class="table-dark">
                                 <tr role='row'>
                                     <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
                                     <th class="sorting text-center" style="width: 24px;">Document Number</th>
@@ -100,7 +56,7 @@
                     </div>
                 </div>
             </div>
-        </div><!-- .nk-block -->
+        </div><!-- .page-block -->
     </div>
     <script type="text/javascript">
         $('#tblBilling').DataTable({
@@ -181,7 +137,7 @@
                 {
                     data: 'fdoc_amt',
                     name: 'fdoc_amt',
-                    className: 'text-right',
+                    className: 'text-end',
                     render: function (data) {
                         if (data == null) return '0.00';
 
@@ -196,11 +152,11 @@
             order: [[1, 'desc']]
         });
 
-        $('#btnSearch').on('click', function () {
+        $('#form_search').on('submit', function (e) {
+            e.preventDefault();
             $('#tblBilling').DataTable().ajax.reload();
         });
 
-        $('.dataTables_filter').addClass('mb-3');
         
         </script>
 @endsection

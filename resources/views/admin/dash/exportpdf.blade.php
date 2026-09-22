@@ -6,11 +6,11 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <!-- Bootstrap 3.3.4 -->
-    <link href="{{ url('assets/admin/css/exportpdf/bootstrap.min.css');}}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/pdf/bootstrap.min.css');}}" rel="stylesheet" type="text/css" />
     <!-- Font Awesome Icons -->
     <!-- Theme -->
-    <link href="{{ url('assets/admin/css/exportpdf/skin-yellow.min.css'); }}" rel="stylesheet" type="text/css" />
-    <link href="{{ url('assets/admin/css/exportpdf/AdminLTE.min.css'); }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/pdf/skin-yellow.min.css'); }}" rel="stylesheet" type="text/css" />
+    <link href="{{ url('assets/pdf/AdminLTE.min.css'); }}" rel="stylesheet" type="text/css" />
     <style type="text/css">.boxx{position: relative;width: 16px;height: 16px;border-radius: 3px;}thead:before, thead:after { display: none; }
 tbody:before, tbody:after { display: none; }.footer{position: fixed; bottom: 0px; text-align: center;}</style>
   </head>

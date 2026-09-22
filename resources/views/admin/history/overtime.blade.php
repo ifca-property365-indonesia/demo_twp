@@ -1,45 +1,40 @@
 @extends('admin.template.layout2.base')
+@section('title', 'Overtime History')
+
 @section('content')
-<style type="text/css">
-    .toolbar {
-        float: left;
-        margin-bottom: 1em;
-    }
-</style>
-<div class="nk-content-body">
-    <div class="components-preview wide-md mx-auto">
-        <div class="nk-block nk-block-lg">
-            <div class="nk-block-head">
-                <div class="nk-block-head-content">
-                    <h4 class="nk-block-title">Overtime History</h4>
+<div class="page-body">
+    <div>
+        <div class="page-block">
+            <div class="page-head">
+                <div class="page-head-row">
+                    <div class="page-head-content">
+                        <h3 class="page-title">Overtime History</h3>
+                    </div>
+                    <div class="page-head-content">
+                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>Generate PDF</span></button>
+                    </div>
                 </div>
             </div>
-            <div class="card card-preview">
-                <div class="card-inner">
-                    <div class="form-group">
-                        <div  style="display: flex">
-                            <label for="pl_project" class="form-label col-2" style="padding-right:20px;"> Reported Date</label>
-                            
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3 align-items-end mb-3">
+                        <div class="col-sm-6 col-md-3">
+                            <label class="form-label" for="start">Request Date From</label>
                             <div class="form-control-wrap">
-                                <div class="form-icon form-icon-left">
-                                    <em class="icon ni ni-calendar"></em>
-                                </div>
-                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" width="50%">
+                                <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
-                            <span class="badge-sm badge-gray badge-dim" style="font-size: 15px"> to </span>
-                            <div class="form-control-wrap">
-                                <div class="form-icon form-icon-left">
-                                    <em class="icon ni ni-calendar"></em>
-                                </div>
-                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" width="50%">
-                            </div>
-                            
                         </div>
-                    </div>
-                    <div class="form-group">
-                            <div  style="display: flex">
-                                <label class="form-label col-2" for="default-01">Tenant</label>
-                                <div class="col-6" style="padding:0px"><select name="debtor" id="debtor" data-placeholder="Choose Tenant" class="form-control select2" tabindex="2" width="50%">
+                        <div class="col-sm-6 col-md-3">
+                            <label class="form-label" for="end">To</label>
+                            <div class="form-control-wrap">
+                                <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label" for="debtor">Tenant</label>
+                            <select name="debtor" id="debtor" data-placeholder="Choose Tenant" class="form-control select2">
                                     <option value=""></option>
                                     <option value="all">All</option>
                                     <?php if(!empty($datadebtor)) {
@@ -47,11 +42,14 @@
                                             echo "<option value='".$key->debtor_acct."'>".$key->debtor_acct."</option>";
                                         }  
                                     } ?>  
-                                </select></div><button class="btn btn-primary btn-sm" id="btnsearch" style="margin-left: 15px"><em class="icon ni ni-search"></em>Search</button>
-                            </div>
+                                </select>
+                        </div>
+                        <div class="col-sm-4 col-md-2">
+                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>Search</span></button>
+                        </div>
                     </div>
-                    <div class="table-responsive">
-                        <table class="table table-hover table-bordered" id="tblovertimee" width="100%">
+<div class="table-responsive">
+                        <table class="table table-hover table-bordered w-100" id="tblovertimee">
                             <thead>
                                 <tr>
                                     <th class="sorting_asc">No.</th>
@@ -66,8 +64,8 @@
                         </table>
                     </div>
                 </div>
-            </div><!-- .card-preview -->
-        </div> <!-- nk-block -->
+            </div><!-- . -->
+        </div> <!-- page-block -->
     </div>
 </div>
 
@@ -143,23 +141,16 @@
             {data:"status",name:"status",
                 render:function (data,type,row) {
                    if(data=='N'){
-                        return '<span class="badge badge-success"> Activated </span>';
+                        return '<span class="badge text-bg-success"> Activated </span>';
                    } else if(data=='P'){
-                        return '<span class="badge badge-danger"> Closed </span>';
+                        return '<span class="badge text-bg-danger"> Closed </span>';
                    } else {
                         return '';
                    }
                 }
             },
             {data:"remarks",name:"remarks"}
-          ],
-          dom: '<"toolbar group">frtip',
-          "responsive": {
-            details: {
-                type: 'column',
-                target: 8
-            }
-          }
+          ]
       });
 
     $('#btnsearch').click(function(){
@@ -168,7 +159,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            swal('Warning','Please choose end date','warning');
+            Swal.fire('Warning', 'Please choose end date', 'warning');
             return;
         }
         tblovertime.ajax.reload(null,true);
@@ -179,13 +170,13 @@
 
         if (date_start!='' && date_end=='')
         {
-            swal('Warning','Please choose end date','warning');
+            Swal.fire('Warning', 'Please choose end date', 'warning');
             return;
         }
         var debtor = $('#debtor').val();
         var site_url = '{{ url("admin/history/dlpdf")}}';
             $.post(site_url,
-                {type:"overtime",date_start:date_start,date_end:date_end,debtor:debtor,"_token": "{{ csrf_token() }}" },
+                {type:"overtime",date_start:date_start,date_end:date_end,debtor_acct:(debtor == 'all' ? '' : debtor),"_token": "{{ csrf_token() }}" },
                 function(data,status) {
                     console.log(data,status);
                     if(status=='success'){
