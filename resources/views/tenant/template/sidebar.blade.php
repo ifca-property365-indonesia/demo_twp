@@ -77,7 +77,7 @@
                         </a>
                     </li><!-- .nk-menu-item -->
                     <li class="nk-menu-item">
-                        <a href="{{ url('/tenant/permit/index') }}" class="nk-menu-link">
+                        <a href="{{ url('/tenant/permit/history') }}" class="nk-menu-link">
                             <span class="nk-menu-icon"><em class="icon ni ni-file-check"></em></span>
                             <span class="nk-menu-text"> Letter Permit</span>
                         </a>

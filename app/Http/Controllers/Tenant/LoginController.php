@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Support\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -35,16 +36,26 @@ class LoginController extends Controller
         ]);
 
         $bsn = $request->bsn;
-        $password = md5(trim($request->password));
+        $plain = $request->password;
 
+        // bcrypt (dan md5 untuk akun lama) dicek per baris, lihat App\Support\Password.
         $datas = DB::table('all_login')
             ->where('tableforeign', 'tenant')
             ->where('idforeign', $bsn)
-            ->where('password', $password)
             ->get();
 
-        if (count($datas) > 0) {
-            $this->createSession($datas[0]->idforeign);
+        foreach ($datas as $login) {
+            if (!Password::check($plain, $login->password)) {
+                continue;
+            }
+
+            Password::upgrade(
+                DB::table('all_login')->where('id', $login->id),
+                $login->password,
+                $plain
+            );
+
+            $this->createSession($login->idforeign);
             return redirect('/tenant/dash');
         }
 

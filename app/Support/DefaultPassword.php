@@ -21,9 +21,9 @@ class DefaultPassword
         return $value !== '' ? $value : self::FALLBACK;
     }
 
-    /** Password default dalam bentuk md5 (format yang disimpan di all_login). */
+    /** Password default dalam bentuk hash siap simpan ke all_login (bcrypt). */
     public static function hash()
     {
-        return md5(self::get());
+        return Password::make(self::get());
     }
 }

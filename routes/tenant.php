@@ -98,7 +98,10 @@ Route::group(['middleware' => ['tenant-auth', 'revalidate']], function () {
 	Route::post('/usersurvey/submit', [UserSurvey::class, 'submit']);
 
 	// PermitController
-	Route::get('/permit/index', [Permit::class, 'index']);
+	Route::get('/permit/add', [Permit::class, 'index']);
 	Route::post('/permit/workpermit', [Permit::class, 'workpermit']);
 	Route::post('/permit/permitofgoods', [Permit::class, 'permitofgoods']);
+	Route::get('/permit/history', [Permit::class, 'HistoryPermit']);
+	Route::get('/permit/historyTable', [Permit::class, 'permitTable']);
+	Route::get('/permit/print/{doc_no}', [Permit::class, 'printPermit'])->where('doc_no', '[A-Za-z0-9\-\/]+');
 });

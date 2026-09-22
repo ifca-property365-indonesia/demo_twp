@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Support\DefaultPassword;
+use App\Support\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use DataTables;
@@ -133,7 +134,7 @@ class AccountController extends Controller
     }
     public function changepass(Request $request)
     {
-        $password = md5($request->password);
+        $password = Password::make($request->password);
         $data = array(
             'password' => $password
         );
@@ -161,7 +162,7 @@ class AccountController extends Controller
     {
         // dari tabel defaultpassword (menu System Spec -> Default Password)
         $password_default = DefaultPassword::get();
-        $password = md5($password_default);
+        $password = Password::make($password_default);
         
         $emailsend = $request->email;
         $subj = "Replacement login information for ". $request->name;

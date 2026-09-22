@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Admin\LoginController as AdminLogin;
 use App\Http\Controllers\Tenant\LoginController as TenantLogin;
+use App\Support\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -43,7 +44,7 @@ class PortalLoginController extends Controller
         ]);
 
         $email = $request->email;
-        $hash = md5(trim($request->password));
+        $plain = $request->password;
         $tenantLogin = app(TenantLogin::class);
 
         // ---------- Admin: cocok? ----------
@@ -52,19 +53,43 @@ class PortalLoginController extends Controller
             ->where('email', $email)
             ->where('tableforeign', 'administrator')
             ->first();
-        $adminOk = ($admin && $admin->password === $hash) ? $admin : null;
+
+        $adminOk = null;
+        if ($admin && Password::check($plain, $admin->password)) {
+            $adminOk = $admin;
+            // akun lama (md5) yang berhasil login langsung dipindah ke bcrypt
+            Password::upgrade(
+                DB::connection('ifcaadm')->table('all_login')->where('id', $admin->id),
+                $admin->password,
+                $plain
+            );
+        }
 
         // ---------- Tenant: business mana saja yang cocok? ----------
+        // Hash bcrypt punya salt berbeda tiap baris, jadi pencocokan tidak bisa lewat
+        // where('password', ...) seperti dulu; barisnya diambil lalu dicek satu per satu.
         $tenantOptions = array();
         $tenants = $tenantLogin->activeTenants($email);
         if (count($tenants) > 0) {
             $ids = array_map(function ($t) { return $t->id; }, $tenants);
-            $matchedIds = DB::table('all_login')
+            $logins = DB::table('all_login')
                 ->where('tableforeign', 'tenant')
                 ->whereIn('idforeign', $ids)
-                ->where('password', $hash)
-                ->pluck('idforeign')
-                ->all();
+                ->get();
+
+            $matchedIds = array();
+            foreach ($logins as $login) {
+                if (!Password::check($plain, $login->password)) {
+                    continue;
+                }
+                $matchedIds[] = $login->idforeign;
+                Password::upgrade(
+                    DB::table('all_login')->where('id', $login->id),
+                    $login->password,
+                    $plain
+                );
+            }
+
             foreach ($tenants as $t) {
                 if (in_array($t->id, $matchedIds)) {
                     $tenantOptions[] = array('id' => $t->id, 'name' => $t->name);

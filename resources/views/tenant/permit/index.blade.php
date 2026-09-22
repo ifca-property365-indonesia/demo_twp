@@ -1117,7 +1117,7 @@
                                 text: event.pesan,
                                 confirmButtonText: "OK"
                             }).then(function () {
-                                window.location.href = "{{ url('/tenant/dash') }}";
+                                window.location.href = "{{ url('/tenant/permit/history') }}";
                             });
 
                         } else {

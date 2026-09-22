@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Support\Password;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -125,7 +126,7 @@ class AccountController extends Controller
     }
     public function changepass(Request $request)
     {
-        $password = md5($request->password);
+        $password = Password::make($request->password);
         $data = array(
             'password' => $password
         );

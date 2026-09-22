@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 use App\Support\TenantScope;
+use DataTables;
+use PDF;
 
 class PermitController extends Controller
 {
@@ -144,7 +146,7 @@ class PermitController extends Controller
                 'contractor' => $request->contractor,
                 'job_type'   => $request->job_type,
                 'work_tool'  => $request->work_tool,
-                'star_date'  => $start_date,   // nama kolom asli di sv_entry_letter
+                'start_date'  => $start_date,   // nama kolom asli di sv_entry_letter
                 'end_date'   => $end_date,
                 'start_time' => $start_time,
                 'end_time'   => $end_time,
@@ -262,7 +264,7 @@ class PermitController extends Controller
                 'company_name' => $request->company,
                 'owner_name'   => $request->owner,
                 'vehicle_no'   => $request->vehicle_no,
-                'star_date'    => $start_date,
+                'start_date'    => $start_date,
                 'end_date'     => $end_date,
             ]);
 
@@ -498,5 +500,188 @@ class PermitController extends Controller
             'status' => 'Fail',
             'pesan'  => $pesan,
         ], $code);
+    }
+
+    /** Halaman History Permit (isi tabel diambil via permitTable). */
+    public function HistoryPermit()
+    {
+        $content = array(
+            'entity_cd'  => Session::get('entity_cd'),
+            'project_no' => Session::get('project_no'),
+            'Tuname'     => Session::get('Tuname'),
+            'Tenemail'   => Session::get('Tenemail'),
+            'datatenant' => $this->dataTenant(),
+        );
+
+        return view('tenant.permit.history', $content);
+    }
+
+    /** Sumber data DataTables (server side) untuk History Permit. */
+    public function permitTable(Request $request)
+    {
+        // Detail permit ada di dua tabel: permit_letter_hd (Work Permit) dan
+        // permit_goods_hd (Entry/Exit Permit of Goods), jadi keduanya ikut di-join
+        // dan tower/floor/unit diambil dari mana pun yang terisi.
+        $permit = DB::connection('dblive')
+            ->table('mgr.sv_entry_letter as sel')
+            ->leftJoin('mgr.permit_letter_hd as plh', function ($join) {
+                $join->on('sel.entity_cd', '=', 'plh.entity_cd')
+                    ->on('sel.project_no', '=', 'plh.project_no')
+                    ->on('sel.complain_no', '=', 'plh.doc_no');
+            })
+            ->leftJoin('mgr.permit_goods_hd as pgh', function ($join) {
+                $join->on('sel.entity_cd', '=', 'pgh.entity_cd')
+                    ->on('sel.project_no', '=', 'pgh.project_no')
+                    ->on('sel.complain_no', '=', 'pgh.doc_no');
+            })
+            ->whereIn('sel.debtor_acct', TenantScope::tenantNos())
+            ->whereIn('sel.complain_type', ['W', 'I', 'O'])
+            ->select(
+                'sel.complain_no as complain_no',
+                'sel.complain_type as complain_type',
+                'sel.note as note',
+                'sel.start_time as start_time',
+                'sel.end_time as end_time',
+                'sel.start_date as start_date',
+                'sel.end_date as end_date',
+                'sel.status as status',
+                'sel.audit_date as audit_date',
+                DB::raw('COALESCE(plh.tower, pgh.tower) as tower'),
+                DB::raw('COALESCE(plh.floor, pgh.floor, sel.floor) as floor'),
+                DB::raw('COALESCE(plh.unit, pgh.unit, sel.lot_no) as unit')
+            );
+
+        // Filter opsional, boleh dipakai sendiri-sendiri atau digabung. Kalau semuanya kosong
+        // (kondisi saat halaman pertama dibuka) seluruh permit milik tenant ikut tampil.
+        $permit_no   = trim((string) $request->permit_no);
+        $permit_type = strtoupper(trim((string) $request->permit_type));
+        $start_date  = $this->parseDmy($request->start_date);
+
+        if ($permit_no !== '') {
+            $permit->where('sel.complain_no', 'like', '%' . $permit_no . '%');
+        }
+
+        if (in_array($permit_type, ['W', 'I', 'O'], true)) {
+            $permit->where('sel.complain_type', $permit_type);
+        }
+
+        if ($start_date) {
+            // Kolom datetime, jadi diambil satu hari penuh.
+            $permit->where('sel.start_date', '>=', $this->fmtDate($start_date))
+                ->where('sel.start_date', '<', $this->fmtDate($start_date . ' +1 day'));
+        }
+
+        // Dibungkus jadi subquery supaya kolom hasil join (note, floor, start_date, ...)
+        // tidak ambigu saat DataTables melakukan search / order per kolom.
+        // Tanpa order di sini: SQL Server menolak ORDER BY di derived table, dan query
+        // count milik DataTables membungkus query ini lagi. Urutan diterapkan lewat
+        // callback order() di bawah.
+        $query = DB::connection('dblive')
+            ->query()
+            ->fromSub($permit, 'p');
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->order(function ($query) use ($request) {
+                // Kalau user klik header kolom, ikuti urutan itu. Kalau tidak
+                // (halaman baru dibuka), urutkan dari tanggal input permit terbaru.
+                $orders = (array) $request->input('order', []);
+                if (empty($orders)) {
+                    $query->orderBy('audit_date', 'desc');
+                    return;
+                }
+
+                foreach ($orders as $order) {
+                    $column = $request->input('columns.' . $order['column'] . '.data');
+                    if ($column && $column !== 'DT_RowIndex') {
+                        $query->orderBy($column, strtolower($order['dir'] ?? '') === 'asc' ? 'asc' : 'desc');
+                    }
+                }
+            })
+            ->make(true);
+    }
+
+    /** 'dd/mm/yyyy' -> 'yyyy-mm-dd'; null kalau kosong atau format lain. */
+    private function parseDmy($date)
+    {
+        if (!$date || !preg_match('#^(\d{2})/(\d{2})/(\d{4})$#', trim($date), $m)) {
+            return null;
+        }
+
+        return $m[3] . '-' . $m[2] . '-' . $m[1];
+    }
+
+    /**
+     * Cetak satu permit dari halaman History ke PDF (tombol Print di tabel).
+     * Hanya permit milik tenant yang sedang login (TenantScope) yang bisa dibuka.
+     */
+    public function printPermit($doc_no)
+    {
+        $header = DB::connection('dblive')
+            ->table('mgr.sv_entry_letter')
+            ->where('complain_no', $doc_no)
+            ->whereIn('debtor_acct', TenantScope::tenantNos())
+            ->whereIn('complain_type', ['W', 'I', 'O'])
+            ->first();
+
+        if (!$header) {
+            abort(404, 'Permit not found.');
+        }
+
+        $keys = [
+            'entity_cd'  => $header->entity_cd,
+            'project_no' => $header->project_no,
+            'doc_no'     => $header->complain_no,
+        ];
+
+        if ($header->complain_type === 'W') {
+            $detail = DB::connection('dblive')->table('mgr.permit_letter_hd')->where($keys)->first();
+            $lines = DB::connection('dblive')
+                ->table('mgr.permit_letter_dtl')
+                ->where($keys)
+                ->orderBy('rowID')
+                ->pluck('staff_name')
+                ->all();
+            $lines_title = 'Worker Name';
+        } else {
+            $detail = DB::connection('dblive')->table('mgr.permit_goods_hd')->where($keys)->first();
+            $lines = DB::connection('dblive')
+                ->table('mgr.permit_goods_dtl')
+                ->where($keys)
+                ->orderBy('rowID')
+                ->pluck('item_name')
+                ->all();
+            $lines_title = 'Item Name';
+        }
+
+        // Nama pengelola gedung & project untuk kop surat.
+        $tenancy = DB::table('pm_tenancy')
+            ->where('tenant_no', $header->debtor_acct)
+            ->where('entity_cd', $header->entity_cd)
+            ->where('project_no', $header->project_no)
+            ->first();
+
+        $tenant = DB::table('tenant')->where('tenant_no_df', $header->debtor_acct)->first();
+
+        $labels = [
+            'W' => 'WORK PERMIT',
+            'I' => 'ENTRY PERMIT OF GOODS',
+            'O' => 'EXIT PERMIT OF GOODS',
+        ];
+
+        $content = [
+            'header'      => $header,
+            'detail'      => $detail,
+            'lines'       => $lines,
+            'lines_title' => $lines_title,
+            'tenancy'     => $tenancy,
+            'tenant'      => $tenant,
+            'title'       => $labels[$header->complain_type],
+            'short'       => $header->complain_type === 'W' ? 'WP' : ($header->complain_type === 'I' ? 'EPG' : 'XPG'),
+        ];
+
+        return PDF::loadView('tenant.permit.print', $content)
+            ->setPaper('a4', 'portrait')
+            ->stream($header->complain_no . '.pdf');
     }
 }
