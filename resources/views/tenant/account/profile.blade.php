@@ -239,6 +239,17 @@
     $('#btnSave').on('click', function () {
         if (!$('#frmEditor').valid()) { return; }
 
+        // Foto masih di tahap crop (belum "Use Photo") -> ingatkan dulu
+        if (cropper) {
+            Swal.fire({
+                title: 'Picture not applied yet',
+                text: 'Click "Use Photo" first to keep the new picture, or Cancel to discard it.',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
         var dataform = $('#frmEditor').serializeArray();
         dataform.push({ name: 'isFile', value: false }, { name: 'labelimage', value: $('#labelimage').val() });
 
