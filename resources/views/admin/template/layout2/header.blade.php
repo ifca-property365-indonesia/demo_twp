@@ -4,7 +4,8 @@
     $username  = Session::get('Tsuname');                                        // administrator.name
     $loginName = Session::get('Tsdisplay_name') ?: $username;                     // all_login.name
     $useremail = Session::get('Tsemail');
-    $pict      = Session::get('Tspict') ?: url('/images/User/defaultuser.png');
+    $pict      = Session::get('Tspict');
+    $pict      = ($pict && !str_ends_with($pict, '/')) ? $pict : url('/images/User/defaultuser.png');
 @endphp
 <header class="header header-sticky p-0 mb-0">
     <div class="container-fluid border-bottom px-3 px-lg-4">

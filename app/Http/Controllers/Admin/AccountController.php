@@ -23,76 +23,51 @@ class AccountController extends Controller
             ->select("SELECT * from all_login where email='$email'");
         echo json_encode($data);
     }
-    public function savepic()
+    /**
+     * Unggah foto profil ke images/user/ (dipanggil dari modal profil setelah foto dipotong).
+     * Balasan JSON: status OK|Failed, pesan, url (absolut), picname.
+     */
+    public function savepic(Request $request)
     {
-        
-        $picture = !empty($_FILES) ? $picture = $_FILES["userfile"] : '';
-        if (!empty($picture["name"])) {
-            $picname = str_replace(' ', '_', $picture["name"]);
-            $picture = $_FILES["userfile"];
-            $psn = '';
-            $msg = '';
-            $picture = array_filter($picture);
+        $file = $request->file('userfile');
 
-            $target_dir = "./images/user/";
-            if (!is_dir($target_dir)) {
-                mkdir($target_dir);
-            }
-            $target_file = $target_dir . str_replace(' ', '_', basename($_FILES["userfile"]["name"]));
-            $uploadOk = 1;
-            $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
-
-            if ($_FILES["userfile"]["size"] > 5000000) {
-                $msg = "Maximum file size is 5MB";
-                $uploadOk = 0;
-                $psn = 'failed';
-                $res = array("pesan" => $msg, "status" => $psn);
-
-                echo json_encode($res);
-                exit();
-            }
-
-            $imageFileType = strtolower($imageFileType);
-            // Allow certain file formats
-            if (
-                $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-                && $imageFileType != "gif" && $imageFileType != "JPG"
-            ) {
-                $msg = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
-                $uploadOk = 0;
-                $psn = 'failed';
-                $res = array("pesan" => $msg, "status" => $psn);
-
-                echo json_encode($res);
-                exit();
-            }
-            // Check if $uploadOk is set to 0 by an error
-            if ($uploadOk == 0) {
-                $msg = "Sorry, your file was not uploaded.";
-                $psn = "Failed";
-                // if everything is ok, try to upload file
-            } else {
-                if (move_uploaded_file($_FILES["userfile"]["tmp_name"], $target_file)) {
-                    $msg = "The file " . basename($_FILES["userfile"]["name"]) . " has been uploaded.";
-                    $psn = "OK";
-                    $descs = "/images/user/" . $picname;
-                    $url = url('images/user/' . $picname);
-                } else {
-                    $msg = "Sorry, there was an error uploading your file.";
-                    $psn = "Failed";
-                }
-            }
-        } else {
-            $msg = "Sorry, there was an error uploading your file.";
-            $psn = "Failed";
+        if (!$file) {
+            // $_FILES kosong: tidak ada file, atau melebihi post_max_size / upload_max_filesize
+            return response()->json(['status' => 'Failed', 'pesan' => 'No file received (check upload size limit).']);
         }
-        $res = array(
-            'pesan' => $msg,
-            'status' => $psn,
-            'url' => $url,
+        if (!$file->isValid()) {
+            return response()->json(['status' => 'Failed', 'pesan' => 'Upload error: ' . $file->getErrorMessage()]);
+        }
+        if ($file->getSize() > 5000000) {
+            return response()->json(['status' => 'Failed', 'pesan' => 'Maximum file size is 5MB']);
+        }
+
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension());
+        if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'], true)) {
+            return response()->json(['status' => 'Failed', 'pesan' => 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.']);
+        }
+
+        // nama unik supaya tidak menimpa file lain dan tidak kena cache browser
+        $base    = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        $base    = preg_replace('/[^A-Za-z0-9_-]+/', '_', $base) ?: 'profile';
+        $picname = $base . '_' . date('YmdHis') . '.' . $ext;
+        $target  = base_path('images/user');
+
+        try {
+            if (!is_dir($target)) {
+                mkdir($target, 0775, true);
+            }
+            $file->move($target, $picname);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 'Failed', 'pesan' => 'Sorry, there was an error uploading your file: ' . $e->getMessage()]);
+        }
+
+        return response()->json([
+            'status'  => 'OK',
+            'pesan'   => 'The file ' . $picname . ' has been uploaded.',
+            'url'     => url('images/user/' . $picname),
             'picname' => $picname,
-        );
-        echo json_encode($res);
+        ]);
     }
     public function updateprofile(Request $request)
     {
@@ -100,17 +75,19 @@ class AccountController extends Controller
         $telp       = $request->handphone;
         $images      = $request->labelimage;
         $email      = $request->email;
-        if (strpos($images, url('images/user/')) !== false) {
-            $image = $images;
-        } else {
-            $image = url('images/user') . "/" . $images;
-        }
-
         $data = array(
             'name' => $name,
             'handphone' => $telp,
-            'pict' => $image
         );
+
+        // Foto: labelimage berisi nama file hasil savepic atau URL lama.
+        // Kosong -> foto yang tersimpan tidak diubah (dulu tersimpan '.../images/user/' tanpa nama file).
+        $images = trim((string) $images);
+        $image  = null;
+        if ($images !== '') {
+            $image = filter_var($images, FILTER_VALIDATE_URL) ? $images : url('images/user/' . basename($images));
+            $data['pict'] = $image;
+        }
         $criteria = array('email' => $email);
 
         
@@ -124,7 +101,9 @@ class AccountController extends Controller
                 // header memakai nilai dari session
                 if ($email === Session::get('Tsemail')) {
                     Session::put('Tsdisplay_name', $name);
-                    Session::put('Tspict', $image);
+                    if ($image !== null) {
+                        Session::put('Tspict', $image);
+                    }
                 }
                 
                 $msg = "Data has been updated successfully";
