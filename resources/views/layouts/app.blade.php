@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="{{ url('assets/vendor/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/vendor/cropperjs/cropper.min.css') }}">
     <!-- App -->
-    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.3') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.4') }}">
     @stack('styles')
 
     {{-- Script dimuat di <head> karena banyak halaman memakai jQuery/plugin langsung di dalam @section('content') --}}

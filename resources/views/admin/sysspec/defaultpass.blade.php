@@ -42,10 +42,10 @@
 
                             <h5>Set default password for new user</h5>
 
-                            {{-- Old Password --}}
+                            {{-- Current Password --}}
                             <div class="mb-3">
                                 <label class="form-label" for="oldpass">
-                                    Old Password
+                                    Current Password
                                 </label>
 
                                 <input
