@@ -7,6 +7,7 @@ use App\Support\DefaultPassword;
 use App\Support\Password;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 use DataTables;
 
 class AccountController extends Controller
@@ -119,6 +120,12 @@ class AccountController extends Controller
                     ->table('all_login')
                     ->where($criteria)
                     ->update($data);
+
+                // header memakai nilai dari session
+                if ($email === Session::get('Tsemail')) {
+                    Session::put('Tsdisplay_name', $name);
+                    Session::put('Tspict', $image);
+                }
                 
                 $msg = "Data has been updated successfully";
                 $st  = 'OK';

@@ -122,13 +122,7 @@
 <!-- SCRIPT TO SHOW VOTER LIST MODAL & INIT DATATABLE -->
 <script type="text/javascript">
     $(document).ready(function() {
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            }
-        });
-
-        // 1. INIT DATATABLE FOR ESSAY TABLE
+// 1. INIT DATATABLE FOR ESSAY TABLE
         $('.tbl-essay-answers').each(function() {
             var rowCount = $(this).find('tbody tr').length;
             var isEmpty = $(this).find('tbody tr td[colspan="3"]').length > 0;

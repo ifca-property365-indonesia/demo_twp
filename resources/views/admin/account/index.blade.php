@@ -37,7 +37,6 @@
 <script type="text/javascript">
   var tblreset;
   $(function() {
-    $('.select2').select2();
     tblreset = $('#tblresett').DataTable({
           processing: true,
           serverSide: true,

@@ -34,6 +34,15 @@ class LoginController extends Controller
         Session::put('Tsuname', $dataAdmin[0]->name);
         Session::put('Tsemail', $email);
         Session::put('Tsuser_id', $dataAdmin[0]->id);
+
+        // Nama & foto untuk header (all_login), supaya view tidak perlu query lagi.
+        // Diperbarui oleh Admin\AccountController::updateprofile.
+        $login = DB::connection('ifcaadm')->table('all_login')
+            ->where('email', $email)
+            ->where('tableforeign', 'administrator')
+            ->first();
+        Session::put('Tsdisplay_name', $login->name ?? $dataAdmin[0]->name);
+        Session::put('Tspict', !empty($login->pict) ? $login->pict : '');
     }
 
     public function logout()

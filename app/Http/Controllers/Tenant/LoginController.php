@@ -94,6 +94,15 @@ class LoginController extends Controller
         Session::put('entity_cd', $dataTenant->entity_cd);
         Session::put('project_no', $dataTenant->project_no);
 
+        // Header: nama (all_login.name), contact person (tenant.contact_name = Tuname) dan foto.
+        // Diperbarui oleh Tenant\AccountController::updateprofile.
+        $login = DB::table('all_login')
+            ->where('email', $dataTenant->email)
+            ->where('tableforeign', 'tenant')
+            ->first();
+        Session::put('Tdisplay_name', $login->name ?? $dataTenant->name);
+        Session::put('Tpict', !empty($login->pict) ? $login->pict : '');
+
         // Akun yang juga administrator (login satu pintu mencatatnya di session 'portals')
         // masuk portal tenant dalam "mode semua tenant" -> lihat App\Support\TenantScope.
         $portals = Session::get('portals', array());

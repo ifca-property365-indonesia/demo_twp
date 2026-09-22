@@ -1,14 +1,11 @@
 @php
-    // Flag tenant (O = Operational) sudah ada di session sejak login.
+    // Semua nilai sudah disiapkan Tenant\LoginController::createSession (dan diperbarui
+    // Tenant\AccountController::updateprofile); view tidak perlu query.
     $portalType = Session::get('Tflag') === 'O' ? 'Operational' : '';
-
-    $login = DB::table('all_login')
-        ->where('email', Session::get('Tenemail'))
-        ->where('tableforeign', 'tenant')
-        ->first();
-    $useremail = $login->email ?? Session::get('Tenemail');
-    $username  = $login->name ?? Session::get('Tuname');
-    $pict      = !empty($login->pict) ? $login->pict : url('/images/User/defaultuser.png');
+    $username   = Session::get('Tdisplay_name') ?: Session::get('TCompany');   // all_login.name
+    $contact    = Session::get('Tuname');                                        // tenant.contact_name
+    $useremail  = Session::get('Tenemail');
+    $pict       = Session::get('Tpict') ?: url('/images/User/defaultuser.png');
 @endphp
 <header class="header header-sticky p-0 mb-0">
     <div class="container-fluid border-bottom px-3 px-lg-4">
@@ -26,7 +23,7 @@
                     <div class="user-avatar"><img src="{{ $pict }}" alt=""></div>
                     <div class="user-info d-none d-sm-block">
                         <div class="user-name">{{ $username }}</div>
-                        <div class="user-role">{{ $useremail }}</div>
+                        <div class="user-role">{{ $contact }}</div>
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-user pt-0">
@@ -34,6 +31,7 @@
                         <div class="user-avatar lg"><img src="{{ $pict }}" alt=""></div>
                         <div>
                             <span class="lead-text">{{ $username }}</span>
+                            <span class="sub-text">{{ $contact }}</span>
                             <span class="sub-text">{{ $useremail }}</span>
                         </div>
                     </div>
@@ -52,7 +50,7 @@
         $('#modaldialog').removeClass('modal-md').addClass('modal-lg');
         $('#modaltitle').html('Edit Profile');
         $('#modalbody').load("{{ url('tenant/account/profile') }}");
-        $('#modal').data('Id', "{{ Session::get('Tenemail') }}");
+        $('#modal').data('Id', "{{ $useremail }}");
         $('#modalfooter').hide();
         $('#modal').modal('show');
     });

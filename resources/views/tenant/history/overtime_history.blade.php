@@ -71,9 +71,6 @@
 	    		responsive: true,
 	    		ajax : {
 		            url : "{{ url('/tenant/hovertimeTable') }}",
-		            headers: {
-		                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-		            },
 		            data: function(data) {
 		                data.date_start = $("#start").val();
 		                data.date_end = $("#end").val();

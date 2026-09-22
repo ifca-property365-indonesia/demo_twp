@@ -87,12 +87,7 @@
 </div>
 
 <script type="text/javascript">
-    $.ajaxSetup({
-        headers: {
-            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-        }
-    });
-    function saveImage(seq, el, web) {
+function saveImage(seq, el, web) {
         var a = el.files[0].size;
         var max = (1024 *1024) * 7;
         if (a > max){

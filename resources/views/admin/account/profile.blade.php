@@ -250,7 +250,7 @@
         }).done(function (res) {
             if (res.status === 'OK') {
                 // header ikut berubah tanpa reload
-                $('.header .user-name, .dropdown-menu-user .user-card .lead-text').text($('#name').val());
+                $('.header .user-role, .dropdown-menu-user .user-card .sub-text:first').text($('#name').val());
                 $('.header .user-avatar img').attr('src', $('#picturebox').attr('src'));
                 $('#picturebox').removeClass('profile-changed');
                 $('#pictureHint').addClass('d-none');

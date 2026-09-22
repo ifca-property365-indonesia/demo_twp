@@ -78,7 +78,14 @@
                             <div class="form-note">Max 2 MB. JPG, JPEG, PNG or GIF.</div>
                         </div>
                         <div class="col-md-6">
-                            <img src="" id="picturebox" class="img-fluid rounded border d-none" style="max-height: 180px;" alt="">
+                            <div id="pictureWrap" class="d-none">
+                                <img src="" id="picturebox" class="img-fluid rounded border" style="max-height: 180px;" alt="">
+                                <div class="mt-2 d-flex align-items-center gap-2">
+                                    <span class="form-note mt-0" id="pictureInfo"></span>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnRemovePicture"><i class="cil-trash"></i><span>Remove</span></button>
+                                </div>
+                                <div class="form-note text-primary" id="pictureHint">Picture is uploaded only when you click Submit.</div>
+                            </div>
                             <input type="hidden" name="picturepath" id="picturepath" value="">
                             <input type="hidden" name="picturename" id="picturename">
                             <input type="hidden" name="pictureattach" id="pictureattach">
@@ -86,6 +93,7 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                        <button type="button" id="btnReset" class="btn btn-outline-secondary"><i class="cil-reload"></i><span>Reset</span></button>
                         <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-send"></i><span>Submit</span></button>
                     </div>
                     <input type="hidden" name="entity" id="entity">
@@ -243,50 +251,103 @@
 				$("#project").val(prj);
 			});
 
-			$("#ticket_image").on('change', function ()
-		    {
-			    $.ajax({
-	            	url : "{{url('tenant/ticket/savepic')}}",
-	            	type:"POST",
-	            	data: function () {
-	            		var data = new FormData();
-	            		data.append("_token", "{{ csrf_token() }}");
-			            data.append("ticket_image", $("#ticket_image").get(0).files[0]);
-			            data.append("req_by", $('#req_by').val());
-			            data.append("ticket_type", $('#ticket_type').val());
-			            return data;
-			        }(),
-			        processData: false,
-			        contentType: false,
-			        dataType:"json",
-			        success:function(data, status){
-			            console.log(data.status);
-			            if(data.status == "OK"){
-							Swal.fire({
-								title: "Information",
-								text: data.pesan,
-								icon: "success",
-								confirmButtonText: "OK"
-							});
-							$('#picturebox').attr('src', data.url).removeClass('d-none');
-							$('#picturepath').val(data.url)
-							$('#picturename').val(data.picname)
-							$('#pictureattach').val(data.pic_attached)
-			            } else {
-							Swal.fire({
-								title: "Error",
-								text: data.pesan,
-								icon: "error",
-								confirmButtonText: "OK"
-							});
-			            }
-			        },
-			            error: function(jqXHR, textStatus, errorThrown){
-			            Swal.fire(textStatus+' Save : '+errorThrown);
-			        }
-			    });
-	        });
+			// ------------------------------------------------------------------
+			// Foto: dipilih -> hanya preview di browser. Unggah ke server baru
+			// dilakukan saat Submit, jadi Reset / batal tidak meninggalkan file.
+			// ------------------------------------------------------------------
+			var pendingFile = null;
 
+			function clearPicture() {
+				pendingFile = null;
+				$('#ticket_image').val('');
+				$('#picturebox').attr('src', '');
+				$('#pictureWrap').addClass('d-none');
+				$('#pictureHint').removeClass('d-none');
+				$('#picturepath, #picturename, #pictureattach').val('');
+			}
+
+			$('#ticket_image').on('change', function () {
+				var file = this.files[0];
+				if (!file) { clearPicture(); return; }
+				if (!/^image\/(png|jpe?g|gif)$/i.test(file.type)) {
+					Swal.fire({ title: 'Information', text: 'Only JPG, JPEG, PNG or GIF files are allowed.', icon: 'warning' });
+					clearPicture();
+					return;
+				}
+				if (file.size > 2000000) {
+					Swal.fire({ title: 'Information', text: 'Maximum file size is 2 MB.', icon: 'warning' });
+					clearPicture();
+					return;
+				}
+				pendingFile = file;
+				var reader = new FileReader();
+				reader.onload = function (e) {
+					$('#picturebox').attr('src', e.target.result);
+					$('#pictureInfo').text(file.name + ' (' + Math.round(file.size / 1024) + ' KB)');
+					$('#pictureWrap').removeClass('d-none');
+				};
+				reader.readAsDataURL(file);
+			});
+
+			$('#btnRemovePicture').on('click', clearPicture);
+
+			// Unggah foto (dipanggil saat Submit). Mengembalikan promise.
+			function uploadPicture() {
+				var d = $.Deferred();
+				if (!pendingFile) { return d.resolve().promise(); }
+
+				var data = new FormData();
+				data.append('ticket_image', pendingFile);
+				data.append('req_by', $('#req_by').val());
+				data.append('ticket_type', $('#ticket_type').val());
+
+				$.ajax({
+					url: "{{ url('tenant/ticket/savepic') }}",
+					type: 'POST',
+					data: data,
+					processData: false,
+					contentType: false,
+					dataType: 'json'
+				}).done(function (res) {
+					if (res.status == 'OK') {
+						$('#picturepath').val(res.url);
+						$('#picturename').val(res.picname);
+						$('#pictureattach').val(res.pic_attached);
+						d.resolve();
+					} else {
+						d.reject(res.pesan || 'Picture upload failed.');
+					}
+				}).fail(function (xhr, textStatus, errorThrown) {
+					d.reject('Picture upload failed: ' + textStatus + ' ' + errorThrown);
+				});
+				return d.promise();
+			}
+
+			// ------------------------------------------------------------------
+			// Reset semua isian (foto yang belum diunggah ikut dibuang)
+			// ------------------------------------------------------------------
+			$('#btnReset').on('click', function () {
+				Swal.fire({
+					title: 'Reset the form?',
+					text: 'All entered data and the selected picture will be cleared.',
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonText: 'Yes, reset',
+					cancelButtonText: 'Cancel',
+					reverseButtons: true
+				}).then(function (r) {
+					if (!r.value) { return; }
+					$('#frm')[0].reset();
+					$('#frm').validate().resetForm();
+					$('#frm .is-invalid').removeClass('is-invalid');
+					$('#ticket_type, #tenant_no').val('').trigger('change');
+					$('#lot_no').empty().append('<option value=""></option>').trigger('change');
+					$('#category').empty().append('<option value=""></option>').prop('disabled', true).trigger('change');
+					$('#floor, #angka, #pre, #entity, #project').val('');
+					clearPicture();
+					$('html, body').animate({ scrollTop: 0 }, 200);
+				});
+			});
 			$("#frm").validate({
 			    ignore: [],
 			    rules: {
@@ -349,6 +410,20 @@
 
 					// Simpan waktu mulai
 					var startTime = Date.now();
+
+					// Foto diunggah dulu (kalau ada), baru ticket disimpan
+					uploadPicture().fail(function (msg) {
+						$('#overlaySpinner').hide();
+						$('#btnSave').prop('disabled', false);
+						Swal.fire({ title: 'Error', icon: 'error', text: msg });
+					}).done(function () {
+					// isi field foto hasil unggah ke data form
+					datafrm = datafrm.filter(function (f) { return ['picturepath', 'picturename', 'pictureattach'].indexOf(f.name) < 0; });
+					datafrm.push(
+						{name:"picturepath", value:$('#picturepath').val()},
+						{name:"picturename", value:$('#picturename').val()},
+						{name:"pictureattach", value:$('#pictureattach').val()}
+					);
 
 					$.ajax({
 						url: "{{ url('api/ticket/save') }}",
@@ -414,6 +489,7 @@
 							}, remaining);
 						}
 					});
+					});
 				}
 			});
 
@@ -445,7 +521,7 @@
 						$('#description').val(data[0].work_requested);
 
 						if (data[0].picture != "") {
-							$('#picturebox').attr("src", data[0].picture).removeClass('d-none');
+							$('#picturebox').attr("src", data[0].picture); $('#pictureInfo').text('Current picture'); $('#pictureHint').addClass('d-none'); $('#pictureWrap').removeClass('d-none');
 							$('#picturepath').val(data[0].picture);
 						}
 

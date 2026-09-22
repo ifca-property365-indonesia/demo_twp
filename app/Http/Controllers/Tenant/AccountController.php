@@ -7,6 +7,7 @@ use App\Support\Password;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class AccountController extends Controller
 {
@@ -111,6 +112,12 @@ class AccountController extends Controller
                 DB::table('all_login')
                     ->where($criteria)
                     ->update($data);
+
+                // header memakai nilai dari session
+                if ($email === Session::get('Tenemail')) {
+                    Session::put('Tdisplay_name', $name);
+                    Session::put('Tpict', $image);
+                }
                 
                 $msg = "Data has been updated successfully";
                 $st  = 'OK';

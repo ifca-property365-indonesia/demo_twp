@@ -778,10 +778,6 @@
         });
     }
 
-    function escapeHtml(s) {
-        return $('<div>').text(s == null ? '' : String(s)).html();
-    }
-
     applyType();
 })(jQuery);
 </script>

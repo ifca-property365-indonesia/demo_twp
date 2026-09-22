@@ -1,11 +1,10 @@
 @php
-    $login = DB::connection('ifcaadm')->table('all_login')
-        ->where('email', Session::get('Tsemail'))
-        ->where('tableforeign', 'administrator')
-        ->first();
-    $useremail = $login->email ?? Session::get('Tsemail');
-    $username  = $login->name ?? Session::get('Tsuname');
-    $pict      = !empty($login->pict) ? $login->pict : url('/images/User/defaultuser.png');
+    // Semua nilai sudah disiapkan Admin\LoginController::createSession (dan diperbarui
+    // Admin\AccountController::updateprofile); view tidak perlu query.
+    $username  = Session::get('Tsuname');                                        // administrator.name
+    $loginName = Session::get('Tsdisplay_name') ?: $username;                     // all_login.name
+    $useremail = Session::get('Tsemail');
+    $pict      = Session::get('Tspict') ?: url('/images/User/defaultuser.png');
 @endphp
 <header class="header header-sticky p-0 mb-0">
     <div class="container-fluid border-bottom px-3 px-lg-4">
@@ -22,15 +21,15 @@
                 <a class="nav-link user-toggle py-0" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                     <div class="user-avatar"><img src="{{ $pict }}" alt=""></div>
                     <div class="user-info d-none d-sm-block">
-                        <div class="user-name">{{ $username }}</div>
-                        <div class="user-role">Administrator</div>
+                        <div class="user-name">{{ $loginName }}</div>
+                        <div class="user-role">{{ $useremail }}</div>
                     </div>
                 </a>
                 <div class="dropdown-menu dropdown-menu-end dropdown-menu-user pt-0">
                     <div class="user-card">
                         <div class="user-avatar lg"><img src="{{ $pict }}" alt=""></div>
                         <div>
-                            <span class="lead-text">{{ $username }}</span>
+                            <span class="sub-text">{{ $loginName }}</span>
                             <span class="sub-text">{{ $useremail }}</span>
                         </div>
                     </div>
@@ -49,7 +48,7 @@
         $('#modaldialog').removeClass('modal-md').addClass('modal-lg');
         $('#modaltitle').html('Edit Profile');
         $('#modalbody').load("{{ url('admin/account/profile') }}");
-        $('#modal').data('Id', "{{ Session::get('Tsemail') }}");
+        $('#modal').data('Id', "{{ $useremail }}");
         $('#modalfooter').hide();
         $('#modal').modal('show');
     });
