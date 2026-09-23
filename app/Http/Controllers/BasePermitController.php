@@ -1012,7 +1012,7 @@ abstract class BasePermitController extends Controller
             abort(403, 'Permit ' . $header->complain_no . ' has been cancelled and cannot be printed.');
         }
 
-        if ($status === 'R') {
+        if ($status === 'R' || $status === 'M') {
             abort(403, 'Permit ' . $header->complain_no . ' not approved and cannot be printed.');
         }
 
