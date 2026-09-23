@@ -968,10 +968,11 @@ abstract class BasePermitController extends Controller
             ->addIndexColumn()
             ->order(function ($query) use ($request) {
                 // Kalau user klik header kolom, ikuti urutan itu. Kalau tidak
-                // (halaman baru dibuka), urutkan dari tanggal input permit terbaru.
+                // (halaman baru dibuka), urutkan dari tanggal mulai terbaru, lalu
+                // nomor permit terbesar untuk tanggal yang sama.
                 $orders = (array) $request->input('order', []);
                 if (empty($orders)) {
-                    $query->orderBy('audit_date', 'desc');
+                    $query->orderBy('start_date', 'desc')->orderBy('complain_no', 'desc');
                     return;
                 }
 

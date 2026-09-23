@@ -190,7 +190,7 @@
         serverSide: true,
         pageLength: 10,
         lengthMenu: [10, 25, 50, 100],
-        order: [],              // urutan default (audit_date desc) diatur di server
+        order: [],              // urutan default (start_date lalu permit no, terbaru dulu) diatur di server
         autoWidth: false,
         language: {
             search: '',
