@@ -37,13 +37,6 @@ abstract class BasePermitController extends Controller
         'O' => 'Exit Permit of Goods',
     ];
 
-    /** Singkatan jenis permit untuk kop PDF. */
-    public const SHORT = [
-        'W' => 'WP',
-        'I' => 'EPG',
-        'O' => 'XPG',
-    ];
-
     /** Status sv_entry_letter -> label (kode yang sama dengan modul ticket). */
     public const STATUSES = [
         'R' => 'Open',
@@ -209,7 +202,7 @@ abstract class BasePermitController extends Controller
 
         return $type === 'W'
             ? ['incharge', 'pic_hp', 'contractor', 'job_type']
-            : ['company', 'owner', 'vehicle_no'];
+            : ['owner', 'job_type'];
     }
 
     // ------------------------------------------------------------------
@@ -480,9 +473,7 @@ abstract class BasePermitController extends Controller
             'contractor' => $detail->kontraktor_name ?? null,
             'job_type'   => $detail->work_type ?? null,
             'work_tool'  => $detail->work_tools ?? null,
-            'company'    => $detail->company_name ?? null,
             'owner'      => $detail->owner_name ?? null,
-            'vehicle_no' => $detail->vehicle_no ?? null,
         ];
 
         $values = [];
@@ -576,12 +567,25 @@ abstract class BasePermitController extends Controller
                 'tool_remarks.*'  => ['nullable', 'string', 'max:255'],
             ];
         } else {
+            // Jam keluar/masuk barang juga boleh lewat tengah malam (aturan: 22.00 - 10.00).
+            // Baris barang: item_name[i] + item_qty[i] (+ item_remarks[i] opsional).
             $rules += [
-                'company'     => ['required', 'string', 'max:50'],
-                'owner'       => ['required', 'string', 'max:50'],
-                'vehicle_no'  => ['required', 'string', 'max:10'],
-                'item_name'   => ['required', 'array', 'min:1'],
-                'item_name.*' => ['required', 'string', 'max:50'],
+                'owner'          => ['required', 'string', 'max:50'],
+                'job_type'       => ['required', 'string', 'max:50'],
+                'start_time'     => ['required', 'date_format:H:i,H:i:s'],
+                'end_time'       => ['required', 'date_format:H:i,H:i:s', 'different:start_time'],
+                'sender_name'    => ['required', 'string', 'max:50'],
+                'sender_id_no'   => ['required', 'string', 'max:30'],
+                'sender_address' => ['required', 'string', 'max:255'],
+                'sender_hp'      => ['required', 'string', 'max:20'],
+                'vehicle_type'   => ['required', 'string', 'max:30'],
+                'vehicle_no'     => ['required', 'string', 'max:10'],
+                'item_name'      => ['required', 'array', 'min:1'],
+                'item_name.*'    => ['required', 'string', 'max:100'],
+                'item_qty'       => ['required', 'array', 'size:' . count((array) $request->input('item_name'))],
+                'item_qty.*'     => ['required', 'string', 'max:20'],
+                'item_remarks'   => ['nullable', 'array'],
+                'item_remarks.*' => ['nullable', 'string', 'max:255'],
             ];
         }
 
@@ -601,11 +605,18 @@ abstract class BasePermitController extends Controller
             'tool_remarks.*'  => 'remarks',
             'worker_name'   => 'worker',
             'worker_name.*' => 'worker name',
-            'company'       => 'company name',
-            'owner'         => 'owner name',
-            'vehicle_no'    => 'vehicle number',
-            'item_name'     => 'item',
-            'item_name.*'   => 'item name',
+            'owner'          => 'owner / tenant name',
+            'sender_name'    => 'sender / pickup name',
+            'sender_id_no'   => 'ID card / driving license no.',
+            'sender_address' => 'address',
+            'sender_hp'      => 'phone number',
+            'vehicle_type'   => 'vehicle type',
+            'vehicle_no'     => 'vehicle number',
+            'item_name'      => 'item',
+            'item_name.*'    => 'item name',
+            'item_qty'       => 'quantity',
+            'item_qty.*'     => 'quantity',
+            'item_remarks.*' => 'remarks',
         ]);
     }
 
@@ -686,37 +697,57 @@ abstract class BasePermitController extends Controller
     /** Baris-baris Entry/Exit Permit of Goods: header sv_entry_letter, permit_goods_hd, permit_goods_dtl. */
     private function goodsPermitRows(array $ctx, Request $request, $type)
     {
+        $start_time = substr($request->start_time, 0, 5);
+        $end_time   = substr($request->end_time, 0, 5);
+
+        // company_name tidak ada lagi di form (form kertas tidak memuatnya) -> null.
         $header = $this->headerRow($ctx, $type, $request) + [
-            'company_name' => $request->company,
-            'owner_name'   => $request->owner,
-            'vehicle_no'   => $request->vehicle_no,
+            'owner_name' => $request->owner,
+            'job_type'   => $request->job_type,
+            'vehicle_no' => $request->vehicle_no,
+            'start_time' => $start_time,
+            'end_time'   => $end_time,
         ];
 
         $detail = [
-            'entity_cd'    => $ctx['entity_cd'],
-            'project_no'   => $ctx['project_no'],
-            'doc_no'       => $ctx['doc_no'],
-            'member_email' => $ctx['member_email'],
-            'member_name'  => $ctx['member_name'],
-            'member_hp'    => $ctx['member_hp'],
-            'debtor_acct'  => $ctx['debtor_acct'],
-            'company_name' => $request->company,
-            'owner_name'   => $request->owner,
-            'tower'        => $ctx['tower'],
-            'floor'        => $request->floor,
-            'unit'         => $ctx['lot_no'],
-            'start_date'   => $this->fmtDate($request->start_date),
-            'vehicle_no'   => $request->vehicle_no,
-            'work_type'    => self::TYPES[$type],
-            'note'         => $request->note,
-            'audit_user'   => self::AUDIT_USER,
-            'audit_date'   => $ctx['audit_date'],
+            'entity_cd'      => $ctx['entity_cd'],
+            'project_no'     => $ctx['project_no'],
+            'doc_no'         => $ctx['doc_no'],
+            'member_email'   => $ctx['member_email'],
+            'member_name'    => $ctx['member_name'],
+            'member_hp'      => $ctx['member_hp'],
+            'debtor_acct'    => $ctx['debtor_acct'],
+            'owner_name'     => $request->owner,
+            'tower'          => $ctx['tower'],
+            'floor'          => $request->floor,
+            'unit'           => $ctx['lot_no'],
+            'start_date'     => $this->fmtDate($request->start_date),
+            'end_date'       => $this->fmtDate($request->end_date),
+            'start_time'     => $start_time,
+            'end_time'       => $end_time,
+            'sender_name'    => $request->sender_name,
+            'sender_id_no'   => $request->sender_id_no,
+            'sender_address' => $request->sender_address,
+            'sender_hp'      => $request->sender_hp,
+            'vehicle_type'   => $request->vehicle_type,
+            'vehicle_no'     => $request->vehicle_no,
+            'work_type'      => $request->job_type,
+            'note'           => $request->note,
+            'audit_user'     => self::AUDIT_USER,
+            'audit_date'     => $ctx['audit_date'],
         ];
 
-        // Form hanya punya nama barang; item_descs NOT NULL, diisi sama.
+        // Jenis barang + jumlah + keterangan (item_descs) per baris.
+        $qtys    = array_values((array) $request->item_qty);
+        $remarks = array_values((array) $request->item_remarks);
         $lines = [];
-        foreach ((array) $request->item_name as $name) {
-            $lines[] = $this->lineRow($ctx) + ['item_name' => trim($name), 'item_descs' => trim($name)];
+        foreach (array_values((array) $request->item_name) as $i => $name) {
+            $remark = trim((string) ($remarks[$i] ?? ''));
+            $lines[] = $this->lineRow($ctx) + [
+                'item_name'  => trim($name),
+                'item_qty'   => trim((string) ($qtys[$i] ?? '')),
+                'item_descs' => $remark === '' ? null : $remark,
+            ];
         }
 
         return [
@@ -859,10 +890,23 @@ abstract class BasePermitController extends Controller
                 ]];
             }
         } else {
+            // Barang: ['item_name', 'item_qty', 'remarks']. Data lama mengisi item_descs sama
+            // dengan item_name, jadi yang seperti itu tidak dianggap keterangan.
             $detail = $db->table('mgr.permit_goods_hd')->where($keys)->first();
-            $lines  = $db->table('mgr.permit_goods_dtl')->where($keys)->orderBy('rowID')->pluck('item_name')->all();
+            $lines  = $db->table('mgr.permit_goods_dtl')->where($keys)->orderBy('rowID')
+                ->get(['item_name', 'item_qty', 'item_descs'])
+                ->map(function ($t) {
+                    $name  = trim((string) $t->item_name);
+                    $descs = trim((string) $t->item_descs);
+                    return [
+                        'item_name' => $name,
+                        'item_qty'  => trim((string) $t->item_qty),
+                        'remarks'   => $descs === $name ? '' : $descs,
+                    ];
+                })->all();
         }
 
+        // lines = nama pekerja (W) atau baris barang (I/O); tools = kegiatan & peralatan (W).
         return ['header' => $header, 'detail' => $detail, 'lines' => $lines, 'tools' => $tools, 'keys' => $keys];
     }
 
@@ -1155,18 +1199,15 @@ abstract class BasePermitController extends Controller
                 ->stream($header->complain_no . '.pdf');
         }
 
-        return PDF::loadView('permit.print', [
-            'header'       => $header,
-            'detail'       => $permit['detail'],
-            'lines'        => $permit['lines'],
-            'lines_title'  => $header->complain_type === 'W' ? 'Worker Name' : 'Item Name',
-            'tenancy'      => $tenancy,
-            'tenant'       => $tenant,
-            'title'        => strtoupper(self::TYPES[$header->complain_type]),
-            'short'        => self::SHORT[$header->complain_type],
-            'type'         => $header->complain_type,
-            'types'        => self::TYPES,
-            'status_label' => self::STATUSES[$status] ?? ($status !== '' ? $status : '-'),
+        // Entry / Exit Permit of Goods: form "Surat Izin Keluar / Masuk Barang".
+        return PDF::loadView('permit.print_goods', [
+            'header'  => $header,
+            'detail'  => $permit['detail'],
+            'items'   => $permit['lines'],
+            'tenancy' => $tenancy,
+            'tenant'  => $tenant,
+            'type'    => $header->complain_type,
+            'logo'    => base_path('img/logoweb/carstensz-logo-print.jpg'),
         ])
             ->setPaper('a4', 'portrait')
             ->stream($header->complain_no . '.pdf');

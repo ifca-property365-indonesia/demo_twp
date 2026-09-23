@@ -104,7 +104,10 @@ CSS `assets/app/css/permit.css`.
   `errors` per field yang ditampilkan inline di form.
 - Semua data ke SQL Server (`dblive`): `mgr.sv_entry_letter` (header, `complain_type` = W/I/O,
   `complain_no` = nomor permit), `mgr.permit_letter_hd/dtl` (Work Permit + pekerja),
+  `mgr.permit_letter_tools` (kegiatan + peralatan / APD Work Permit),
   `mgr.permit_goods_hd/dtl` (Permit of Goods + barang), `mgr.sv_entry_letter_log`.
+  Script tabel: `database/sql/2026-09-23_permit_letter_work_tools.sql` dan
+  `database/sql/2026-09-23_permit_goods_letter.sql`.
 - Nomor permit dari `mgr.sv_spec.letter_no` per entity/project (`LP100001` -> `LP100002`). Diambil di
   dalam transaksi dengan `lockForUpdate()` (updlock/holdlock) lalu dinaikkan, jadi dua request bersamaan
   tidak pernah mendapat nomor yang sama. Nomor di form hanya pratinjau (`GET /tenant/permit/letterNo/{id}`).

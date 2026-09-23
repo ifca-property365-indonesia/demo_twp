@@ -244,29 +244,20 @@
                                 @if ($locked)<span class="permit-section__hint">This section cannot be changed</span>@endif
                             </div>
                             <div class="row g-3">
-                                <div class="col-md-5">
+                                <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="company">Company Name <span class="req">*</span></label>
+                                        <label class="form-label" for="owner">Owner / Tenant Name <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="company" {!! $attr('company', 'Company Name') !!} value="{{ $detail->company_name ?? '' }}">
+                                            <input type="text" class="form-control" id="owner" {!! $attr('owner', 'Owner / Tenant Name') !!} value="{{ $detail->owner_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="owner">Owner Name <span class="req">*</span></label>
+                                        <label class="form-label" for="goods_job_type">Job Type <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="owner" {!! $attr('owner', 'Owner Name') !!} value="{{ $detail->owner_name ?? '' }}">
-                                            <div class="invalid-feedback"></div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="mb-3">
-                                        <label class="form-label" for="vehicle_no">Vehicle Number <span class="req">*</span></label>
-                                        <div class="form-control-wrap">
-                                            <input type="text" class="form-control text-uppercase" id="vehicle_no" {!! $attr('vehicle_no', 'Vehicle Number', 10) !!} placeholder="B 1234 XYZ" value="{{ $detail->vehicle_no ?? '' }}">
+                                            <input type="text" class="form-control" id="goods_job_type" {!! $attr('job_type', 'Job Type') !!} placeholder="e.g. Moving in furniture" value="{{ $detail->work_type ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -299,7 +290,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 time-field" hidden>
+                                <div class="col-12 shift-field" hidden>
                                     <div class="mb-2">
                                         <label class="form-label d-block">Working Hours <span class="req">*</span></label>
                                         <div class="d-flex flex-wrap gap-3">
@@ -335,12 +326,19 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-12 time-field" hidden>
+                                <div class="col-12 shift-field" hidden>
                                     <div class="form-note text-danger mt-0 mb-3">
                                         <i class="cil-info"></i>
                                         Start Time and End Time are the <strong>daily working hours</strong> for this permit,
                                         applied to every day between the start and end date &mdash; not the total duration of the work.
                                         End Time may be past midnight (e.g. 22:00 - 10:00).
+                                    </div>
+                                </div>
+                                <div class="col-12 goods-field" hidden>
+                                    <div class="form-note text-danger mt-0 mb-3">
+                                        <i class="cil-info"></i>
+                                        Goods may only be moved in / out between <strong>22:00 - 10:00</strong> unless special permission is given.
+                                        Report to security before and after moving the goods.
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -356,12 +354,12 @@
                             </div>
                         </section>
 
-                        {{-- 5. Workers / Items --}}
+                        {{-- 5a. Pekerja (Work Permit) --}}
                         <section class="permit-section" id="sectionLines" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">5</span>
-                                <h6 class="permit-section__title"><span id="linesTitle">Workers</span> <span class="req">*</span></h6>
-                                <span class="permit-section__hint">Total <strong><span id="lineCount">0</span></strong> <span id="lineUnit">worker(s)</span> &middot; press Enter to add a new row</span>
+                                <h6 class="permit-section__title">Workers <span class="req">*</span></h6>
+                                <span class="permit-section__hint">Total <strong><span id="lineCount">0</span></strong> worker(s) &middot; press Enter to add a new row</span>
                             </div>
                             <div class="permit-lines">
                                 <div class="table-responsive">
@@ -369,7 +367,7 @@
                                         <thead>
                                             <tr>
                                                 <th class="line-no">No.</th>
-                                                <th id="linesCol">Worker Name</th>
+                                                <th>Worker Name</th>
                                                 <th class="line-act"></th>
                                             </tr>
                                         </thead>
@@ -410,6 +408,100 @@
                                     <button type="button" class="btn btn-sm btn-primary" id="btnAddTool">
                                         <i class="cil-plus"></i><span>Add Activity</span>
                                     </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        {{-- 5b. Daftar barang (Entry / Exit Permit of Goods) --}}
+                        <section class="permit-section" id="sectionItems" hidden>
+                            <div class="permit-section__head">
+                                <span class="permit-section__num">5</span>
+                                <h6 class="permit-section__title">Goods <span class="req">*</span></h6>
+                                <span class="permit-section__hint"><span id="itemCount">0</span> row(s) &middot; press Enter to move to the next field</span>
+                            </div>
+                            <div class="permit-lines">
+                                <div class="table-responsive">
+                                    <table class="table" id="tblItems">
+                                        <thead>
+                                            <tr>
+                                                <th class="line-no">No.</th>
+                                                <th style="min-width: 14rem;">Type of Goods</th>
+                                                <th style="min-width: 7rem; width: 9rem;">Quantity</th>
+                                                <th style="min-width: 10rem;">Remarks</th>
+                                                <th class="line-act"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="permit-lines__foot">
+                                    <button type="button" class="btn btn-sm btn-primary" id="btnAddItem">
+                                        <i class="cil-plus"></i><span>Add Item</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        {{-- 6. Pengirim / pengambil & kendaraan (Entry / Exit Permit of Goods) --}}
+                        <section class="permit-section" id="sectionSender" hidden>
+                            <div class="permit-section__head">
+                                <span class="permit-section__num">6</span>
+                                <h6 class="permit-section__title">Sender / Pickup &amp; Vehicle</h6>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="sender_name">Sender / Pickup Name <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="sender_name" {!! $attr('sender_name', 'Sender / Pickup Name') !!} value="{{ $detail->sender_name ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="sender_id_no">ID Card / Driving License No. <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="sender_id_no" {!! $attr('sender_id_no', 'ID Card / Driving License No.', 30) !!} value="{{ $detail->sender_id_no ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="sender_hp">Phone Number <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="sender_hp" inputmode="tel" {!! $attr('sender_hp', 'Phone Number', 20) !!} value="{{ $detail->sender_hp ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="sender_address">Address <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="sender_address" {!! $attr('sender_address', 'Address', 255) !!} value="{{ $detail->sender_address ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="vehicle_type">Vehicle Type <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="vehicle_type" {!! $attr('vehicle_type', 'Vehicle Type', 30) !!} placeholder="e.g. Pickup, box truck" value="{{ $detail->vehicle_type ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="vehicle_no">Vehicle Number <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control text-uppercase" id="vehicle_no" {!! $attr('vehicle_no', 'Vehicle Number', 10) !!} placeholder="B 1234 XYZ" value="{{ $detail->vehicle_no ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </section>
@@ -462,8 +554,10 @@
     };
     var TYPES    = @json($types);
     var IS_EDIT  = {{ $isEdit ? 'true' : 'false' }};
+    // Baris tersimpan (ubah permit): nama pekerja (W) atau barang (I/O), dan kegiatan (W)
     var EDIT_LINES = @json(array_values((array) $lines));
     var EDIT_TOOLS = @json(array_values((array) $tools));
+    var GOODS_TIME = ['22:00', '10:00'];   // jam default keluar/masuk barang
     var MIN_SPINNER_MS = 800;   // overlay tampil minimal segini supaya tidak berkedip
 
     var $form     = $('#frmPermit');
@@ -472,8 +566,6 @@
     var $lot      = $('#lot_no');
     var $floor    = $('#floor');
     var $permitNo = $('#permit_no');
-    var $tbody    = $('#tblLines tbody');
-    var $tools    = $('#tblTools tbody');
     var $btnSave  = $('#btnSave');
     var $spinner  = $('#overlaySpinner');
 
@@ -483,7 +575,9 @@
         goods:    $('#sectionGoods'),
         schedule: $('#sectionSchedule'),
         lines:    $('#sectionLines'),
-        tools:    $('#sectionTools')
+        tools:    $('#sectionTools'),
+        items:    $('#sectionItems'),
+        sender:   $('#sectionSender')
     };
 
     // ---------------------------------------------------------------
@@ -504,28 +598,34 @@
     function applyType() {
         var type   = $type.val();
         var chosen = !!TYPES[type];
-        var isWork = type === 'W';
+        var isWork  = type === 'W';
+        var isGoods = chosen && !isWork;
 
         $('#permitTitle').text(chosen ? TYPES[type] : 'Permit Information');
         $('#permitEmpty').prop('hidden', chosen);
 
         setVisible(sections.location, chosen);
         setVisible(sections.schedule, chosen);
-        setVisible(sections.lines,    chosen);
         setVisible(sections.work,     isWork);
+        setVisible(sections.lines,    isWork);
         setVisible(sections.tools,    isWork);
-        setVisible(sections.goods,    chosen && !isWork);
-        setVisible($('.time-field'),  isWork);
+        setVisible(sections.goods,    isGoods);
+        setVisible(sections.items,    isGoods);
+        setVisible(sections.sender,   isGoods);
+        setVisible($('.time-field'),  chosen);
+        setVisible($('.shift-field'), isWork);
+        setVisible($('.goods-field'), isGoods);
 
-        $('#linesTitle').text(isWork ? 'Workers' : 'Items');
-        $('#linesCol').text(isWork ? 'Worker Name' : 'Item Name');
-        $('#lineUnit').text(isWork ? 'worker(s)' : 'item(s)');
-        $('#btnAddLine span').text(isWork ? 'Add Worker' : 'Add Item');
-        $tbody.find('input').attr('placeholder', linePlaceholder());
+        // Permit barang baru: jam default 22:00 - 10:00 (sesuai aturan), boleh diubah
+        if (isGoods && !IS_EDIT) {
+            $('#start_time').val(GOODS_TIME[0]);
+            $('#end_time').val(GOODS_TIME[1]);
+        }
 
         // setVisible() meng-enable semua input; kembalikan status tombol hapus & jam kerja
-        renumber();
-        renumberTools();
+        grids.workers.renumber();
+        grids.tools.renumber();
+        grids.items.renumber();
         applyShift();
 
         if (IS_EDIT) {
@@ -611,7 +711,7 @@
     // ---------------------------------------------------------------
     function applyShift() {
         var $opt = $('input[name="work_shift"]:checked');
-        var fixed = $opt.length && $opt.val() !== 'O';
+        var fixed = $type.val() === 'W' && $opt.length && $opt.val() !== 'O';
 
         if (fixed) {
             $('#start_time').val($opt.data('start'));
@@ -641,157 +741,111 @@
     });
 
     // ---------------------------------------------------------------
-    // Baris pekerja / barang
+    // Tabel baris (pekerja, kegiatan & peralatan, barang).
+    // cols: {name: nama field (dikirim sebagai name[]), key: kunci data tersimpan,
+    //        max, placeholder, label: diisi = wajib}
     // ---------------------------------------------------------------
-    function linePlaceholder() {
-        return $type.val() === 'W' ? 'Worker name' : 'Item name';
-    }
+    function makeGrid(tableSel, countSel, addBtnSel, cols) {
+        var $body = $(tableSel + ' tbody');
 
-    function addLine(focus) {
-        var $tr = $(
-            '<tr>' +
-                '<td class="line-no"></td>' +
-                '<td><div class="form-control-wrap">' +
-                    '<input type="text" class="form-control" name="line_name[]" maxlength="50" autocomplete="off">' +
-                    '<div class="invalid-feedback"></div>' +
-                '</div></td>' +
-                '<td class="line-act">' +
-                    '<button type="button" class="btn btn-del" title="Remove row"><i class="cil-trash"></i></button>' +
-                '</td>' +
-            '</tr>'
-        );
-
-        $tr.find('input').attr('placeholder', linePlaceholder());
-        $tbody.append($tr);
-        renumber();
-
-        if (focus) {
-            $tr.find('input').trigger('focus');
+        function renumber() {
+            var $rows = $body.children('tr');
+            $rows.each(function (i) {
+                $(this).find('.line-no').text(i + 1);
+            });
+            $rows.find('.btn-del').prop('disabled', $rows.length <= 1);
+            $(countSel).text($rows.length);
         }
-    }
 
-    function renumber() {
-        var $rows = $tbody.children('tr');
-        $rows.each(function (i) {
-            $(this).find('.line-no').text(i + 1);
-        });
-        $rows.find('.btn-del').prop('disabled', $rows.length <= 1);
-        $('#lineCount').text($rows.length);
-    }
+        function add(focus, data) {
+            var $tr = $('<tr><td class="line-no"></td></tr>');
 
-    $('#btnAddLine').on('click', function () {
-        addLine(true);
-    });
+            cols.forEach(function (c) {
+                var $input = $('<input type="text" class="form-control" autocomplete="off">')
+                    .attr({ name: c.name + '[]', maxlength: c.max, placeholder: c.placeholder || '' });
+                if (c.label) {
+                    $input.attr('data-req', c.label);
+                }
+                if (data) {
+                    $input.val(typeof data === 'string' ? data : (data[c.key] || ''));
+                }
+                $('<td>').append(
+                    $('<div class="form-control-wrap">').append($input, '<div class="invalid-feedback"></div>')
+                ).appendTo($tr);
+            });
 
-    $tbody.on('click', '.btn-del', function () {
-        if ($tbody.children('tr').length <= 1) {
-            return;
-        }
-        $(this).closest('tr').remove();
-        renumber();
-    });
+            $tr.append('<td class="line-act"><button type="button" class="btn btn-del" title="Remove row"><i class="cil-trash"></i></button></td>');
+            $body.append($tr);
+            renumber();
 
-    // Enter di baris terakhir -> tambah baris baru
-    $tbody.on('keydown', 'input', function (e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            if ($(this).closest('tr').is(':last-child')) {
-                addLine(true);
-            } else {
-                $(this).closest('tr').next().find('input').trigger('focus');
+            if (focus) {
+                $tr.find('input').first().trigger('focus');
             }
         }
-    });
 
-    if (IS_EDIT && EDIT_LINES.length) {
-        EDIT_LINES.forEach(function (name) {
-            addLine(false);
-            $tbody.children('tr').last().find('input').val(name);
+        function reset(rows) {
+            $body.empty();
+            if (rows && rows.length) {
+                rows.forEach(function (r) { add(false, r); });
+            } else {
+                add(false);
+            }
+        }
+
+        $(addBtnSel).on('click', function () {
+            add(true);
         });
-    } else {
-        addLine(false);
-    }
 
-    // ---------------------------------------------------------------
-    // Baris kegiatan & peralatan (Work Permit)
-    // ---------------------------------------------------------------
-    function toolCell(name, max, placeholder) {
-        return '<td><div class="form-control-wrap">' +
-                '<input type="text" class="form-control" name="' + name + '[]" maxlength="' + max + '" placeholder="' + placeholder + '" autocomplete="off">' +
-                '<div class="invalid-feedback"></div>' +
-            '</div></td>';
-    }
-
-    function addTool(focus, data) {
-        var $tr = $(
-            '<tr>' +
-                '<td class="line-no"></td>' +
-                toolCell('tool_activity', 100, 'e.g. Ceiling installation') +
-                toolCell('tool_name', 100, 'e.g. Ladder, helmet, gloves') +
-                toolCell('tool_remarks', 255, 'Optional') +
-                '<td class="line-act">' +
-                    '<button type="button" class="btn btn-del" title="Remove row"><i class="cil-trash"></i></button>' +
-                '</td>' +
-            '</tr>'
-        );
-
-        if (data) {
-            $tr.find('[name="tool_activity[]"]').val(data.activity || '');
-            $tr.find('[name="tool_name[]"]').val(data.tool_name || '');
-            $tr.find('[name="tool_remarks[]"]').val(data.remarks || '');
-        }
-
-        $tools.append($tr);
-        renumberTools();
-
-        if (focus) {
-            $tr.find('input').first().trigger('focus');
-        }
-    }
-
-    function renumberTools() {
-        var $rows = $tools.children('tr');
-        $rows.each(function (i) {
-            $(this).find('.line-no').text(i + 1);
+        $body.on('click', '.btn-del', function () {
+            if ($body.children('tr').length <= 1) {
+                return;
+            }
+            $(this).closest('tr').remove();
+            renumber();
         });
-        $rows.find('.btn-del').prop('disabled', $rows.length <= 1);
-        $('#toolCount').text($rows.length);
-    }
 
-    $('#btnAddTool').on('click', function () {
-        addTool(true);
-    });
-
-    $tools.on('click', '.btn-del', function () {
-        if ($tools.children('tr').length <= 1) {
-            return;
-        }
-        $(this).closest('tr').remove();
-        renumberTools();
-    });
-
-    // Enter: pindah ke kolom berikutnya; di kolom terakhir baris terakhir -> baris baru
-    $tools.on('keydown', 'input', function (e) {
-        if (e.key !== 'Enter') {
-            return;
-        }
-        e.preventDefault();
-        var $inputs = $tools.find('input');
-        var idx = $inputs.index(this);
-        if (idx === $inputs.length - 1) {
-            addTool(true);
-        } else {
-            $inputs.eq(idx + 1).trigger('focus');
-        }
-    });
-
-    if (IS_EDIT && EDIT_TOOLS.length) {
-        EDIT_TOOLS.forEach(function (t) {
-            addTool(false, t);
+        // Enter: pindah ke kolom berikutnya; di kolom terakhir baris terakhir -> baris baru
+        $body.on('keydown', 'input', function (e) {
+            if (e.key !== 'Enter') {
+                return;
+            }
+            e.preventDefault();
+            var $inputs = $body.find('input');
+            var idx = $inputs.index(this);
+            if (idx === $inputs.length - 1) {
+                add(true);
+            } else {
+                $inputs.eq(idx + 1).trigger('focus');
+            }
         });
-    } else {
-        addTool(false);
+
+        return { add: add, renumber: renumber, reset: reset };
     }
+
+    var grids = {
+        workers: makeGrid('#tblLines', '#lineCount', '#btnAddLine', [
+            { name: 'worker_name', max: 50, placeholder: 'Worker name', label: 'Worker name' }
+        ]),
+        tools: makeGrid('#tblTools', '#toolCount', '#btnAddTool', [
+            { name: 'tool_activity', key: 'activity',  max: 100, placeholder: 'e.g. Ceiling installation', label: 'Activity' },
+            { name: 'tool_name',     key: 'tool_name', max: 100, placeholder: 'e.g. Ladder, helmet, gloves', label: 'Tools / PPE' },
+            { name: 'tool_remarks',  key: 'remarks',   max: 255, placeholder: 'Optional' }
+        ]),
+        items: makeGrid('#tblItems', '#itemCount', '#btnAddItem', [
+            { name: 'item_name',    key: 'item_name', max: 100, placeholder: 'e.g. Sofa, boxes', label: 'Type of goods' },
+            { name: 'item_qty',     key: 'item_qty',  max: 20,  placeholder: 'e.g. 2 pcs', label: 'Quantity' },
+            { name: 'item_remarks', key: 'remarks',   max: 255, placeholder: 'Optional' }
+        ])
+    };
+
+    function loadGrids() {
+        var type = IS_EDIT ? $type.val() : '';
+        grids.workers.reset(type === 'W' ? EDIT_LINES : []);
+        grids.tools.reset(type === 'W' ? EDIT_TOOLS : []);
+        grids.items.reset(type && type !== 'W' ? EDIT_LINES : []);
+    }
+
+    loadGrids();
 
     // ---------------------------------------------------------------
     // Validasi inline
@@ -843,23 +897,16 @@
             fail($('#end_date'), 'End Date cannot be earlier than Start Date.');
         }
 
-        if ($type.val() === 'W') {
-            var st = $('#start_time').val(), et = $('#end_time').val();
-            // boleh lewat tengah malam (22:00 - 10:00), asal tidak sama
-            if (st && et && et === st) {
-                fail($('#end_time'), 'End Time must be different from Start Time.');
-            }
+        // boleh lewat tengah malam (22:00 - 10:00), asal tidak sama
+        var st = $('#start_time').val(), et = $('#end_time').val();
+        if (st && et && et === st) {
+            fail($('#end_time'), 'End Time must be different from Start Time.');
         }
 
-        $tbody.find('input:enabled').each(function () {
+        // Kolom wajib di tabel baris (yang tampil saja)
+        $form.find('.permit-lines input[data-req]:enabled').each(function () {
             if ($.trim($(this).val()) === '') {
-                fail($(this), linePlaceholder() + ' cannot be empty.');
-            }
-        });
-
-        $tools.find('[name="tool_activity[]"]:enabled, [name="tool_name[]"]:enabled').each(function () {
-            if ($.trim($(this).val()) === '') {
-                fail($(this), (this.name === 'tool_name[]' ? 'Tools / PPE' : 'Activity') + ' cannot be empty.');
+                fail($(this), $(this).data('req') + ' cannot be empty.');
             }
         });
 
@@ -872,28 +919,24 @@
         return true;
     }
 
-    // Pesan validasi dari server ({field: [msg]}, field baris: worker_name.0 / item_name.0)
+    // Pesan validasi dari server ({field: [msg]}); field baris berbentuk item_name.0, tool_name.2, ...
     function showServerErrors(errors) {
         var $first = null;
 
         $.each(errors, function (key, msgs) {
             var msg = $.isArray(msgs) ? msgs[0] : msgs;
-            var m = /^(worker_name|item_name)\.(\d+)$/.exec(key);
-            var t = /^(tool_activity|tool_name|tool_remarks)\.(\d+)$/.exec(key);
+            var m = /^(\w+)\.(\d+)$/.exec(key);
             var $el;
 
             if (m) {
-                $el = $tbody.children('tr').eq(parseInt(m[2], 10)).find('input');
-            } else if (key === 'worker_name' || key === 'item_name') {
-                $el = $tbody.find('input').first();
-            } else if (t) {
-                $el = $tools.children('tr').eq(parseInt(t[2], 10)).find('[name="' + t[1] + '[]"]');
-            } else if (/^tool_/.test(key)) {
-                $el = $tools.find('input').first();
+                $el = $form.find('[name="' + m[1] + '[]"]:enabled').eq(parseInt(m[2], 10));
             } else if (key === 'work_shift') {
                 $el = $('#start_time');
             } else {
-                $el = $form.find('[name="' + key + '"]');
+                $el = $form.find('[name="' + key + '"]:enabled');
+                if (!$el.length) {
+                    $el = $form.find('[name="' + key + '[]"]:enabled').first();
+                }
             }
 
             if ($el && $el.length) {
@@ -920,16 +963,6 @@
     // ---------------------------------------------------------------
     // Submit
     // ---------------------------------------------------------------
-    function payload() {
-        var lineKey = $type.val() === 'W' ? 'worker_name[]' : 'item_name[]';
-        return $.map($form.serializeArray(), function (f) {
-            if (f.name === 'line_name[]') {
-                f.name = lineKey;
-            }
-            return f;
-        });
-    }
-
     $form.on('submit', function (e) {
         e.preventDefault();
 
@@ -974,7 +1007,7 @@
         $.ajax({
             url: $form.attr('action'),
             type: 'POST',
-            data: payload(),
+            data: $form.serialize(),
             dataType: 'json'
         }).done(function (res) {
             finish(function () {
@@ -1034,10 +1067,7 @@
             }
             $form[0].reset();
             $form.find('.js-select2').val('').trigger('change');
-            $tbody.empty();
-            addLine(false);
-            $tools.empty();
-            addTool(false);
+            loadGrids();
             $('#work_shift_D').prop('checked', true);
             $('#noteCount').text('0');
             $('#end_date').removeAttr('min');
