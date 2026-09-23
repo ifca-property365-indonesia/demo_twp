@@ -361,8 +361,8 @@ class HistoryController extends Controller
 
             $query = DB::connection('dblive')
                 ->table('mgr.ar_ledger')
-                ->where('entity_cd', $entity)
-                ->where('project_no', $project)
+                ->whereIn('entity_cd', TenantScope::entityCds())
+                ->whereIn('project_no', TenantScope::projectNos())
                 ->whereIn('class', ['I', 'N'])
                 ->where('mbal_amt', 0)
                 ->whereIn('debtor_acct', TenantScope::tenantNos());

@@ -53,6 +53,28 @@ class TenantScope
         return DB::table('pm_tenancy')->where('status', 'A')->distinct()->pluck('business_no')->map(fn ($v) => (string) $v)->all();
     }
 
+    /**
+     * Daftar entity_cd yang masuk cakupan. Tenant biasa: entity tenancy-nya sendiri;
+     * mode semua tenant: seluruh entity tenancy aktif, supaya data tenant di entity lain
+     * ikut terlihat (dipakai bersama tenantNos() yang membatasi debtor_acct).
+     */
+    public static function entityCds()
+    {
+        if (!self::all()) {
+            return array((string) Session::get('entity_cd'));
+        }
+        return DB::table('pm_tenancy')->where('status', 'A')->distinct()->pluck('entity_cd')->map(fn ($v) => (string) $v)->all();
+    }
+
+    /** Daftar project_no yang masuk cakupan (lihat entityCds()). */
+    public static function projectNos()
+    {
+        if (!self::all()) {
+            return array((string) Session::get('project_no'));
+        }
+        return DB::table('pm_tenancy')->where('status', 'A')->distinct()->pluck('project_no')->map(fn ($v) => (string) $v)->all();
+    }
+
     /** Daftar tenant.id (MySQL, dipakai kolom id_tenant) yang masuk cakupan. */
     public static function tenantIds()
     {
@@ -79,6 +101,12 @@ class TenantScope
     public static function sqlTenantNo($column = 'debtor_acct')
     {
         return self::sqlIn($column, self::tenantNos());
+    }
+
+    /** "entity_cd IN (...)" untuk query mentah SQL Server. */
+    public static function sqlEntity($column = 'entity_cd')
+    {
+        return self::sqlIn($column, self::entityCds());
     }
 
     /** "id_tenant IN (...)" untuk query mentah MySQL. */

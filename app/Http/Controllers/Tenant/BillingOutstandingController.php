@@ -324,7 +324,7 @@ class BillingOutstandingController extends Controller
                 mgr.pl_project d 
                 ON a.entity_cd = d.entity_cd
                 AND a.project_no = d.project_no 
-            WHERE a.meter_type='E' AND a.entity_cd='$entity' and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
+            WHERE a.meter_type='E' AND " . TenantScope::sqlEntity('a.entity_cd') . " and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
 
         
         $query = DB::connection('dblive')->select($sql);

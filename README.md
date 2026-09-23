@@ -66,10 +66,15 @@ Akun yang juga administrator (mis. `admin@ifca.co.id`, yang tenant_no `IFCA`-nya
 SQL Server) masuk portal tenant dengan session `Tall_tenants = true`. Semua query portal tenant memakai
 `TenantScope::tenantNos()` / `tenantIds()` / `businessNos()` (`IN (...)`) sehingga untuk akun ini:
 
-- form Ticket: dropdown tenancy berisi **seluruh tenancy aktif** (`pm_tenancy.status = 'A'`), lalu unit
+- form Ticket & Permit: dropdown tenancy berisi **seluruh tenancy aktif** (`pm_tenancy.status = 'A'`), lalu unit
   milik tenancy yang dipilih;
 - Dashboard & Billing Outstanding: combo unit/meter berisi unit semua tenant (label `tenant_no - unit`);
 - Invoice, Proforma, History (ticket/overtime/billing/invoice), survey: data semua tenant.
+
+Selain `debtor_acct`, batasan **entity_cd / project_no** juga ikut melebar lewat
+`TenantScope::entityCds()` / `projectNos()` / `sqlEntity()` (dipakai Dashboard, Invoice, Proforma,
+History Invoice, grafik & combo meter). Tanpa itu, akun admin tetap tersaring ke entity/project
+tenancy-nya sendiri sehingga tenant di project lain tidak muncul.
 
 Tenant baru otomatis ikut. Tenant biasa tetap hanya melihat data miliknya sendiri.
 

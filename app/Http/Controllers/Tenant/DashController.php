@@ -477,7 +477,7 @@ public function getEusage_by_lotno($entity="", $project="", $tenant_no="", $lotn
                 mgr.pl_project d 
                 ON a.entity_cd = d.entity_cd
                 AND a.project_no = d.project_no 
-            WHERE a.meter_type='E' AND a.entity_cd='$entity' and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
+            WHERE a.meter_type='E' AND " . TenantScope::sqlEntity('a.entity_cd') . " and " . TenantScope::sqlTenantNo('b.debtor_acct') . " AND b.lot_no='$lotno' ORDER BY a.read_date";
 
         $query = DB::connection('dblive')->select($sql);
         return $query;
@@ -492,7 +492,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
                 YEAR(a.read_date) AS Yearly,
                 a.usage AS usages
             FROM mgr.pm_meter_dtl_his a
-            WHERE a.entity_cd = '$entity'
+            WHERE " . TenantScope::sqlEntity('a.entity_cd') . "
             AND " . TenantScope::sqlTenantNo('a.debtor_acct') . "
             AND a.meter_id = '$meterId'
             AND a.meter_cd LIKE '{$utility}%'
@@ -507,8 +507,8 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
     {
         $query = DB::connection('dblive')
                 ->table('mgr.ar_bill')
-                ->where('entity_cd', $entity)
-                ->where('project_no', $project)
+                ->whereIn('entity_cd', TenantScope::entityCds())
+                ->whereIn('project_no', TenantScope::projectNos())
                 ->whereIn('debtor_acct', TenantScope::tenantNos())
                 ->orderBy('doc_date', 'desc')
                 ->get();
@@ -519,8 +519,8 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
     {
         $query = DB::connection('dblive')
                 ->table('mgr.ar_ledger')
-                ->where('entity_cd', $entity)
-                ->where('project_no', $project)
+                ->whereIn('entity_cd', TenantScope::entityCds())
+                ->whereIn('project_no', TenantScope::projectNos())
                 ->whereIn('class', ['I', 'N'])
                 ->where('mbal_amt', '>', 0)
                 ->whereIn('debtor_acct', TenantScope::tenantNos())
@@ -764,7 +764,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
         $meters = DB::connection('dblive')
             ->table('mgr.pm_meter_dtl_his')
             ->select('meter_id', 'lot_no', 'debtor_acct')
-            ->where('entity_cd', $entity)
+            ->whereIn('entity_cd', TenantScope::entityCds())
             ->whereIn('debtor_acct', TenantScope::tenantNos())
             ->where('meter_cd', 'LIKE', $utility . '%')
             ->distinct()
