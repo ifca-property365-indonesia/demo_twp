@@ -155,6 +155,7 @@
     var EDIT_URL   = "{{ $base }}/edit";
     var CANCEL_URL = "{{ $base }}/cancel";
     var EDITABLE  = @json(array_values($editable));
+    var PRINTABLE = @json(\App\Http\Controllers\BasePermitController::PRINTABLE_STATUS);
 
     var TYPE_BADGE   = { W: 'badge-soft-primary', I: 'badge-soft-success', O: 'badge-soft-warning' };
     var STATUS_BADGE = {
@@ -257,11 +258,10 @@
                             'data-permit="' + esc(d) + '" title="Cancel ' + esc(d) + '">' +
                             '<i class="cil-ban"></i></button>';
                     }
-                    // Permit yang sudah dibatalkan tidak bisa dicetak
-                    // if (status === 'X' status === 'M' || status === 'R' || ) {
-                    if (status === 'X' || status === 'M') {
+                    // Hanya permit Approved yang bisa dicetak (dicek juga di server)
+                    if (status !== PRINTABLE) {
                         html += '<span class="btn btn-sm btn-outline-primary btn-print disabled" ' +
-                            'title="Cancelled permit cannot be printed" aria-disabled="true">' +
+                            'title="Only approved permits can be printed" aria-disabled="true">' +
                             '<i class="cil-print"></i></span>';
                     } else {
                         html += '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +

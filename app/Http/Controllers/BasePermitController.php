@@ -54,6 +54,9 @@ abstract class BasePermitController extends Controller
     /** Status yang isinya masih boleh diubah / dibatalkan (belum disetujui atau dibatalkan). */
     public const EDITABLE_STATUSES = ['R', 'M'];
 
+    /** Satu-satunya status yang boleh dicetak ke PDF (Approved). */
+    public const PRINTABLE_STATUS = 'Y';
+
     /** Status yang bisa ditetapkan admin saat mengubah permit. */
     public const ADMIN_STATUSES = [
         'Y' => 'Approve',
@@ -1172,7 +1175,7 @@ abstract class BasePermitController extends Controller
         ]);
     }
 
-    /** Permit yang boleh dicetak portal ini; abort kalau tidak ada / dibatalkan. */
+    /** Permit yang boleh dicetak portal ini: hanya yang sudah Approved (Y). */
     private function printablePermit($doc_no)
     {
         $permit = $this->findPermit($doc_no);
@@ -1184,13 +1187,10 @@ abstract class BasePermitController extends Controller
         $header = $permit['header'];
         $status = trim((string) $header->status);
 
-        if ($status === 'X') {
-            abort(403, 'Permit ' . $header->complain_no . ' has been cancelled and cannot be printed.');
+        if ($status !== self::PRINTABLE_STATUS) {
+            abort(403, 'Permit ' . trim($header->complain_no) . ' cannot be printed (status: '
+                . (self::STATUSES[$status] ?? ($status !== '' ? $status : '-')) . '). Only approved permits can be printed.');
         }
-
-        // if ($status === 'R' || $status === 'M') {
-        //     abort(403, 'Permit ' . $header->complain_no . ' not approved and cannot be printed.');
-        // }
 
         return $permit;
     }
