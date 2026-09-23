@@ -6,7 +6,12 @@
     $isEdit  = !empty($permit);
     $detail  = $detail ?? null;
     $lines   = $lines ?? [];
+    $tools   = $tools ?? [];
     $permit  = $permit ?? null;
+    // Jam Kerja: D = 10.00-22.00, N = 22.00-10.00, O = lain-lain (jam diisi bebas)
+    $shift   = $isEdit && $permit->complain_type === 'W'
+        ? \App\Http\Controllers\BasePermitController::workShiftOf($permit->start_time, $permit->end_time)
+        : 'D';
     $locked  = $locked ?? [];
     $type    = $isEdit ? $permit->complain_type : '';
     $base    = url($portal . '/permit');
@@ -189,18 +194,9 @@
                             <div class="permit-section__head">
                                 <span class="permit-section__num">3</span>
                                 <h6 class="permit-section__title">Work Detail</h6>
-                                @if ($locked)<span class="permit-section__hint">Only Work Tools can be changed</span>@endif
+                                @if ($locked)<span class="permit-section__hint">This section cannot be changed</span>@endif
                             </div>
                             <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="mb-3">
-                                        <label class="form-label" for="incharge">Person in Charge <span class="req">*</span></label>
-                                        <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="incharge" {!! $attr('incharge', 'Person in Charge') !!} value="{{ $detail->pic_name ?? '' }}">
-                                            <div class="invalid-feedback"></div>
-                                        </div>
-                                    </div>
-                                </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label" for="contractor">Contractor Name <span class="req">*</span></label>
@@ -221,9 +217,18 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="work_tool">Work Tools <span class="req">*</span></label>
+                                        <label class="form-label" for="incharge">Person in Charge <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="work_tool" {!! $attr('work_tool', 'Work Tools') !!} placeholder="e.g. Drill, ladder" value="{{ $detail->work_tools ?? '' }}">
+                                            <input type="text" class="form-control" id="incharge" {!! $attr('incharge', 'Person in Charge') !!} value="{{ $detail->pic_name ?? '' }}">
+                                            <div class="invalid-feedback"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label" for="pic_hp">Office Phone / HP <span class="req">*</span></label>
+                                        <div class="form-control-wrap">
+                                            <input type="text" class="form-control" id="pic_hp" inputmode="tel" {!! $attr('pic_hp', 'Office Phone / HP', 20) !!} placeholder="Person in charge phone" value="{{ $detail->pic_hp ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -294,6 +299,24 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-12 time-field" hidden>
+                                    <div class="mb-2">
+                                        <label class="form-label d-block">Working Hours <span class="req">*</span></label>
+                                        <div class="d-flex flex-wrap gap-3">
+                                            @foreach ($work_shifts as $code => $range)
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="radio" name="work_shift" id="work_shift_{{ $code }}" value="{{ $code }}"
+                                                        data-start="{{ $range[0] }}" data-end="{{ $range[1] }}" @checked($shift === $code)>
+                                                    <label class="form-check-label" for="work_shift_{{ $code }}">{{ $range[0] }} - {{ $range[1] }}</label>
+                                                </div>
+                                            @endforeach
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="work_shift" id="work_shift_O" value="O" @checked($shift === 'O')>
+                                                <label class="form-check-label" for="work_shift_O">Other</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-6 col-md-3 time-field" hidden>
                                     <div class="mb-3">
                                         <label class="form-label" for="start_time">Start Time <span class="req">*</span></label>
@@ -317,6 +340,7 @@
                                         <i class="cil-info"></i>
                                         Start Time and End Time are the <strong>daily working hours</strong> for this permit,
                                         applied to every day between the start and end date &mdash; not the total duration of the work.
+                                        End Time may be past midnight (e.g. 22:00 - 10:00).
                                     </div>
                                 </div>
                                 <div class="col-12">
@@ -337,7 +361,7 @@
                             <div class="permit-section__head">
                                 <span class="permit-section__num">5</span>
                                 <h6 class="permit-section__title"><span id="linesTitle">Workers</span> <span class="req">*</span></h6>
-                                <span class="permit-section__hint"><span id="lineCount">0</span> row(s) &middot; press Enter to add a new row</span>
+                                <span class="permit-section__hint">Total <strong><span id="lineCount">0</span></strong> <span id="lineUnit">worker(s)</span> &middot; press Enter to add a new row</span>
                             </div>
                             <div class="permit-lines">
                                 <div class="table-responsive">
@@ -355,6 +379,36 @@
                                 <div class="permit-lines__foot">
                                     <button type="button" class="btn btn-sm btn-primary" id="btnAddLine">
                                         <i class="cil-plus"></i><span>Add Worker</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </section>
+
+                        {{-- 6. Kegiatan & peralatan (Work Permit) --}}
+                        <section class="permit-section" id="sectionTools" hidden>
+                            <div class="permit-section__head">
+                                <span class="permit-section__num">6</span>
+                                <h6 class="permit-section__title">Work Activities &amp; Tools <span class="req">*</span></h6>
+                                <span class="permit-section__hint"><span id="toolCount">0</span> row(s)</span>
+                            </div>
+                            <div class="permit-lines">
+                                <div class="table-responsive">
+                                    <table class="table" id="tblTools">
+                                        <thead>
+                                            <tr>
+                                                <th class="line-no">No.</th>
+                                                <th style="min-width: 14rem;">Job Type / Activity</th>
+                                                <th style="min-width: 12rem;">Tools / PPE</th>
+                                                <th style="min-width: 10rem;">Remarks</th>
+                                                <th class="line-act"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                                <div class="permit-lines__foot">
+                                    <button type="button" class="btn btn-sm btn-primary" id="btnAddTool">
+                                        <i class="cil-plus"></i><span>Add Activity</span>
                                     </button>
                                 </div>
                             </div>
@@ -409,6 +463,7 @@
     var TYPES    = @json($types);
     var IS_EDIT  = {{ $isEdit ? 'true' : 'false' }};
     var EDIT_LINES = @json(array_values((array) $lines));
+    var EDIT_TOOLS = @json(array_values((array) $tools));
     var MIN_SPINNER_MS = 800;   // overlay tampil minimal segini supaya tidak berkedip
 
     var $form     = $('#frmPermit');
@@ -418,6 +473,7 @@
     var $floor    = $('#floor');
     var $permitNo = $('#permit_no');
     var $tbody    = $('#tblLines tbody');
+    var $tools    = $('#tblTools tbody');
     var $btnSave  = $('#btnSave');
     var $spinner  = $('#overlaySpinner');
 
@@ -426,7 +482,8 @@
         work:     $('#sectionWork'),
         goods:    $('#sectionGoods'),
         schedule: $('#sectionSchedule'),
-        lines:    $('#sectionLines')
+        lines:    $('#sectionLines'),
+        tools:    $('#sectionTools')
     };
 
     // ---------------------------------------------------------------
@@ -456,13 +513,20 @@
         setVisible(sections.schedule, chosen);
         setVisible(sections.lines,    chosen);
         setVisible(sections.work,     isWork);
+        setVisible(sections.tools,    isWork);
         setVisible(sections.goods,    chosen && !isWork);
         setVisible($('.time-field'),  isWork);
 
         $('#linesTitle').text(isWork ? 'Workers' : 'Items');
         $('#linesCol').text(isWork ? 'Worker Name' : 'Item Name');
+        $('#lineUnit').text(isWork ? 'worker(s)' : 'item(s)');
         $('#btnAddLine span').text(isWork ? 'Add Worker' : 'Add Item');
         $tbody.find('input').attr('placeholder', linePlaceholder());
+
+        // setVisible() meng-enable semua input; kembalikan status tombol hapus & jam kerja
+        renumber();
+        renumberTools();
+        applyShift();
 
         if (IS_EDIT) {
             $btnSave.prop('disabled', false).find('span').text('Save Changes');
@@ -539,6 +603,32 @@
         $('#end_date').attr('min', v);
         if (v && (!$('#end_date').val() || $('#end_date').val() < v)) {
             $('#end_date').val(v);
+        }
+    });
+
+    // ---------------------------------------------------------------
+    // Jam Kerja: 10:00-22:00 / 22:00-10:00 mengisi jam otomatis, Other = isi sendiri
+    // ---------------------------------------------------------------
+    function applyShift() {
+        var $opt = $('input[name="work_shift"]:checked');
+        var fixed = $opt.length && $opt.val() !== 'O';
+
+        if (fixed) {
+            $('#start_time').val($opt.data('start'));
+            $('#end_time').val($opt.data('end'));
+            clearError($('#start_time'));
+            clearError($('#end_time'));
+        }
+        $('#start_time, #end_time').prop('readonly', fixed);
+    }
+
+    $('input[name="work_shift"]').on('change', function () {
+        if ($(this).val() === 'O') {
+            $('#start_time, #end_time').val('');
+        }
+        applyShift();
+        if ($(this).val() === 'O') {
+            $('#start_time').trigger('focus');
         }
     });
 
@@ -623,6 +713,87 @@
     }
 
     // ---------------------------------------------------------------
+    // Baris kegiatan & peralatan (Work Permit)
+    // ---------------------------------------------------------------
+    function toolCell(name, max, placeholder) {
+        return '<td><div class="form-control-wrap">' +
+                '<input type="text" class="form-control" name="' + name + '[]" maxlength="' + max + '" placeholder="' + placeholder + '" autocomplete="off">' +
+                '<div class="invalid-feedback"></div>' +
+            '</div></td>';
+    }
+
+    function addTool(focus, data) {
+        var $tr = $(
+            '<tr>' +
+                '<td class="line-no"></td>' +
+                toolCell('tool_activity', 100, 'e.g. Ceiling installation') +
+                toolCell('tool_name', 100, 'e.g. Ladder, helmet, gloves') +
+                toolCell('tool_remarks', 255, 'Optional') +
+                '<td class="line-act">' +
+                    '<button type="button" class="btn btn-del" title="Remove row"><i class="cil-trash"></i></button>' +
+                '</td>' +
+            '</tr>'
+        );
+
+        if (data) {
+            $tr.find('[name="tool_activity[]"]').val(data.activity || '');
+            $tr.find('[name="tool_name[]"]').val(data.tool_name || '');
+            $tr.find('[name="tool_remarks[]"]').val(data.remarks || '');
+        }
+
+        $tools.append($tr);
+        renumberTools();
+
+        if (focus) {
+            $tr.find('input').first().trigger('focus');
+        }
+    }
+
+    function renumberTools() {
+        var $rows = $tools.children('tr');
+        $rows.each(function (i) {
+            $(this).find('.line-no').text(i + 1);
+        });
+        $rows.find('.btn-del').prop('disabled', $rows.length <= 1);
+        $('#toolCount').text($rows.length);
+    }
+
+    $('#btnAddTool').on('click', function () {
+        addTool(true);
+    });
+
+    $tools.on('click', '.btn-del', function () {
+        if ($tools.children('tr').length <= 1) {
+            return;
+        }
+        $(this).closest('tr').remove();
+        renumberTools();
+    });
+
+    // Enter: pindah ke kolom berikutnya; di kolom terakhir baris terakhir -> baris baru
+    $tools.on('keydown', 'input', function (e) {
+        if (e.key !== 'Enter') {
+            return;
+        }
+        e.preventDefault();
+        var $inputs = $tools.find('input');
+        var idx = $inputs.index(this);
+        if (idx === $inputs.length - 1) {
+            addTool(true);
+        } else {
+            $inputs.eq(idx + 1).trigger('focus');
+        }
+    });
+
+    if (IS_EDIT && EDIT_TOOLS.length) {
+        EDIT_TOOLS.forEach(function (t) {
+            addTool(false, t);
+        });
+    } else {
+        addTool(false);
+    }
+
+    // ---------------------------------------------------------------
     // Validasi inline
     // ---------------------------------------------------------------
     function feedbackOf($el) {
@@ -674,14 +845,21 @@
 
         if ($type.val() === 'W') {
             var st = $('#start_time').val(), et = $('#end_time').val();
-            if (st && et && et <= st) {
-                fail($('#end_time'), 'End Time must be later than Start Time.');
+            // boleh lewat tengah malam (22:00 - 10:00), asal tidak sama
+            if (st && et && et === st) {
+                fail($('#end_time'), 'End Time must be different from Start Time.');
             }
         }
 
         $tbody.find('input:enabled').each(function () {
             if ($.trim($(this).val()) === '') {
                 fail($(this), linePlaceholder() + ' cannot be empty.');
+            }
+        });
+
+        $tools.find('[name="tool_activity[]"]:enabled, [name="tool_name[]"]:enabled').each(function () {
+            if ($.trim($(this).val()) === '') {
+                fail($(this), (this.name === 'tool_name[]' ? 'Tools / PPE' : 'Activity') + ' cannot be empty.');
             }
         });
 
@@ -701,12 +879,19 @@
         $.each(errors, function (key, msgs) {
             var msg = $.isArray(msgs) ? msgs[0] : msgs;
             var m = /^(worker_name|item_name)\.(\d+)$/.exec(key);
+            var t = /^(tool_activity|tool_name|tool_remarks)\.(\d+)$/.exec(key);
             var $el;
 
             if (m) {
                 $el = $tbody.children('tr').eq(parseInt(m[2], 10)).find('input');
             } else if (key === 'worker_name' || key === 'item_name') {
                 $el = $tbody.find('input').first();
+            } else if (t) {
+                $el = $tools.children('tr').eq(parseInt(t[2], 10)).find('[name="' + t[1] + '[]"]');
+            } else if (/^tool_/.test(key)) {
+                $el = $tools.find('input').first();
+            } else if (key === 'work_shift') {
+                $el = $('#start_time');
             } else {
                 $el = $form.find('[name="' + key + '"]');
             }
@@ -851,6 +1036,9 @@
             $form.find('.js-select2').val('').trigger('change');
             $tbody.empty();
             addLine(false);
+            $tools.empty();
+            addTool(false);
+            $('#work_shift_D').prop('checked', true);
             $('#noteCount').text('0');
             $('#end_date').removeAttr('min');
             applyType();

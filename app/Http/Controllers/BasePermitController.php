@@ -17,13 +17,15 @@ use PDF;
  * Semua data di SQL Server (koneksi dblive):
  *   mgr.sv_entry_letter      header (complain_type = W/I/O, complain_no = nomor permit, status)
  *   mgr.permit_letter_hd/dtl detail Work Permit + daftar pekerja
+ *   mgr.permit_letter_tools  rincian kegiatan + peralatan / APD Work Permit
  *   mgr.permit_goods_hd/dtl  detail Permit of Goods + daftar barang
  *   mgr.sv_entry_letter_log  log; tiap perubahan status di-INSERT (tidak pernah di-update)
  *   mgr.sv_spec.letter_no    nomor permit berikutnya per entity/project (LP100001, LP100002, ...)
  *
  * Beda portal:
  *   - tenant hanya melihat/mengubah permit miliknya (TenantScope), admin semua tenant;
- *   - saat ubah permit, tenant boleh mengubah bagian 3-5, admin hanya Work Tools + bagian 4-5;
+ *   - saat ubah permit, tenant boleh mengubah bagian 3-6, admin hanya bagian 4-6
+ *     (jadwal, pekerja, kegiatan & peralatan);
  *   - admin bisa menetapkan status Approved (Y) / Cancel (X); tanpa itu jadi Modify (M).
  */
 abstract class BasePermitController extends Controller
@@ -63,6 +65,16 @@ abstract class BasePermitController extends Controller
     public const ADMIN_STATUSES = [
         'Y' => 'Approve',
         'X' => 'Cancel',
+    ];
+
+    /**
+     * Pilihan Jam Kerja Work Permit (sesuai form Surat Izin Kerja): kode -> [mulai, selesai].
+     * Tidak disimpan sebagai kolom sendiri; diturunkan lagi dari start_time/end_time.
+     * 'O' (lain-lain) = jam diisi bebas.
+     */
+    public const WORK_SHIFTS = [
+        'D' => ['10:00', '22:00'],
+        'N' => ['22:00', '10:00'],
     ];
 
     /** Jam operasional pengelola gedung (ditampilkan di form permit). */
@@ -150,6 +162,7 @@ abstract class BasePermitController extends Controller
             'permit'    => $permit['header'],
             'detail'    => $permit['detail'],
             'lines'     => $permit['lines'],
+            'tools'     => $permit['tools'],
             'locked'    => $this->lockedFields($permit['header']->complain_type),
         ]));
     }
@@ -178,13 +191,15 @@ abstract class BasePermitController extends Controller
             'types'        => self::TYPES,
             'statuses'     => self::ADMIN_STATUSES,
             'office_hours' => self::OFFICE_HOURS,
+            'work_shifts'  => self::WORK_SHIFTS,
+            'tools'        => [],
             'locked'       => [],
         ], $extra);
     }
 
     /**
      * Field bagian 3 yang tidak boleh diubah portal ini saat update.
-     * Admin hanya boleh mengubah Work Tools (Work Permit) dan bagian 4-5.
+     * Admin tidak boleh mengubah bagian 3 sama sekali (hanya bagian 4-6).
      */
     protected function lockedFields($type)
     {
@@ -193,7 +208,7 @@ abstract class BasePermitController extends Controller
         }
 
         return $type === 'W'
-            ? ['incharge', 'contractor', 'job_type']
+            ? ['incharge', 'pic_hp', 'contractor', 'job_type']
             : ['company', 'owner', 'vehicle_no'];
     }
 
@@ -258,6 +273,7 @@ abstract class BasePermitController extends Controller
     {
         $type = $request->input('permit_type');
 
+        $this->applyWorkShift($request, $type);
         $validator = $this->permitValidator($request, $type);
 
         if ($validator->fails()) {
@@ -283,6 +299,9 @@ abstract class BasePermitController extends Controller
                 $db->table('mgr.sv_entry_letter')->insert($rows['header']);
                 $db->table($rows['detail_table'])->insert($rows['detail']);
                 $db->table($rows['lines_table'])->insert($rows['lines']);
+                if (isset($rows['tools_table'])) {
+                    $db->table($rows['tools_table'])->insert($rows['tools']);
+                }
                 $this->writeLog($ctx, 'Request created by ' . $this->portal());
 
                 return $ctx['doc_no'];
@@ -304,7 +323,7 @@ abstract class BasePermitController extends Controller
 
     /**
      * Simpan perubahan permit. Jenis permit, nomor, tenant, unit dan lantai tidak ikut
-     * diubah; admin juga tidak boleh mengubah field bagian 3 selain Work Tools.
+     * diubah; admin juga tidak boleh mengubah field bagian 3.
      * Status: tenant -> M (Modify); admin -> Y/X kalau dipilih, selain itu M.
      */
     public function update(Request $request)
@@ -329,6 +348,7 @@ abstract class BasePermitController extends Controller
         // Field yang tidak boleh diubah portal ini: pakai nilai yang tersimpan.
         $locked = $this->lockedFields($type);
         $request->merge($this->storedValues($permit, $locked));
+        $this->applyWorkShift($request, $type);
 
         $validator = $this->permitValidator($request, $type, true, $locked);
         if ($validator->fails()) {
@@ -382,6 +402,12 @@ abstract class BasePermitController extends Controller
                 // Daftar pekerja / barang ditulis ulang
                 $db->table($rows['lines_table'])->where($keys)->delete();
                 $db->table($rows['lines_table'])->insert($rows['lines']);
+
+                // Kegiatan & peralatan Work Permit juga ditulis ulang
+                if (isset($rows['tools_table'])) {
+                    $db->table($rows['tools_table'])->where($keys)->delete();
+                    $db->table($rows['tools_table'])->insert($rows['tools']);
+                }
 
                 $this->writeLog($ctx, $remarks);
             });
@@ -450,6 +476,7 @@ abstract class BasePermitController extends Controller
         $detail = $permit['detail'];
         $map = [
             'incharge'   => $detail->pic_name ?? null,
+            'pic_hp'     => $detail->pic_hp ?? null,
             'contractor' => $detail->kontraktor_name ?? null,
             'job_type'   => $detail->work_type ?? null,
             'work_tool'  => $detail->work_tools ?? null,
@@ -528,15 +555,25 @@ abstract class BasePermitController extends Controller
         }
 
         if ($type === 'W') {
+            // Jam kerja boleh melewati tengah malam (22.00 - 10.00), jadi end_time
+            // cukup berbeda dari start_time, tidak harus lebih besar.
+            // Baris kegiatan: tool_activity[i] + tool_name[i] (+ tool_remarks[i] opsional).
             $rules += [
-                'incharge'      => ['required', 'string', 'max:50'],
-                'contractor'    => ['required', 'string', 'max:50'],
-                'job_type'      => ['required', 'string', 'max:50'],
-                'work_tool'     => ['required', 'string', 'max:50'],
-                'start_time'    => ['required', 'date_format:H:i,H:i:s'],
-                'end_time'      => ['required', 'date_format:H:i,H:i:s', 'after:start_time'],
-                'worker_name'   => ['required', 'array', 'min:1'],
-                'worker_name.*' => ['required', 'string', 'max:50'],
+                'incharge'        => ['required', 'string', 'max:50'],
+                'pic_hp'          => ['required', 'string', 'max:20'],
+                'contractor'      => ['required', 'string', 'max:50'],
+                'job_type'        => ['required', 'string', 'max:50'],
+                'work_shift'      => ['required', 'in:' . implode(',', array_keys(self::WORK_SHIFTS)) . ',O'],
+                'start_time'      => ['required', 'date_format:H:i,H:i:s'],
+                'end_time'        => ['required', 'date_format:H:i,H:i:s', 'different:start_time'],
+                'worker_name'     => ['required', 'array', 'min:1'],
+                'worker_name.*'   => ['required', 'string', 'max:50'],
+                'tool_activity'   => ['required', 'array', 'min:1'],
+                'tool_activity.*' => ['required', 'string', 'max:100'],
+                'tool_name'       => ['required', 'array', 'size:' . count((array) $request->input('tool_activity'))],
+                'tool_name.*'     => ['required', 'string', 'max:100'],
+                'tool_remarks'    => ['nullable', 'array'],
+                'tool_remarks.*'  => ['nullable', 'string', 'max:255'],
             ];
         } else {
             $rules += [
@@ -554,8 +591,14 @@ abstract class BasePermitController extends Controller
             'tenant_no'     => 'tenant',
             'lot_no'        => 'unit',
             'incharge'      => 'person in charge',
+            'pic_hp'        => 'office phone / HP',
             'contractor'    => 'contractor name',
-            'work_tool'     => 'work tools',
+            'work_shift'    => 'working hours',
+            'tool_activity'   => 'activity',
+            'tool_activity.*' => 'activity',
+            'tool_name'       => 'tools / PPE',
+            'tool_name.*'     => 'tools / PPE',
+            'tool_remarks.*'  => 'remarks',
             'worker_name'   => 'worker',
             'worker_name.*' => 'worker name',
             'company'       => 'company name',
@@ -574,11 +617,25 @@ abstract class BasePermitController extends Controller
         $start_time = substr($request->start_time, 0, 5);
         $end_time   = substr($request->end_time, 0, 5);
 
+        // Kegiatan + peralatan / APD per baris; kolom work_tool(s) lama diisi ringkasannya.
+        $toolNames = array_values((array) $request->tool_name);
+        $remarks   = array_values((array) $request->tool_remarks);
+        $tools = [];
+        foreach (array_values((array) $request->tool_activity) as $i => $activity) {
+            $remark = trim((string) ($remarks[$i] ?? ''));
+            $tools[] = $this->lineRow($ctx) + [
+                'activity'  => trim($activity),
+                'tool_name' => trim((string) ($toolNames[$i] ?? '')),
+                'remarks'   => $remark === '' ? null : $remark,
+            ];
+        }
+        $summary = mb_substr(implode(', ', array_unique(array_column($tools, 'tool_name'))), 0, 255);
+
         $header = $this->headerRow($ctx, 'W', $request) + [
             'pj_name'    => $request->incharge,
             'contractor' => $request->contractor,
             'job_type'   => $request->job_type,
-            'work_tool'  => $request->work_tool,
+            'work_tool'  => $summary,
             'start_time' => $start_time,
             'end_time'   => $end_time,
         ];
@@ -592,12 +649,13 @@ abstract class BasePermitController extends Controller
             'member_hp'       => $ctx['member_hp'],
             'debtor_acct'     => $ctx['debtor_acct'],
             'pic_name'        => $request->incharge,
+            'pic_hp'          => $request->pic_hp,
             'kontraktor_name' => $request->contractor,
             'tower'           => $ctx['tower'],
             'floor'           => $request->floor,
             'unit'            => $ctx['lot_no'],
             'work_type'       => $request->job_type,
-            'work_tools'      => $request->work_tool,
+            'work_tools'      => $summary,
             'start_day'       => date('l', strtotime($request->start_date)),
             'end_day'         => date('l', strtotime($request->end_date)),
             'start_date'      => $start_date,
@@ -620,6 +678,8 @@ abstract class BasePermitController extends Controller
             'detail'       => $detail,
             'lines_table'  => 'mgr.permit_letter_dtl',
             'lines'        => $lines,
+            'tools_table'  => 'mgr.permit_letter_tools',
+            'tools'        => $tools,
         ];
     }
 
@@ -775,15 +835,68 @@ abstract class BasePermitController extends Controller
             'doc_no'     => $header->complain_no,
         ];
 
+        $tools = [];
+
         if ($header->complain_type === 'W') {
             $detail = $db->table('mgr.permit_letter_hd')->where($keys)->first();
             $lines  = $db->table('mgr.permit_letter_dtl')->where($keys)->orderBy('rowID')->pluck('staff_name')->all();
+            $tools  = $db->table('mgr.permit_letter_tools')->where($keys)->orderBy('rowID')
+                ->get(['activity', 'tool_name', 'remarks'])
+                ->map(function ($t) {
+                    return [
+                        'activity'  => trim((string) $t->activity),
+                        'tool_name' => trim((string) $t->tool_name),
+                        'remarks'   => trim((string) $t->remarks),
+                    ];
+                })->all();
+
+            // Permit lama (sebelum ada permit_letter_tools): satu baris dari work_type + work_tools.
+            if (!$tools && $detail && trim((string) $detail->work_tools) !== '') {
+                $tools = [[
+                    'activity'  => trim((string) $detail->work_type),
+                    'tool_name' => trim((string) $detail->work_tools),
+                    'remarks'   => '',
+                ]];
+            }
         } else {
             $detail = $db->table('mgr.permit_goods_hd')->where($keys)->first();
             $lines  = $db->table('mgr.permit_goods_dtl')->where($keys)->orderBy('rowID')->pluck('item_name')->all();
         }
 
-        return ['header' => $header, 'detail' => $detail, 'lines' => $lines, 'keys' => $keys];
+        return ['header' => $header, 'detail' => $detail, 'lines' => $lines, 'tools' => $tools, 'keys' => $keys];
+    }
+
+    /**
+     * Jam Kerja Work Permit: pilihan 10.00-22.00 / 22.00-10.00 mengisi start_time & end_time
+     * dari WORK_SHIFTS (jam kiriman form diabaikan); 'O' (lain-lain) memakai jam yang diisi.
+     */
+    private function applyWorkShift(Request $request, $type)
+    {
+        if ($type !== 'W') {
+            return;
+        }
+
+        $shift = strtoupper(trim((string) $request->input('work_shift')));
+        if (isset(self::WORK_SHIFTS[$shift])) {
+            $request->merge([
+                'start_time' => self::WORK_SHIFTS[$shift][0],
+                'end_time'   => self::WORK_SHIFTS[$shift][1],
+            ]);
+        }
+    }
+
+    /** Kode Jam Kerja (D / N / O = lain-lain) dari jam tersimpan. */
+    public static function workShiftOf($start_time, $end_time)
+    {
+        $times = [substr(trim((string) $start_time), 0, 5), substr(trim((string) $end_time), 0, 5)];
+
+        foreach (self::WORK_SHIFTS as $code => $range) {
+            if ($range === $times) {
+                return $code;
+            }
+        }
+
+        return 'O';
     }
 
     /** Nomor permit yang akan dipakai berikutnya (hanya untuk ditampilkan di form). */
@@ -1024,6 +1137,23 @@ abstract class BasePermitController extends Controller
             ->first();
 
         $tenant = DB::table('tenant')->where('tenant_no_df', $header->debtor_acct)->first();
+
+        // Work Permit dicetak dengan format form "Surat Izin Kerja / Working Permit".
+        if ($header->complain_type === 'W') {
+            return PDF::loadView('permit.print_work', [
+                'header'  => $header,
+                'detail'  => $permit['detail'],
+                'workers' => count($permit['lines']),
+                'tools'   => $permit['tools'],
+                'tenancy' => $tenancy,
+                'tenant'  => $tenant,
+                'shift'   => self::workShiftOf($header->start_time, $header->end_time),
+                'shifts'  => self::WORK_SHIFTS,
+                'logo'    => base_path('img/logoweb/carstensz-logo-print.jpg'),
+            ])
+                ->setPaper('a4', 'portrait')
+                ->stream($header->complain_no . '.pdf');
+        }
 
         return PDF::loadView('permit.print', [
             'header'       => $header,
