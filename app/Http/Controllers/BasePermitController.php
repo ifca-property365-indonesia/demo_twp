@@ -1011,6 +1011,10 @@ abstract class BasePermitController extends Controller
             abort(403, 'Permit ' . $header->complain_no . ' has been cancelled and cannot be printed.');
         }
 
+        if ($status === 'R') {
+            abort(403, 'Permit ' . $header->complain_no . ' not approved and cannot be printed.');
+        }
+
         // Nama pengelola gedung & project untuk kop surat.
         $tenancy = DB::table('pm_tenancy')
             ->where('tenant_no', $header->debtor_acct)

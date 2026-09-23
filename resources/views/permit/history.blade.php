@@ -258,7 +258,7 @@
                             '<i class="cil-ban"></i></button>';
                     }
                     // Permit yang sudah dibatalkan tidak bisa dicetak
-                    if (status === 'X') {
+                    if (status === 'X' || status === 'R') {
                         html += '<span class="btn btn-sm btn-outline-primary btn-print disabled" ' +
                             'title="Cancelled permit cannot be printed" aria-disabled="true">' +
                             '<i class="cil-print"></i></span>';

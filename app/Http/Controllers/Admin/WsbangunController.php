@@ -41,7 +41,7 @@ class WsbangunController extends Controller
         
     }
 
-public function business($method='', $value='')
+    public function business($method='', $value='')
     {
         if(!empty($method)&&!empty($value))
         {

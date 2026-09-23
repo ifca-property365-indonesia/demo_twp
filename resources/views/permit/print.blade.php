@@ -21,8 +21,10 @@
                font-weight: bold; padding: 4px 10px; color: #1f3d5c; }
         .box { width: 9px; height: 9px; border: 1px solid #1f3d5c; display: inline-block;
                text-align: center; line-height: 9px; font-size: 8px; margin-right: 6px; }
-        .grid td { border-right: 1px solid #1f3d5c; }
-        .grid td.last { border-right: 0; }
+        /* pemisah kolom hanya untuk sel .grid itu sendiri, bukan tabel di dalamnya */
+        .grid > tbody > tr > td { border-right: 1px solid #1f3d5c; }
+        .grid > tbody > tr > td.last { border-right: 0; }
+        .grid .row-line td, .grid .row-line th { border: 0; }
         .items th { background: #e9eef3; border: 1px solid #1f3d5c; padding: 4px 6px; font-size: 9px; }
         .items td { border: 1px solid #1f3d5c; padding: 4px 6px; }
         .sign { height: 62px; }
@@ -108,10 +110,10 @@
     </tr>
 
     <!-- deskripsi -->
-    <tr><td class="bar center">Description of Works</td></tr>
+    <!-- <tr><td class="bar center">Description of Works</td></tr>
     <tr>
         <td class="pad line val" style="height: 58px;">{{ $txt($header->note) }}</td>
-    </tr>
+    </tr> -->
 
     <!-- jenis permit & detail -->
     <tr>
@@ -119,17 +121,6 @@
             <table class="grid">
                 <tr>
                     <td class="pad" style="width: 50%;">
-                        <div class="lbl bold" style="margin-bottom: 8px;">Type of Permit :</div>
-                        <table class="row-line">
-                            @foreach ($types as $code => $label)
-                                <tr>
-                                    <td style="width: 20px;"><span class="box">{{ $type === $code ? 'X' : '' }}</span></td>
-                                    <td class="lbl">{{ $label }}</td>
-                                </tr>
-                            @endforeach
-                        </table>
-                    </td>
-                    <td class="pad last" style="width: 50%;">
                         <div class="lbl bold" style="margin-bottom: 8px;">Detail :</div>
                         <table class="row-line">
                             @if ($type === 'W')
@@ -149,6 +140,10 @@
                                     <td class="lbl">Work Tools</td>
                                     <td class="val">: {{ $txt($detail->work_tools ?? $header->work_tool) }}</td>
                                 </tr>
+                                <tr>
+                                    <td class="lbl">Working Time</td>
+                                    <td class="val">: {{ $txt($header->start_time) }} - {{ $txt($header->end_time) }}</td>
+                                </tr>
                             @else
                                 <tr>
                                     <td class="lbl" style="width: 95px;">Company</td>
@@ -163,6 +158,12 @@
                                     <td class="val">: {{ $txt($detail->vehicle_no ?? $header->vehicle_no) }}</td>
                                 </tr>
                             @endif
+                        </table>
+                    </td>
+                    <td class="pad last" style="width: 50%;">
+                        <div class="lbl bold" style="margin-bottom: 8px;">Notes :</div>
+                        <table class="row-line">
+                            <tr><td style="height: 58px;">{{ $txt($header->note) }}</td></tr>
                         </table>
                     </td>
                 </tr>
