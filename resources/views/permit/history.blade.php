@@ -1,9 +1,11 @@
-@extends('tenant.template.base')
+@extends($layout)
+
+@php $base = url($portal . '/permit'); @endphp
 
 @section('title', 'Permit History')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ url('assets/app/css/permit.css?ver=1.0.0') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/permit.css?ver=1.0.2') }}">
 @endpush
 
 @section('content')
@@ -17,15 +19,19 @@
                     </div>
                 </div>
                 <div class="page-head-content">
-                    <a href="{{ url('/tenant/permit/add') }}" class="btn btn-primary d-none d-sm-inline-flex">
+                    <a href="{{ $base . '/add' }}" class="btn btn-primary d-none d-sm-inline-flex">
                         <i class="cil-plus"></i><span>Request Permit</span>
                     </a>
-                    <a href="{{ url('/tenant/permit/add') }}" class="btn btn-icon btn-primary d-inline-flex d-sm-none">
+                    <a href="{{ $base . '/add' }}" class="btn btn-icon btn-primary d-inline-flex d-sm-none">
                         <i class="cil-plus"></i>
                     </a>
                 </div>
             </div>
         </div>
+
+        @if (session('alert'))
+            <div class="alert alert-warning d-flex align-items-center gap-2"><i class="cil-warning"></i><div>{{ session('alert') }}</div></div>
+        @endif
 
         <div class="page-block">
             {{-- Filter --}}
@@ -42,6 +48,21 @@
                                     </div>
                                 </div>
                             </div>
+                            @if ($is_admin)
+                            <div class="col-sm-6 col-lg-3">
+                                <div class="mb-3">
+                                    <label class="form-label" for="tenant_no">Tenant</label>
+                                    <div class="form-control-wrap">
+                                        <select id="tenant_no" name="tenant_no" class="form-select">
+                                            <option value="">All tenants</option>
+                                            @foreach ($tenants as $t)
+                                                <option value="{{ $t->tenant_no }}">{{ $t->tenant_no }}{{ $t->entity_desc ? ' - ' . $t->entity_desc : '' }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                             <div class="col-sm-6 col-lg-3">
                                 <div class="mb-3">
                                     <label class="form-label" for="permit_type">Permit Type</label>
@@ -101,6 +122,7 @@
                                 <tr>
                                     <th class="text-center" style="width: 48px;">No.</th>
                                     <th>Permit No</th>
+                                    @if ($is_admin)<th>Tenant</th>@endif
                                     <th>Type</th>
                                     <th class="text-center">Tower</th>
                                     <th class="text-center">Floor</th>
@@ -110,7 +132,7 @@
                                     <th>End</th>
                                     <th class="text-center">Time</th>
                                     <th class="text-center">Status</th>
-                                    <th class="text-center" style="width: 56px;">Print</th>
+                                    <th class="text-center" style="width: 132px;">Action</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -129,7 +151,10 @@
 
     var TYPES    = @json($types);
     var STATUSES = @json($statuses);
-    var PRINT_URL = "{{ url('/tenant/permit/print') }}";
+    var PRINT_URL  = "{{ $base }}/print";
+    var EDIT_URL   = "{{ $base }}/edit";
+    var CANCEL_URL = "{{ $base }}/cancel";
+    var EDITABLE  = @json(array_values($editable));
 
     var TYPE_BADGE   = { W: 'badge-soft-primary', I: 'badge-soft-success', O: 'badge-soft-warning' };
     var STATUS_BADGE = {
@@ -179,9 +204,10 @@
             lengthMenu: 'Show _MENU_'
         },
         ajax: {
-            url: "{{ url('/tenant/permit/historyTable') }}",
+            url: "{{ $base }}/historyTable",
             data: function (d) {
                 d.permit_no   = $('#permit_no').val();
+                d.tenant_no   = $('#tenant_no').val();
                 d.permit_type = $('#permit_type').val();
                 d.status      = $('#status').val();
                 d.start_date  = $('#start_date').val();
@@ -198,6 +224,7 @@
             { data: 'DT_RowIndex', orderable: false, searchable: false, className: 'text-center' },
             { data: 'complain_no', className: 'nowrap',
                 render: function (d) { return '<span class="permit-link">' + esc(d) + '</span>'; } },
+            @if ($is_admin){ data: 'debtor_acct', className: 'nowrap', render: dash },@endif
             { data: 'complain_type', className: 'nowrap',
                 render: function (d) { return TYPES[d] ? badge(TYPE_BADGE[d] || 'badge-soft-secondary', TYPES[d]) : dash(d); } },
             { data: 'tower', className: 'text-center', render: dash },
@@ -217,11 +244,30 @@
                     var code = (d == null) ? '' : String(d).trim();
                     return STATUSES[code] ? badge(STATUS_BADGE[code] || 'badge-soft-secondary', STATUSES[code]) : dash(code);
                 } },
-            { data: 'complain_no', orderable: false, searchable: false, className: 'text-center',
-                render: function (d) {
-                    return '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
-                        'class="btn btn-sm btn-outline-primary btn-print" title="Print ' + esc(d) + '">' +
-                        '<i class="cil-print"></i></a>';
+            { data: 'complain_no', orderable: false, searchable: false, className: 'text-center nowrap',
+                render: function (d, type, row) {
+                    var html = '';
+                    var status = (row.status == null) ? '' : String(row.status).trim();
+
+                    if (EDITABLE.indexOf(status) >= 0) {
+                        html += '<a href="' + EDIT_URL + '/' + encodeURIComponent(d) + '" ' +
+                            'class="btn btn-sm btn-outline-secondary btn-print me-1" title="Update ' + esc(d) + '">' +
+                            '<i class="cil-pencil"></i></a>';
+                        html += '<button type="button" class="btn btn-sm btn-outline-danger btn-print btn-cancel me-1" ' +
+                            'data-permit="' + esc(d) + '" title="Cancel ' + esc(d) + '">' +
+                            '<i class="cil-ban"></i></button>';
+                    }
+                    // Permit yang sudah dibatalkan tidak bisa dicetak
+                    if (status === 'X') {
+                        html += '<span class="btn btn-sm btn-outline-primary btn-print disabled" ' +
+                            'title="Cancelled permit cannot be printed" aria-disabled="true">' +
+                            '<i class="cil-print"></i></span>';
+                    } else {
+                        html += '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
+                            'class="btn btn-sm btn-outline-primary btn-print" title="Print ' + esc(d) + '">' +
+                            '<i class="cil-print"></i></a>';
+                    }
+                    return html;
                 } }
         ]
     });
@@ -231,12 +277,41 @@
         table.ajax.reload();
     });
 
-    $('#permit_type, #status').on('change', function () {
+    $('#permit_type, #status, #tenant_no').on('change', function () {
         table.ajax.reload();
     });
 
+    // Batalkan permit langsung dari tabel
+    $('#tblPermit').on('click', '.btn-cancel', function () {
+        var permitNo = $(this).data('permit');
+
+        Swal.fire({
+            title: 'Cancel permit ' + permitNo + '?',
+            text: 'A cancelled permit can no longer be changed.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, cancel it',
+            cancelButtonText: 'No',
+            reverseButtons: true,
+            confirmButtonColor: '#e55353'
+        }).then(function (r) {
+            if (!r.value) { return; }
+
+            $.ajax({ url: CANCEL_URL, type: 'POST', data: { doc_no: permitNo }, dataType: 'json' })
+                .done(function (res) {
+                    Swal.fire({ title: 'Information', icon: res.status === 'OK' ? 'success' : 'error', text: res.pesan });
+                    table.ajax.reload(null, false);
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    var res = xhr.responseJSON || {};
+                    Swal.fire({ title: 'Error', icon: 'error', text: res.pesan || (textStatus + ' : ' + errorThrown) });
+                    table.ajax.reload(null, false);
+                });
+        });
+    });
+
     $('#btnReset').on('click', function () {
-        $('#permit_no, #permit_type, #status').val('');
+        $('#permit_no, #permit_type, #status, #tenant_no').val('');
         $('#start_date').val('');
         if ($.fn.datepicker) {
             $('#start_date').datepicker('update', '');

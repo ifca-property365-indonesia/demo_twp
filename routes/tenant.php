@@ -100,7 +100,11 @@ Route::group(['middleware' => ['tenant-auth', 'revalidate']], function () {
 	// PermitController (Letter Permit)
 	Route::get('/permit/add', [Permit::class, 'index']);
 	Route::get('/permit/letterNo/{id_tenancy}', [Permit::class, 'letterNo'])->whereNumber('id_tenancy');
+	Route::get('/permit/lots/{id_tenancy}', [Permit::class, 'lots'])->whereNumber('id_tenancy');
 	Route::post('/permit/save', [Permit::class, 'save']);
+	Route::get('/permit/edit/{doc_no}', [Permit::class, 'edit'])->where('doc_no', '[A-Za-z0-9\-]+');
+	Route::post('/permit/update', [Permit::class, 'update']);
+	Route::post('/permit/cancel', [Permit::class, 'cancel']);
 	Route::get('/permit/history', [Permit::class, 'history']);
 	Route::get('/permit/historyTable', [Permit::class, 'table']);
 	Route::get('/permit/print/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');

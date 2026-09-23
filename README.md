@@ -83,10 +83,13 @@ Menu admin **Password -> Default Password** (`/admin/systemspec/defaultpass`) me
 
 Kalau tabel kosong, fallback `cartenz123` (nilai hardcode lama).
 
-## Letter Permit (portal tenant)
+## Letter Permit (portal tenant & admin)
 
-Menu **Letter Permit** (`/tenant/permit/history`, form `/tenant/permit/add`), `Tenant\PermitController`,
-view `resources/views/tenant/permit/{index,history,print}.blade.php`, CSS `assets/app/css/permit.css`.
+Menu **Letter Permit** di kedua portal: `/tenant/permit/history` & `/admin/permit/history`
+(form: `.../permit/add`). Logika bersama di `App\Http\Controllers\BasePermitController`,
+turunannya `Tenant\PermitController` dan `Admin\PermitController` hanya menentukan cakupan data,
+layout dan identitas pemohon. View bersama `resources/views/permit/{form,history,print}.blade.php`,
+CSS `assets/app/css/permit.css`.
 
 - Tiga jenis permit: **Work Permit** (`W`), **Entry Permit of Goods** (`I`), **Exit Permit of Goods** (`O`).
   Satu form: bagian Location / Schedule / Note sama untuk semua jenis; bagian detail dan daftar
@@ -105,6 +108,28 @@ view `resources/views/tenant/permit/{index,history,print}.blade.php`, CSS `asset
 - History: DataTables server side (`GET /tenant/permit/historyTable`), filter nomor / jenis / status /
   tanggal mulai; tombol Print -> `GET /tenant/permit/print/{doc_no}` (dompdf), hanya permit milik tenant
   yang sedang login (`TenantScope`).
+- **Beda portal**: tenant hanya melihat/membuat permit miliknya (`TenantScope`); admin melihat
+  **semua tenant**, bisa membuat permit untuk tenant mana pun (pilihan unit tetap mengikuti tenant
+  yang dipilih), dan punya filter Tenant + kolom Tenant di History.
+- **Ubah permit**: tombol pensil di History -> `GET <portal>/permit/edit/{doc_no}` (form yang sama,
+  mode edit) dan `POST <portal>/permit/update`. Bisa diubah selama status `R` (Open) atau `M`
+  (Modify) — lihat `BasePermitController::EDITABLE_STATUSES`. Bagian 1-2 (jenis permit, nomor,
+  tenant, unit, lantai) selalu hanya tampilan. **Tenant** boleh mengubah bagian 3-5; **admin** hanya
+  Work Tools (Work Permit) + bagian 4-5 — field terkunci dirender tanpa atribut `name` dan nilainya
+  diambil dari data tersimpan di server (`lockedFields()`), jadi tidak bisa diakali lewat POST.
+- **Status & log**: tiap perubahan menambah baris baru di `mgr.sv_entry_letter_log` (tidak pernah
+  di-update), sehingga jejak create/modify/approve/cancel tetap lengkap:
+
+  | Aksi | status `sv_entry_letter` | remarks log |
+  |---|---|---|
+  | Buat permit | `R` | `Request created by tenant` / `... by admin` |
+  | Tenant / admin ubah isi | `M` | `Modified by tenant` / `Modified by admin` |
+  | Admin pilih **Approve** saat menyimpan | `Y` | `Approved by admin` |
+  | Admin pilih **Cancel** saat menyimpan | `X` | `Cancelled by admin` |
+  | Tenant tekan tombol Cancel di History | `X` | `Cancelled by tenant` |
+
+  Setelah `Y` atau `X`, permit tidak bisa diubah atau dibatalkan lagi oleh siapa pun
+  (`POST <portal>/permit/cancel` dan `update` menolak dengan 422).
 - `database/sql/2026-09-21_create_tenant_permit_tables.sql` (tabel MySQL) **tidak dipakai**; ditinggalkan
   sebagai catatan rancangan awal.
 

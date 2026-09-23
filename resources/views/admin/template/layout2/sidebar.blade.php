@@ -71,6 +71,12 @@
         </li>
         @endif
 
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('admin/permit*') ? 'active' : '' }}" href="{{ url('/admin/permit/history') }}">
+                <i class="nav-icon cil-clipboard"></i> Letter Permit
+            </a>
+        </li>
+
         {{-- History --}}
         <li class="nav-group {{ $historyOpen ? 'show' : '' }}">
             <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-history"></i> History</a>

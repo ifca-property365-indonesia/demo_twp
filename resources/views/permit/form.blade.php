@@ -1,9 +1,30 @@
-@extends('tenant.template.base')
+@extends($layout)
 
-@section('title', 'Request Permit')
+@php
+    // $permit terisi saat membuka form dari History (ubah permit): bagian 1-2 hanya tampilan.
+    // $locked = field bagian 3 yang tidak boleh diubah portal ini (admin: selain Work Tools).
+    $isEdit  = !empty($permit);
+    $detail  = $detail ?? null;
+    $lines   = $lines ?? [];
+    $permit  = $permit ?? null;
+    $locked  = $locked ?? [];
+    $type    = $isEdit ? $permit->complain_type : '';
+    $base    = url($portal . '/permit');
+    $fmtDate = function ($v) { return $v ? date('Y-m-d', strtotime($v)) : ''; };
+    $fmtTime = function ($v) { return $v ? substr(trim($v), 0, 5) : ''; };
+
+    // Atribut input bagian 3: terkunci -> hanya tampilan (tanpa name, tidak dikirim).
+    $attr = function ($field, $label, $max = 50) use ($locked) {
+        return in_array($field, $locked, true)
+            ? 'readonly'
+            : 'name="' . $field . '" maxlength="' . $max . '" required data-label="' . $label . '"';
+    };
+@endphp
+
+@section('title', $isEdit ? 'Update Permit' : 'Request Permit')
 
 @push('styles')
-    <link rel="stylesheet" href="{{ url('assets/app/css/permit.css?ver=1.0.0') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/permit.css?ver=1.0.2') }}">
 @endpush
 
 @section('content')
@@ -11,16 +32,22 @@
         <div class="page-head permit-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Request Permit</h3>
+                    <h3 class="page-title">{{ $isEdit ? 'Update Permit' : 'Request Permit' }}</h3>
                     <div class="page-desc text-body-secondary">
-                        <p>Work Permit, Entry Permit of Goods, or Exit Permit of Goods.</p>
+                        <p>
+                            @if ($isEdit)
+                                Permit type, number, tenant and unit cannot be changed.
+                            @else
+                                Work Permit, Entry Permit of Goods, or Exit Permit of Goods.
+                            @endif
+                        </p>
                     </div>
                 </div>
                 <div class="page-head-content">
-                    <a href="{{ url('/tenant/permit/history') }}" class="btn btn-outline-secondary d-none d-sm-inline-flex">
+                    <a href="{{ $base . '/history' }}" class="btn btn-outline-secondary d-none d-sm-inline-flex">
                         <i class="cil-history"></i><span>Permit History</span>
                     </a>
-                    <a href="{{ url('/tenant/permit/history') }}" class="btn btn-icon btn-outline-secondary d-inline-flex d-sm-none">
+                    <a href="{{ $base . '/history' }}" class="btn btn-icon btn-outline-secondary d-inline-flex d-sm-none">
                         <i class="cil-history"></i>
                     </a>
                 </div>
@@ -30,15 +57,16 @@
         <div class="page-block">
             <div class="card permit-card">
                 <div class="card-body">
-                    <form id="frmPermit" class="permit-form" method="POST" action="{{ url('tenant/permit/save') }}" novalidate autocomplete="off">
+                    <form id="frmPermit" class="permit-form" method="POST" action="{{ $base . ($isEdit ? '/update' : '/save') }}" novalidate autocomplete="off">
                         @csrf
+                        @if ($isEdit)<input type="hidden" name="doc_no" value="{{ $permit->complain_no }}">@endif
 
                         {{-- 1. Permit information --}}
                         <section class="permit-section">
                             <div class="permit-section__head">
                                 <span class="permit-section__num">1</span>
                                 <h6 class="permit-section__title" id="permitTitle">Permit Information</h6>
-                                <span class="permit-no" title="Next permit number">
+                                <span class="permit-no" title="{{ $isEdit ? 'Permit number' : 'Next permit number' }}">
                                     <i class="cil-clipboard"></i>
                                     <span id="permitNoBadge">{{ $letter_no !== '' ? $letter_no : '-' }}</span>
                                 </span>
@@ -48,12 +76,17 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="permit_type">Permit Type <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <select name="permit_type" id="permit_type" class="form-control js-select2" required data-label="Permit Type" data-placeholder="Choose a permit type">
-                                                <option value=""></option>
-                                                @foreach ($types as $code => $label)
-                                                    <option value="{{ $code }}">{{ $label }}</option>
-                                                @endforeach
-                                            </select>
+                                            @if ($isEdit)
+                                                <input type="hidden" name="permit_type" id="permit_type" value="{{ $type }}">
+                                                <input type="text" class="form-control" value="{{ $types[$type] ?? $type }}" readonly>
+                                            @else
+                                                <select name="permit_type" id="permit_type" class="form-control js-select2" required data-label="Permit Type" data-placeholder="Choose a permit type">
+                                                    <option value=""></option>
+                                                    @foreach ($types as $code => $label)
+                                                        <option value="{{ $code }}">{{ $label }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @endif
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -64,14 +97,14 @@
                                         <div class="form-control-wrap">
                                             <input type="text" class="form-control" id="permit_no" name="permit_no" value="{{ $letter_no }}" readonly>
                                         </div>
-                                        <div class="form-note">Generated automatically when the permit is submitted.</div>
+                                        @unless ($isEdit)<div class="form-note">Generated automatically when the permit is submitted.</div>@endunless
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label" for="pemohon">Applicant</label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="pemohon" name="pemohon" value="{{ $Tuname }}" readonly>
+                                            <input type="text" class="form-control" id="pemohon" name="pemohon" value="{{ $isEdit ? ($detail->member_name ?? $permit->serv_req_by) : ($applicant['name'] ?? '') }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -79,7 +112,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="handphone">Phone Number</label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="handphone" name="handphone" value="{{ $datatenant->handphone ?? '' }}" readonly>
+                                            <input type="text" class="form-control" id="handphone" name="handphone" value="{{ $isEdit ? ($detail->member_hp ?? $permit->contact_no) : ($applicant['hp'] ?? '') }}" readonly>
                                         </div>
                                     </div>
                                 </div>
@@ -93,7 +126,7 @@
                         </div>
 
                         {{-- 2. Location --}}
-                        <section class="permit-section" id="sectionLocation" hidden>
+                        <section class="permit-section" id="sectionLocation" @unless($isEdit) hidden @endunless>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">2</span>
                                 <h6 class="permit-section__title">Location</h6>
@@ -104,12 +137,20 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="tenant_no">Tenant <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <select name="tenant_no" id="tenant_no" class="form-control js-select2" required data-label="Tenant" data-placeholder="Choose a tenant">
-                                                <option value=""></option>
-                                                @foreach ($tenancies as $t)
-                                                    <option value="{{ $t->id }}">{{ $t->tenant_no }}{{ $t->entity_desc ? ' - ' . $t->entity_desc : '' }}</option>
-                                                @endforeach
-                                            </select>
+                                            @if ($isEdit)
+                                                @php
+                                                    $tenancy = $tenancies->firstWhere('tenant_no', $permit->debtor_acct);
+                                                    $tenantLabel = trim($permit->debtor_acct) . ($tenancy && $tenancy->entity_desc ? ' - ' . $tenancy->entity_desc : '');
+                                                @endphp
+                                                <input type="text" id="tenant_no" class="form-control" value="{{ $tenantLabel }}" readonly>
+                                            @else
+                                                <select name="tenant_no" id="tenant_no" class="form-control js-select2" required data-label="Tenant" data-placeholder="Choose a tenant">
+                                                    <option value=""></option>
+                                                    @foreach ($tenancies as $t)
+                                                        <option value="{{ $t->id }}">{{ $t->tenant_no }}{{ $t->entity_desc ? ' - ' . $t->entity_desc : '' }}</option>
+                                                    @endforeach
+                                                </select>
+                                            @endif
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -118,9 +159,13 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="lot_no">Unit <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <select name="lot_no" id="lot_no" class="form-control js-select2" required data-label="Unit" data-placeholder="Choose a unit">
-                                                <option value=""></option>
-                                            </select>
+                                            @if ($isEdit)
+                                                <input type="text" id="lot_no" class="form-control" value="{{ $detail->unit ?? $permit->lot_no }}" readonly>
+                                            @else
+                                                <select name="lot_no" id="lot_no" class="form-control js-select2" required data-label="Unit" data-placeholder="Choose a unit">
+                                                    <option value=""></option>
+                                                </select>
+                                            @endif
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -129,7 +174,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="floor">Floor <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="floor" name="floor" required data-label="Floor" readonly placeholder="-">
+                                            <input type="text" class="form-control" id="floor" {{ $isEdit ? '' : 'name=floor required' }} data-label="Floor" readonly placeholder="-" value="{{ $isEdit ? ($detail->floor ?? $permit->floor) : '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -142,13 +187,14 @@
                             <div class="permit-section__head">
                                 <span class="permit-section__num">3</span>
                                 <h6 class="permit-section__title">Work Detail</h6>
+                                @if ($locked)<span class="permit-section__hint">Only Work Tools can be changed</span>@endif
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
                                         <label class="form-label" for="incharge">Person in Charge <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="incharge" name="incharge" maxlength="50" required data-label="Person in Charge">
+                                            <input type="text" class="form-control" id="incharge" {!! $attr('incharge', 'Person in Charge') !!} value="{{ $detail->pic_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -157,7 +203,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="contractor">Contractor Name <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="contractor" name="contractor" maxlength="50" required data-label="Contractor Name">
+                                            <input type="text" class="form-control" id="contractor" {!! $attr('contractor', 'Contractor Name') !!} value="{{ $detail->kontraktor_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -166,7 +212,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="job_type">Job Type <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="job_type" name="job_type" maxlength="50" required data-label="Job Type" placeholder="e.g. Interior renovation">
+                                            <input type="text" class="form-control" id="job_type" {!! $attr('job_type', 'Job Type') !!} placeholder="e.g. Interior renovation" value="{{ $detail->work_type ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -175,7 +221,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="work_tool">Work Tools <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="work_tool" name="work_tool" maxlength="50" required data-label="Work Tools" placeholder="e.g. Drill, ladder">
+                                            <input type="text" class="form-control" id="work_tool" {!! $attr('work_tool', 'Work Tools') !!} placeholder="e.g. Drill, ladder" value="{{ $detail->work_tools ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -188,13 +234,14 @@
                             <div class="permit-section__head">
                                 <span class="permit-section__num">3</span>
                                 <h6 class="permit-section__title">Goods Detail</h6>
+                                @if ($locked)<span class="permit-section__hint">This section cannot be changed</span>@endif
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-5">
                                     <div class="mb-3">
                                         <label class="form-label" for="company">Company Name <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="company" name="company" maxlength="50" required data-label="Company Name">
+                                            <input type="text" class="form-control" id="company" {!! $attr('company', 'Company Name') !!} value="{{ $detail->company_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -203,7 +250,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="owner">Owner Name <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="owner" name="owner" maxlength="50" required data-label="Owner Name">
+                                            <input type="text" class="form-control" id="owner" {!! $attr('owner', 'Owner Name') !!} value="{{ $detail->owner_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -212,7 +259,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="vehicle_no">Vehicle Number <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control text-uppercase" id="vehicle_no" name="vehicle_no" maxlength="10" required data-label="Vehicle Number" placeholder="B 1234 XYZ">
+                                            <input type="text" class="form-control text-uppercase" id="vehicle_no" {!! $attr('vehicle_no', 'Vehicle Number', 10) !!} placeholder="B 1234 XYZ" value="{{ $detail->vehicle_no ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -231,7 +278,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="start_date">Start Date <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="date" class="form-control" id="start_date" name="start_date" required data-label="Start Date">
+                                            <input type="date" class="form-control" id="start_date" name="start_date" required data-label="Start Date" value="{{ $fmtDate($permit->start_date ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -240,7 +287,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="end_date">End Date <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="date" class="form-control" id="end_date" name="end_date" required data-label="End Date">
+                                            <input type="date" class="form-control" id="end_date" name="end_date" required data-label="End Date" value="{{ $fmtDate($permit->end_date ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -249,7 +296,7 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="start_time">Start Time <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="time" class="form-control" id="start_time" name="start_time" required data-label="Start Time">
+                                            <input type="time" class="form-control" id="start_time" name="start_time" required data-label="Start Time" value="{{ $fmtTime($permit->start_time ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -258,16 +305,23 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="end_time">End Time <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="time" class="form-control" id="end_time" name="end_time" required data-label="End Time">
+                                            <input type="time" class="form-control" id="end_time" name="end_time" required data-label="End Time" value="{{ $fmtTime($permit->end_time ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 time-field" hidden>
+                                    <div class="form-note text-danger mt-0 mb-3">
+                                        <i class="cil-info"></i>
+                                        Start Time and End Time are the <strong>daily working hours</strong> for this permit,
+                                        applied to every day between the start and end date &mdash; not the total duration of the work.
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="mb-3">
                                         <label class="form-label" for="note">Note <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <textarea class="form-control" id="note" name="note" rows="3" maxlength="500" required data-label="Note" placeholder="Describe the work / goods in detail"></textarea>
+                                            <textarea class="form-control" id="note" name="note" rows="3" maxlength="500" required data-label="Note" placeholder="Describe the work / goods in detail">{{ $permit->note ?? '' }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-note"><span id="noteCount">0</span>/500</div>
@@ -305,12 +359,31 @@
                         </section>
 
                         <div class="permit-actions">
-                            <span class="hint"><span class="req">*</span> Required fields</span>
+                            @if ($is_admin && $isEdit)
+                                <div class="permit-status">
+                                    <label class="form-label mb-1" for="set_status">Status after saving</label>
+                                    <select name="set_status" id="set_status" class="form-select">
+                                        <option value="">Modify</option>
+                                        @foreach ($statuses as $code => $label)
+                                            <option value="{{ $code }}">{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
+                            <span class="hint">
+                                <span class="d-block"><span class="req">*</span> Required fields</span>
+                                <div class="form-note text-danger mt-0 mb-3">
+                                        <span class="d-block mt-1"><i class="cil-info"></i>
+                                        Operating hours are <strong>{{ $office_hours }}</strong> on working days.
+                                        Requests submitted outside these hours will be processed on the next working day.
+                                        </span>
+                                    </div>
+                            </span>
                             <button type="button" class="btn btn-outline-secondary" id="btnReset">
                                 <i class="cil-reload"></i><span>Reset</span>
                             </button>
-                            <button type="submit" class="btn btn-primary" id="btnSave" disabled>
-                                <i class="cil-send"></i><span>Submit</span>
+                            <button type="submit" class="btn btn-primary" id="btnSave" @unless($isEdit) disabled @endunless>
+                                <i class="cil-send"></i><span>{{ $isEdit ? 'Save Changes' : 'Submit' }}</span>
                             </button>
                         </div>
                     </form>
@@ -327,11 +400,13 @@
     'use strict';
 
     var URLS = {
-        lots:     "{{ url('tenant/ticket/getLotNo') }}",
-        letterNo: "{{ url('tenant/permit/letterNo') }}",
-        history:  "{{ url('tenant/permit/history') }}"
+        lots:     "{{ $base }}/lots",
+        letterNo: "{{ $base }}/letterNo",
+        history:  "{{ $base }}/history"
     };
-    var TYPES = @json($types);
+    var TYPES    = @json($types);
+    var IS_EDIT  = {{ $isEdit ? 'true' : 'false' }};
+    var EDIT_LINES = @json(array_values((array) $lines));
     var MIN_SPINNER_MS = 800;   // overlay tampil minimal segini supaya tidak berkedip
 
     var $form     = $('#frmPermit');
@@ -387,8 +462,12 @@
         $('#btnAddLine span').text(isWork ? 'Add Worker' : 'Add Item');
         $tbody.find('input').attr('placeholder', linePlaceholder());
 
-        $btnSave.prop('disabled', !chosen)
-            .find('span').text(chosen ? 'Submit ' + TYPES[type] : 'Submit');
+        if (IS_EDIT) {
+            $btnSave.prop('disabled', false).find('span').text('Save Changes');
+        } else {
+            $btnSave.prop('disabled', !chosen)
+                .find('span').text(chosen ? 'Submit ' + TYPES[type] : 'Submit');
+        }
 
         clearErrors();
     }
@@ -398,6 +477,7 @@
     // ---------------------------------------------------------------
     // Tenant -> Unit -> Floor (+ nomor permit mengikuti entity/project tenancy)
     // ---------------------------------------------------------------
+    if (!IS_EDIT) {
     $tenant.on('change', function () {
         var id = $(this).val();
 
@@ -408,7 +488,7 @@
             return;
         }
 
-        $.post(URLS.lots, { id_tenancy: id })
+        $.get(URLS.lots + '/' + id)
             .done(function (html) {
                 $lot.html(html).val('').trigger('change.select2');
                 // Satu unit saja: langsung dipilih
@@ -437,6 +517,7 @@
             clearError($floor);
         }
     });
+    }
 
     // Hanya satu tenancy: langsung dipilih
     function autoSelectTenant() {
@@ -446,7 +527,7 @@
         }
     }
 
-    autoSelectTenant();
+    if (!IS_EDIT) { autoSelectTenant(); }
 
     // ---------------------------------------------------------------
     // Tanggal: end >= start, default end = start
@@ -530,7 +611,14 @@
         }
     });
 
-    addLine(false);
+    if (IS_EDIT && EDIT_LINES.length) {
+        EDIT_LINES.forEach(function (name) {
+            addLine(false);
+            $tbody.children('tr').last().find('input').val(name);
+        });
+    } else {
+        addLine(false);
+    }
 
     // ---------------------------------------------------------------
     // Validasi inline
@@ -668,11 +756,11 @@
         }
 
         Swal.fire({
-            title: 'Submit ' + TYPES[$type.val()] + '?',
-            html: 'Permit number <strong>' + escapeHtml($permitNo.val() || '-') + '</strong> will be submitted for approval.',
+            title: (IS_EDIT ? 'Save changes to ' : 'Submit ') + TYPES[$type.val()] + '?',
+            html: 'Permit number <strong>' + escapeHtml($permitNo.val() || '-') + '</strong> will be ' + (IS_EDIT ? 'updated.' : 'submitted for approval.'),
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: 'Yes, submit',
+            confirmButtonText: IS_EDIT ? 'Yes, save' : 'Yes, submit',
             cancelButtonText: 'Cancel',
             reverseButtons: true
         }).then(function (result) {
@@ -705,7 +793,7 @@
             finish(function () {
                 if (res.status === 'OK') {
                     Swal.fire({
-                        title: 'Permit Submitted',
+                        title: IS_EDIT ? 'Permit Updated' : 'Permit Submitted',
                         html: escapeHtml(res.pesan) + '<br><small class="text-body-secondary">You will be redirected to Permit History.</small>',
                         icon: 'success',
                         confirmButtonText: 'OK',
@@ -740,6 +828,11 @@
     // Reset
     // ---------------------------------------------------------------
     $('#btnReset').on('click', function () {
+        if (IS_EDIT) {
+            // kembalikan ke data tersimpan
+            window.location.reload();
+            return;
+        }
         Swal.fire({
             title: 'Reset the form?',
             text: 'All entered data will be cleared.',

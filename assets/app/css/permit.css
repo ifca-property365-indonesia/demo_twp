@@ -133,7 +133,8 @@
     padding-top: 1.25rem;
     border-top: 1px solid var(--pm-border-soft);
 }
-.permit-actions .hint { margin-right: auto; font-size: .78rem; color: var(--pm-muted); }
+.permit-actions .hint { margin-right: auto; font-size: .78rem; color: var(--pm-muted); max-width: 46rem; line-height: 1.5; }
+.permit-actions .hint strong { color: var(--pm-text); }
 .permit-actions .btn { min-width: 120px; }
 
 /* ---------- history: filter + table ---------- */
@@ -179,3 +180,8 @@
     .permit-actions .btn { width: 100%; }
     .permit-section__hint { display: none; }
 }
+
+/* Pilihan status (admin, saat ubah permit) di baris tombol */
+.permit-actions .permit-status { min-width: 15rem; }
+.permit-actions .permit-status .form-label { font-size: .75rem; font-weight: 600; }
+@media (max-width: 575.98px) { .permit-actions .permit-status { width: 100%; } }

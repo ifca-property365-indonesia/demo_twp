@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\SurveyPublishController as SurveyPublish;
 use App\Http\Controllers\Admin\SurveyResultController as SurveyResult;
 use App\Http\Controllers\Admin\SurveyTemplateController as SurveyTemplate;
 use App\Http\Controllers\Admin\SysSpecController as SysSpec;
+use App\Http\Controllers\Admin\PermitController as Permit;
 use App\Http\Controllers\Admin\ManagementController as Management;
 use App\Http\Controllers\Admin\NewSurveyController as NewSurvey;
 use Illuminate\Support\Facades\Route;
@@ -121,4 +122,16 @@ Route::group(['middleware' => ['admin-auth', 'revalidate']], function () {
     Route::post('/usersurvey/update', [NewSurvey::class, 'update']);
     Route::get('/usersurvey/results', [NewSurvey::class, 'allResults']);
     Route::post('/usersurvey/voters', [NewSurvey::class, 'getOptionVoters']);
+
+    // PermitController (Letter Permit) - lihat & buat permit untuk semua tenant
+    Route::get('/permit/add', [Permit::class, 'index']);
+    Route::get('/permit/letterNo/{id_tenancy}', [Permit::class, 'letterNo'])->whereNumber('id_tenancy');
+    Route::get('/permit/lots/{id_tenancy}', [Permit::class, 'lots'])->whereNumber('id_tenancy');
+    Route::post('/permit/save', [Permit::class, 'save']);
+    Route::get('/permit/edit/{doc_no}', [Permit::class, 'edit'])->where('doc_no', '[A-Za-z0-9\-]+');
+    Route::post('/permit/update', [Permit::class, 'update']);
+    Route::post('/permit/cancel', [Permit::class, 'cancel']);
+    Route::get('/permit/history', [Permit::class, 'history']);
+    Route::get('/permit/historyTable', [Permit::class, 'table']);
+    Route::get('/permit/print/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');
 });
