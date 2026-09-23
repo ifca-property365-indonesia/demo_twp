@@ -120,10 +120,12 @@
                         </section>
 
                         {{-- Placeholder sebelum jenis permit dipilih --}}
+                        @unless ($isEdit)
                         <div class="alert alert-info d-flex align-items-center gap-2" id="permitEmpty">
                             <i class="cil-info fs-5"></i><div>
                             Select a <strong>Permit Type</strong> above to fill in the permit details.</div>
                         </div>
+                        @endunless
 
                         {{-- 2. Location --}}
                         <section class="permit-section" id="sectionLocation" @unless($isEdit) hidden @endunless>
