@@ -12,7 +12,11 @@
             <div class="card">
                 <div class="card-body">
 
-                    <div class="mb-3"><span class="badge badge-soft-primary fs-6">Tenant No: {{ $tenant_no }}</span></div>
+                    {{-- Mode semua tenant (akun admin di portal tenant): daftar berisi banyak tenant,
+                         jadi label satu tenant tidak relevan. --}}
+                    @unless (App\Support\TenantScope::all())
+                        <div class="mb-3"><span class="badge badge-soft-primary fs-6">Tenant No: {{ $tenant_no }}</span></div>
+                    @endunless
                     <div class="table-responsive">
                         <?php
                             if(!empty($list_bill)) {
