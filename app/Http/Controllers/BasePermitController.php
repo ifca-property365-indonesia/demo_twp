@@ -777,7 +777,7 @@ abstract class BasePermitController extends Controller
             'status'          => 'R',
             'audit_user'      => self::AUDIT_USER,
             'audit_date'      => $ctx['audit_date'],
-            'complain_source' => 'LETTER',
+            'complain_source' => 'TWP PERMIT',
             'lot_no'          => $ctx['lot_no'],
             'post_status'     => 'N',
             'note'            => $request->note,
@@ -1121,7 +1121,11 @@ abstract class BasePermitController extends Controller
             ->query()
             ->fromSub($permit, 'p');
 
+        // escapeColumns([]): isi kolom dikirim apa adanya, karena history.blade sudah
+        // meng-escape tiap kolom saat render (esc/dash). Kalau server juga meng-escape,
+        // '&' tampil sebagai '&amp;'.
         return DataTables::of($query)
+            ->escapeColumns([])
             ->addIndexColumn()
             ->order(function ($query) use ($request) {
                 // Kalau user klik header kolom, ikuti urutan itu. Kalau tidak
@@ -1153,8 +1157,23 @@ abstract class BasePermitController extends Controller
         return $m[3] . '-' . $m[2] . '-' . $m[1];
     }
 
-    /** Cetak satu permit ke PDF (tombol Print di tabel), hanya yang masuk cakupan portal. */
-    public function printPdf($doc_no)
+    /**
+     * Tombol Print di tabel: halaman HTML kecil yang menampilkan PDF (printPdf) dalam iframe.
+     * PDF sendiri tidak bisa membawa ikon, jadi tanpa halaman ini tab browser memakai
+     * favicon root domain (XAMPP), bukan ikon TWP.
+     */
+    public function printPage($doc_no)
+    {
+        $header = $this->printablePermit($doc_no)['header'];
+
+        return view('permit.print_frame', [
+            'title'   => trim($header->complain_no),
+            'pdf_url' => $this->base('pdf/' . rawurlencode(trim($header->complain_no))),
+        ]);
+    }
+
+    /** Permit yang boleh dicetak portal ini; abort kalau tidak ada / dibatalkan. */
+    private function printablePermit($doc_no)
     {
         $permit = $this->findPermit($doc_no);
 
@@ -1169,9 +1188,18 @@ abstract class BasePermitController extends Controller
             abort(403, 'Permit ' . $header->complain_no . ' has been cancelled and cannot be printed.');
         }
 
-        if ($status === 'R' || $status === 'M') {
-            abort(403, 'Permit ' . $header->complain_no . ' not approved and cannot be printed.');
-        }
+        // if ($status === 'R' || $status === 'M') {
+        //     abort(403, 'Permit ' . $header->complain_no . ' not approved and cannot be printed.');
+        // }
+
+        return $permit;
+    }
+
+    /** File PDF satu permit (dimuat oleh printPage), hanya yang masuk cakupan portal. */
+    public function printPdf($doc_no)
+    {
+        $permit = $this->printablePermit($doc_no);
+        $header = $permit['header'];
 
         // Nama pengelola gedung & project untuk kop surat.
         $tenancy = DB::table('pm_tenancy')
@@ -1191,8 +1219,6 @@ abstract class BasePermitController extends Controller
                 'tools'   => $permit['tools'],
                 'tenancy' => $tenancy,
                 'tenant'  => $tenant,
-                'shift'   => self::workShiftOf($header->start_time, $header->end_time),
-                'shifts'  => self::WORK_SHIFTS,
                 'logo'    => base_path('img/logoweb/carstensz-logo-print.jpg'),
             ])
                 ->setPaper('a4', 'portrait')

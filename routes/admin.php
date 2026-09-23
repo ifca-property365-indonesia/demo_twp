@@ -133,5 +133,6 @@ Route::group(['middleware' => ['admin-auth', 'revalidate']], function () {
     Route::post('/permit/cancel', [Permit::class, 'cancel']);
     Route::get('/permit/history', [Permit::class, 'history']);
     Route::get('/permit/historyTable', [Permit::class, 'table']);
-    Route::get('/permit/print/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');
+    Route::get('/permit/print/{doc_no}', [Permit::class, 'printPage'])->where('doc_no', '[A-Za-z0-9\-]+');
+    Route::get('/permit/pdf/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');
 });

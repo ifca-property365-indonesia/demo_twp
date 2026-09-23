@@ -18,9 +18,6 @@
         .info .lbl { width: 130px; }
         .info .sep { width: 14px; }
         .info .val { border-bottom: 1px solid #000; padding-left: 4px; }
-        .box { display: inline-block; width: 8px; height: 8px; border: 1px solid #000; text-align: center;
-               line-height: 8px; font-size: 7px; font-weight: bold; margin-right: 4px; vertical-align: middle; }
-        .shift { margin-right: 14px; }
 
         .grid th { background: #d9d9d9; border: 1px solid #000; padding: 2px 4px; font-weight: normal; }
         .grid td { border: 1px solid #000; padding: 1px 4px; height: 12px; }
@@ -120,18 +117,7 @@
     </tr>
     <tr>
         <td class="lbl">Jam Kerja</td><td class="sep">:</td>
-        <td style="padding-left: 4px;">
-            @foreach ($shifts as $code => $range)
-                <span class="shift"><span class="box">{{ $shift === $code ? 'X' : '' }}</span>Pkl {{ $time($range[0]) }} - {{ $time($range[1]) }}</span>
-            @endforeach
-            <span><span class="box">{{ $shift === 'O' ? 'X' : '' }}</span>Lain- lain (
-                @if ($shift === 'O')
-                    {{ $time($header->start_time) }} - {{ $time($header->end_time) }}
-                @else
-                    ....................
-                @endif
-            )</span>
-        </td>
+        <td class="val">Pkl {{ $time($header->start_time) }} - {{ $time($header->end_time) }}</td>
     </tr>
 </table>
 
