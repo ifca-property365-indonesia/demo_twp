@@ -10,6 +10,8 @@ return [
     'crop_help'              => 'Geser foto untuk mengatur posisinya di dalam bingkai; gunakan slider atau roda mouse untuk memperbesar.',
     'use_photo'              => 'Gunakan Foto',
     'tab_personal'           => 'Data Pribadi',
+    'contact_name'           => 'Nama Kontak',
+    'contact_name_note'      => 'Nama orang yang dapat dihubungi untuk akun ini.',
     'handphone'              => 'Nomor Ponsel',
     'phone_format'           => 'Format: 6221995500 | 021995500',
     'new_password'           => 'Kata Sandi Baru',

@@ -11,9 +11,35 @@ use Illuminate\Support\Facades\Session;
 
 class AccountController extends Controller
 {
-    public function getbyemail($email)
+    /**
+     * Profil akun yang sedang login. Semua aksi di controller ini memakai email session
+     * (Tenemail), bukan email dari URL / form, jadi akun lain tidak bisa dibaca atau diubah.
+     */
+    private function sessionEmail()
     {
-        $data = DB::select("SELECT * from all_login where email='$email'");
+        return (string) Session::get('Tenemail');
+    }
+
+    private function forbidden()
+    {
+        return response()->json(['status' => 'Failed', 'pesan' => __('common.error_occurred', ['message' => 'session'])], 403);
+    }
+
+    public function getbyemail($email = null)
+    {
+        $email = $this->sessionEmail();
+        if ($email === '') {
+            return $this->forbidden();
+        }
+        // tanpa kolom password
+        $data = DB::select("SELECT id, name, email, handphone, pict, tableforeign, idforeign from all_login where email = ?", [$email]);
+        // contact_name dari tabel tenant (business yang sedang dibuka, kalau emailnya sama)
+        $tenant = DB::table('tenant')->where('email', $email)
+            ->orderByRaw('id = ? DESC', [(int) Session::get('Tuser_id')])
+            ->first(['contact_name']);
+        foreach ($data as $row) {
+            $row->contact_name = $tenant->contact_name ?? null;
+        }
         echo json_encode($data);
     }
     /**
@@ -67,8 +93,11 @@ class AccountController extends Controller
         $name       = $request->name;
         $telp       = $request->handphone;
         $images      = $request->labelimage;
-        $email      = $request->email;
-        
+        $email      = $this->sessionEmail();
+        if ($email === '') {
+            return $this->forbidden();
+        }
+
         $data = array(
             'name' => $name,
             'handphone' => $telp,
@@ -91,12 +120,19 @@ class AccountController extends Controller
                     ->where($criteria)
                     ->update($data);
 
+                // Contact name -> tabel tenant, semua baris dengan email yang sedang login
+                $contact = trim((string) $request->contact_name);
+                if ($request->has('contact_name')) {
+                    DB::table('tenant')
+                        ->where('email', $email)
+                        ->update(['contact_name' => $contact === '' ? null : $contact]);
+                    Session::put('Tuname', $contact);
+                }
+
                 // header memakai nilai dari session
-                if ($email === Session::get('Tenemail')) {
-                    Session::put('Tdisplay_name', $name);
-                    if ($image !== null) {
-                        Session::put('Tpict', $image);
-                    }
+                Session::put('Tdisplay_name', $name);
+                if ($image !== null) {
+                    Session::put('Tpict', $image);
                 }
                 
                 $msg = __('common.updated');
@@ -113,11 +149,18 @@ class AccountController extends Controller
     }
     public function changepass(Request $request)
     {
+        $email = $this->sessionEmail();
+        if ($email === '') {
+            return $this->forbidden();
+        }
+        if (trim((string) $request->password) === '') {
+            return response()->json(['status' => 'Failed', 'pesan' => __('shared/plugins.validate.required')]);
+        }
         $password = Password::make($request->password);
         $data = array(
             'password' => $password
         );
-        $criteria = array('email' => $request->email);
+        $criteria = array('email' => $email);
 
         try { 
             

@@ -62,6 +62,11 @@
                         <input type="text" class="form-control" id="name" name="name">
                     </div>
                     <div class="mb-3">
+                        <label for="contact_name" class="form-label">{{ __('tenant/account.contact_name') }}</label>
+                        <input type="text" class="form-control" id="contact_name" name="contact_name" maxlength="100">
+                        <div class="form-note">{{ __('tenant/account.contact_name_note') }}</div>
+                    </div>
+                    <div class="mb-3">
                         <label for="email" class="form-label">{{ __('common.email') }}</label>
                         <input type="text" class="form-control" id="email" name="email" readonly>
                     </div>
@@ -262,6 +267,7 @@
             if (res.status === 'OK') {
                 // header ikut berubah tanpa reload
                 $('.header .user-name, .dropdown-menu-user .user-card .lead-text').text($('#name').val());
+                $('.header .user-role, .dropdown-menu-user .user-card .sub-text:first').text($.trim($('#contact_name').val()));
                 $('.header .user-avatar img').attr('src', $('#picturebox').attr('src'));
                 $('#picturebox').removeClass('profile-changed');
                 $('#pictureHint').addClass('d-none');
@@ -303,6 +309,7 @@
             if (!data || !data.length) { return; }
             $('#name').val(data[0].name);
             $('#handphone').val(data[0].handphone);
+            $('#contact_name').val(data[0].contact_name || '');
             $('#email').val(data[0].email);
             $('#image').val(data[0].pict);
             $('#labelimage').val(data[0].pict);

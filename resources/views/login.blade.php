@@ -25,6 +25,10 @@
                 <input type="email" class="form-control form-control-lg" name="email" id="email"
                        placeholder="{{ __('shared/login.ph_email') }}" value="{{ old('email') }}" required autofocus autocomplete="username">
             </div>
+            {{-- email tidak terdaftar / akun expired (diisi via /login/businesses); password dikunci --}}
+            <div class="alert alert-warning d-flex align-items-center py-2 px-3 mt-2 mb-0 small" id="email-status" role="alert" style="display:none !important">
+                <i class="cil-warning me-2"></i><div id="email-status-text"></div>
+            </div>
         </div>
 
         {{-- muncul otomatis kalau email adalah tenant (diisi via /login/businesses) --}}
@@ -59,29 +63,48 @@
         var select = document.getElementById('bsn');
         var passwordEl = document.getElementById('password');
         var passwordPlaceholder = passwordEl.placeholder;
+        var statusEl = document.getElementById('email-status');
+        var statusText = document.getElementById('email-status-text');
+        var submitBtn = document.querySelector('#formlogin button[type=submit]');
         var lastEmail = null;
         var timer = null;
 
-        function lockPassword(checking) {
+        // pesan di bawah email (null = sembunyikan)
+        function showStatus(message) {
+            statusText.textContent = message || '';
+            statusEl.style.setProperty('display', message ? 'flex' : 'none', 'important');
+        }
+        function lockPassword(checking, placeholder) {
             passwordEl.disabled = true;
             passwordEl.value = '';
-            passwordEl.placeholder = checking ? @json(__('shared/login.checking_email')) : @json(__('shared/login.enter_email_first'));
+            passwordEl.placeholder = placeholder || (checking ? @json(__('shared/login.checking_email')) : @json(__('shared/login.enter_email_first')));
         }
         function unlockPassword() {
             passwordEl.disabled = false;
             passwordEl.placeholder = passwordPlaceholder;
+            submitBtn.disabled = false;
         }
         lockPassword(false);
 
-        // Respons server: admin (true/false) dan daftar tenants (id, name).
+        // Respons server: admin (true/false), daftar tenants (id, name), status & message.
         // Email admin selalu masuk sebagai admin (pindah ke tenant lewat menu di header),
         // jadi dropdown business hanya muncul untuk email tenant biasa.
         function render(data) {
             var tenants = data.admin ? [] : (data.tenants || []);
             var list = tenants.slice();
 
-            unlockPassword();
             select.innerHTML = '';
+            // email tidak terdaftar / akun expired / tidak aktif: tampilkan info, password tetap terkunci
+            if (data.status && data.status !== 'ok') {
+                group.style.display = 'none';
+                select.required = false;
+                showStatus(data.message);
+                lockPassword(false, data.message);
+                submitBtn.disabled = true;
+                return;
+            }
+            showStatus(null);
+            unlockPassword();
             if (!tenants.length) {
                 group.style.display = 'none';
                 select.required = false;
@@ -127,6 +150,8 @@
         emailEl.addEventListener('blur', load);
         emailEl.addEventListener('input', function () {
             lockPassword(false);   // email berubah -> harus dicek ulang
+            showStatus(null);
+            submitBtn.disabled = false;
             lastEmail = null;
             clearTimeout(timer);
             timer = setTimeout(load, 500);

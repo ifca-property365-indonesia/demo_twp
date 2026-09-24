@@ -10,6 +10,8 @@ return [
     'crop_help'              => 'Drag the picture to position it inside the frame; use the slider or mouse wheel to zoom.',
     'use_photo'              => 'Use Photo',
     'tab_personal'           => 'Personal',
+    'contact_name'           => 'Contact Name',
+    'contact_name_note'      => 'Name of the person to contact for this account.',
     'handphone'              => 'Handphone',
     'phone_format'           => 'Format: 6221995500 | 021995500',
     'new_password'           => 'New Password',

@@ -102,9 +102,12 @@ class PortalLoginController extends Controller
         }
 
         if (!$adminOk && count($tenantOptions) === 0) {
+            // email tidak terdaftar / akun expired: pesan khusus (password tidak dicek);
+            // selain itu email terdaftar & aktif tapi password salah
+            $status = $this->accountStatus($email);
             return redirect('/')
                 ->withInput($request->only('email', 'bsn'))
-                ->with('alert', __('shared/login.incorrect'));
+                ->with('alert', $status['message'] ?? __('shared/login.incorrect'));
         }
 
         // bahasa pilihan user ini (belum pernah memilih -> English)
@@ -141,13 +144,14 @@ class PortalLoginController extends Controller
 
     /**
      * AJAX dari halaman login: portal apa saja yang dimiliki sebuah email
-     * ({admin: bool, tenants: [{id, name}]}) untuk dropdown "Login sebagai".
+     * ({admin: bool, tenants: [{id, name}], status, message}) untuk dropdown "Login sebagai".
+     * status: ok | not_registered | expired | inactive; selain ok, password dikunci di halaman login.
      */
     public function businesses(Request $request)
     {
         $email = trim((string) $request->query('email'));
         if ($email === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            return response()->json(array('admin' => false, 'tenants' => array()));
+            return response()->json(array('admin' => false, 'tenants' => array(), 'status' => 'ok', 'message' => null));
         }
 
         $isAdmin = DB::connection('ifcaadm')
@@ -160,7 +164,42 @@ class PortalLoginController extends Controller
         foreach (app(TenantLogin::class)->activeTenants($email) as $t) {
             $list[] = array('id' => $t->id, 'name' => $t->name);
         }
-        return response()->json(array('admin' => $isAdmin, 'tenants' => $list));
+
+        $status = ($isAdmin || $list) ? array('status' => 'ok', 'message' => null) : $this->accountStatus($email);
+        return response()->json(array('admin' => $isAdmin, 'tenants' => $list) + $status);
+    }
+
+    /**
+     * Kenapa email ini tidak punya portal yang bisa dibuka (dipanggil kalau bukan admin dan
+     * tidak ada business aktif):
+     *  - not_registered : email tidak ada di tabel tenant maupun sebagai admin
+     *  - expired        : ada tenancy status 'A' tapi semua expiry_date sudah lewat
+     *  - inactive       : tenant ada tapi tidak punya tenancy aktif (dihapus / status bukan 'A')
+     *  - ok             : ada business aktif (salah password, dsb.)
+     */
+    private function accountStatus($email)
+    {
+        $businessNos = DB::table('tenant')->where('email', $email)->pluck('business_no')->filter()->unique()->values();
+        $isAdmin = DB::connection('ifcaadm')->table('all_login')
+            ->where('email', $email)->where('tableforeign', 'administrator')->exists();
+
+        if ($businessNos->isEmpty() && !$isAdmin) {
+            return array('status' => 'not_registered', 'message' => __('shared/login.email_not_registered'));
+        }
+        if ($isAdmin || count(app(TenantLogin::class)->activeTenants($email)) > 0) {
+            return array('status' => 'ok', 'message' => null);
+        }
+
+        $lastExpiry = DB::table('pm_tenancy')
+            ->whereIn('business_no', $businessNos)
+            ->where('status', 'A')
+            ->max('expiry_date');
+        if ($lastExpiry) {
+            return array('status' => 'expired', 'message' => __('shared/login.account_expired', [
+                'date' => \Carbon\Carbon::parse($lastExpiry)->translatedFormat('d F Y'),
+            ]));
+        }
+        return array('status' => 'inactive', 'message' => __('shared/login.account_inactive'));
     }
 
     /** Menu header: pindah ke portal Admin (hanya kalau password login tadi cocok untuk admin). */
