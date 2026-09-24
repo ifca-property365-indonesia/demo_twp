@@ -2,7 +2,7 @@
 
 // Halaman riwayat tenant: Billing, Invoice, Overtime, Ticket History.
 return [
-    'billing_title'   => 'Riwayat Tagihan',
+    'billing_title'   => 'Riwayat Pembayaran',
     'invoice_title'   => 'Riwayat Tagihan',
     'overtime_title'  => 'Riwayat Lembur',
     'ticket_title'    => 'Riwayat Tiket',
