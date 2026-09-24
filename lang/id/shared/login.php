@@ -14,7 +14,6 @@ return [
     'choose'            => '-- Pilih --',
 
     'incorrect'         => 'Email atau kata sandi salah.',
-    'email_not_registered' => 'Email tidak terdaftar.',
     'account_expired'   => 'Akun Anda sudah expired sejak :date. Silakan hubungi pengelola gedung.',
     'account_inactive'  => 'Akun Anda tidak aktif. Silakan hubungi pengelola gedung.',
     'no_admin_access'   => 'Akun ini tidak memiliki akses Admin.',
