@@ -11,7 +11,7 @@
                         <h3 class="page-title">{{ __('admin/history.ticket_history') }}</h3>
                     </div>
                     <div class="page-head-content">
-                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>{{ __('common.generate_pdf') }}</span></button>
+                        <button type="button" class="btn btn-pdf" id="btngenpdf"><i class="cil-cloud-download"></i><span>{{ __('common.generate_pdf') }}</span></button>
                     </div>
                 </div>
             </div>

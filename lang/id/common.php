@@ -25,6 +25,8 @@ return [
     'change'        => 'Ganti',
     'upload'        => 'Unggah',
     'generate_pdf'  => 'Buat PDF',
+    'pdf_printed_at'=> 'Dicetak: :date',
+    'pdf_page'      => 'Halaman :page dari :total',
     'read_more'     => 'Selengkapnya',
     'yes'           => 'Ya',
     'no'            => 'Tidak',

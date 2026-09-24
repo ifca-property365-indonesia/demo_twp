@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\PdfTable;
 use App\Support\TicketHd;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use DataTables;
-use PDF;
 
 class HistoryController extends Controller
 {
@@ -157,158 +157,180 @@ class HistoryController extends Controller
         Session::put('debtor', $debtor);
         echo url('admin/history/export/'.$type);
     }
+    /** Keterangan filter di bawah judul PDF: periode (dd/mm/yyyy) & tenant */
+    private function pdfFilters($start, $end, $tenant = null)
+    {
+        $filters = [
+            __('common.period') => ($start || $end)
+                ? ($start ?: '...') . ' - ' . ($end ?: '...')
+                : __('common.all'),
+        ];
+        if ($tenant !== null) {
+            $filters[__('common.tenant')] = $tenant !== '' ? $tenant : __('common.all');
+        }
+        return $filters;
+    }
+
+    /** Tanggal dari database ke format tabel (FormatDateNew / FormatDateTimeNew di app.js) */
+    private function pdfDate($value, $withTime = false)
+    {
+        if (empty($value)) {
+            return '-';
+        }
+        try {
+            return \Carbon\Carbon::parse($value)->format($withTime ? 'd-m-Y H:i' : 'd-m-Y');
+        } catch (\Exception $e) {
+            return (string) $value;
+        }
+    }
+
+    /** PDF dibuka di tab baru (inline), isi & kolom sama dengan DataTable halaman History */
     public function export(Request $request)
     {
         $type = $request->type;
-        $date_end = Session::get('date_end');
+        $rawEnd = Session::get('date_end');
+        $rawStart = Session::get('date_start');
+        $date_end = $rawEnd;
         if(empty($date_end)){
-            $date_end=date('Y-m-d 23:59:59', time() + 86400);  
+            $date_end=date('Y-m-d 23:59:59', time() + 86400);
         }else{
             $aa = explode("/",$date_end);
             $date_end = $aa[2]."-".$aa[1]."-".$aa[0]." 23:59:59";
         }
-        $date_start = Session::get('date_start');
+        $date_start = $rawStart;
         if(empty($date_start)){
             $date_start=date('Y-m-01 00:00:00', strtotime("-12 months"));
         }else{
             $aa = explode("/",$date_start);
             $date_start = $aa[2]."-".$aa[1]."-".$aa[0]." 00:00:00";
         }
-        if(!empty($type))
-        {
-            switch ($type) {
-                case 'ticket':
-                    $list_log = '';$i=1;
-                    $debtor = Session::get('debtor');
-                    if(empty($debtor)){
-                        $debtor='';
-                    }
-                    // sama dengan tabel: tanggal filter apa adanya (dd/mm/yyyy), kosong = tanpa batas
-                    $dt_ticket = $this->ticketRows(
-                        Session::get('date_start') ?: null,
-                        Session::get('date_end') ?: null,
-                        (string) $debtor
-                    );
-                    if(count($dt_ticket) > 0)
-                    {
-                        
-                        foreach ($dt_ticket as $ticket) {
-                            // label status sama dengan tabel Ticket History (kode asli kalau tidak dikenal)
-                            $status = trim((string) $ticket->status);
-                            $descs = \Illuminate\Support\Facades\Lang::has('admin/history.ticket_statuses.' . $status)
-                                ? __('admin/history.ticket_statuses.' . $status)
-                                : $status;
-                            $list_log.='<tr role="row" class="odd">';
-                            $list_log.='<td style="padding: 4px">'.$i.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->report_no.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->categoryname.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->name.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->work_requested.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->reported_date.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->serv_req_by.'</td>';
-                            $list_log.='<td style="padding: 4px"> '.$ticket->lot_no.'</td>';
-                            $list_log.='<td style="padding: 4px">'. $descs. '</td>';
-                            $list_log.='</tr>';
-                            $i++;
-                        }
-                    }else{
-                        $list_log.='<tr class="odd">';
-                        $list_log.='<td colspan="9" style="text-align:center">'.e(__('admin/history.pdf_no_data_row')).'</td>';
-                        $list_log.='</tr>';
-                    }
-                    
-                    $content = array('listD'=>$list_log);
-                    $nf = 'history_tiket';
-                    $pdf = PDF::loadView('admin.history.expticket', $content);
-                    return $pdf->setPaper("a4","potrait")->stream($nf.'.pdf');
-                    break;
-                case 'log':
-                    $where = '';
-                    $sql ="SELECT * FROM (
-                        SELECT 
-                            @rownum := @rownum + 1 AS row_number,idforeign,logintime,ipaddress,name,email 
-                        FROM log_login join tenant on tenant.id = log_login.idforeign
-                        JOIN (SELECT @rownum := 0) r
-                        ) sub
-                    where sub.logintime between '".$date_start."' and '".$date_end."' ".$where."";
-                    $dtUsers = DB::connection('ifcaadm')->select($sql);
-                    $list_log = '';
-                    if(!empty($dtUsers))
-                    {
-                        foreach ($dtUsers as $logUsers) {
-                            $list_log.='<tr class="odd">';
-                            $list_log.='<td>'.\Carbon\Carbon::parse($logUsers->logintime)->translatedFormat('d M Y H:i:s').'</td>';
-                            $list_log.='<td>'.$logUsers->name.'</td>';
-                            $list_log.='<td>'.$logUsers->ipaddress.'</td>';
-                            $list_log.='</tr>';
-                        }
-                    }else{
-                        $list_log.='<tr class="odd">';
-                        $list_log.='<td colspan="3" style="text-align:center">'.e(__('admin/history.pdf_no_data_row')).'</td>';
-                        $list_log.='</tr>';
-                    }
-                    $content = array('listD'=>$list_log);
-                    $nf = 'log_users';
-                    $pdf = PDF::loadView('admin.history.explog', $content);
-                    return $pdf->stream($nf.'.pdf');
-                    break;
-                case 'overtime':
-                    $debtor = Session::get('debtor');
-                    if(empty($debtor)){
-                        $debtor='';
-                    }
-                    $where = '';
+        $disclaimer = __('admin/history.pdf_disclaimer');
 
-                    if($debtor!='' || !empty($debtor))
-                    {
-                        $where=" AND debtor_acct='".$debtor."' ".$where;
-                    }
+        switch ($type) {
+            case 'ticket':
+                $debtor = (string) (Session::get('debtor') ?: '');
+                // sama dengan tabel: tanggal filter apa adanya (dd/mm/yyyy), kosong = tanpa batas
+                $dt_ticket = $this->ticketRows($rawStart ?: null, $rawEnd ?: null, $debtor);
 
-                    $sql ="SELECT ROW_NUMBER() OVER (ORDER BY begin_date desc) AS [row_number], * from mgr.v_overtime_history where  begin_date between CONVERT(DATETIME,'".$date_start."',110) and CONVERT(DATETIME,'".$date_end."',110)".$where ;
-                    $dt_overtime = DB::connection('ifcapb')->select($sql);
-                    $list_log = '';$i=1;
-                    if(!empty($dt_overtime))
-                    {
-                        foreach ($dt_overtime as $overtime) {
-                            $descs = '';
-                            $status = $overtime->status;
-                            if($status=='N'){
-                                $descs = __('admin/history.activated');
-                            }else if($status=='P'){
-                                $descs = __('admin/history.closed');
-                            }
-                            $list_log .= '<tr class="odd">';
-                            $list_log .= '<td style="padding: 5px">' .$i. '</td>';
-                            $list_log .= '<td style="padding: 5px">' .$overtime->lot_no. '</td>';
-                            $list_log .= '<td style="padding: 5px">' .$overtime->debtor_acct. '</td>';
-                            $list_log .= '<td style="padding: 5px">' .\Carbon\Carbon::parse($overtime->begin_date)->translatedFormat('d M Y H:i:s'). '</td>';
-                            $list_log .= '<td style="padding: 5px">' .\Carbon\Carbon::parse($overtime->end_date)->translatedFormat('d M Y H:i:s'). '</td>';
-                            $list_log .= '<td style="padding: 5px">'. $descs. '</td>';
-                            $list_log .= '<td style="padding: 5px">' .$overtime->remarks. '</td>';
-                            $list_log .= '</tr>';
-                            $i++;
-                        }
-                    }else{
-                        $list_log.='<tr class="odd">';
-                        $list_log.='<td colspan="7" style="text-align:center">'.e(__('admin/history.pdf_no_data_row')).'</td>';
-                        $list_log.='</tr>';
-                    }
-                    $content = array('listD'=>$list_log);
-                    $nf = 'history_overtime';
-                    $pdf = PDF::loadView('admin.history.expOT', $content);
-                    return $pdf->stream($nf.'.pdf');
-                    break;
-                    break;
-                default:
-                    abort(404);
-                    break;
-            }
+                // warna badge sama dengan tabel Ticket History
+                $tones = ['Z' => 'warning', 'Y' => 'success', 'C' => 'success', 'F' => 'success', 'X' => 'secondary'];
+                $rows = [];
+                foreach ($dt_ticket as $ticket) {
+                    $status = trim((string) $ticket->status);
+                    $known = $status !== '' && \Illuminate\Support\Facades\Lang::has('admin/history.ticket_statuses.' . $status);
+                    $rows[] = [
+                        $ticket->row_number,
+                        $ticket->report_no,
+                        $ticket->categoryname,
+                        $ticket->name,
+                        $ticket->work_requested,
+                        $this->pdfDate($ticket->reported_date),
+                        $ticket->serv_req_by,
+                        $ticket->lot_no,
+                        [
+                            'text' => $known ? __('admin/history.ticket_statuses.' . $status) : ($status !== '' ? $status : '-'),
+                            'badge' => $known ? ($tones[$status] ?? 'info') : 'secondary',
+                        ],
+                    ];
+                }
+                $tenant = $debtor === '' ? '' : (count($dt_ticket) ? $dt_ticket[0]->name : $debtor);
 
-        } else {
-            abort(404);
-            exit();
+                return PdfTable::stream('history_tiket', [
+                    'title' => __('admin/history.ticket_history'),
+                    'filters' => $this->pdfFilters($rawStart, $rawEnd, $tenant),
+                    'columns' => [
+                        ['label' => __('admin/history.col_no'), 'align' => 'center', 'width' => '4%'],
+                        ['label' => __('admin/history.wo_number'), 'align' => 'center', 'width' => '10%'],
+                        ['label' => __('common.category'), 'align' => 'left', 'width' => '11%'],
+                        ['label' => __('admin/history.tenant_name'), 'align' => 'left', 'width' => '14%'],
+                        ['label' => __('common.description'), 'align' => 'left'],
+                        ['label' => __('admin/history.reported_date'), 'align' => 'center', 'width' => '9%'],
+                        ['label' => __('admin/history.request_by'), 'align' => 'left', 'width' => '10%'],
+                        ['label' => __('admin/history.lot_number'), 'align' => 'center', 'width' => '8%'],
+                        ['label' => __('admin/history.ticket_status'), 'align' => 'center', 'width' => '10%'],
+                    ],
+                    'rows' => $rows,
+                    'disclaimer' => $disclaimer,
+                ]);
+
+            case 'log':
+                $sql ="SELECT * FROM (
+                    SELECT
+                        @rownum := @rownum + 1 AS row_number,idforeign,logintime,ipaddress,name,email
+                    FROM log_login join tenant on tenant.id = log_login.idforeign
+                    JOIN (SELECT @rownum := 0) r
+                    ) sub
+                where sub.logintime between ? and ?";
+                $dtUsers = DB::connection('ifcaadm')->select($sql, [$date_start, $date_end]);
+                $rows = [];
+                foreach ($dtUsers as $i => $logUsers) {
+                    $rows[] = [
+                        $i + 1,
+                        $this->pdfDate($logUsers->logintime, true),
+                        $logUsers->name,
+                        $logUsers->ipaddress,
+                    ];
+                }
+
+                return PdfTable::stream('log_users', [
+                    'title' => __('admin/history.log_user_history'),
+                    'filters' => $this->pdfFilters($rawStart, $rawEnd),
+                    'columns' => [
+                        ['label' => __('admin/history.col_no'), 'align' => 'center', 'width' => '7%'],
+                        ['label' => __('admin/history.login_date'), 'align' => 'center', 'width' => '22%'],
+                        ['label' => __('admin/history.user_name'), 'align' => 'left'],
+                        ['label' => __('admin/history.login_from'), 'align' => 'left', 'width' => '22%'],
+                    ],
+                    'rows' => $rows,
+                    'disclaimer' => $disclaimer,
+                ]);
+
+            case 'overtime':
+                $debtor = (string) (Session::get('debtor') ?: '');
+                $sql = "SELECT ROW_NUMBER() OVER (ORDER BY begin_date desc) AS [row_number], * from mgr.v_overtime_history where begin_date between CONVERT(DATETIME,?,110) and CONVERT(DATETIME,?,110)";
+                $bindings = [$date_start, $date_end];
+                if ($debtor !== '') {
+                    $sql .= " AND debtor_acct = ?";
+                    $bindings[] = $debtor;
+                }
+                $dt_overtime = DB::connection('ifcapb')->select($sql, $bindings);
+
+                // badge sama dengan tabel Overtime History
+                $statuses = [
+                    'N' => ['text' => __('admin/history.activated'), 'badge' => 'success'],
+                    'P' => ['text' => __('admin/history.closed'), 'badge' => 'danger'],
+                ];
+                $rows = [];
+                foreach ($dt_overtime as $overtime) {
+                    $rows[] = [
+                        $overtime->row_number,
+                        $overtime->lot_no,
+                        $overtime->debtor_acct,
+                        $this->pdfDate($overtime->begin_date, true),
+                        $this->pdfDate($overtime->end_date, true),
+                        $statuses[$overtime->status] ?? '',
+                        $overtime->remarks,
+                    ];
+                }
+
+                return PdfTable::stream('history_overtime', [
+                    'title' => __('admin/history.overtime_history'),
+                    'filters' => $this->pdfFilters($rawStart, $rawEnd, $debtor),
+                    'columns' => [
+                        ['label' => __('admin/history.col_no'), 'align' => 'center', 'width' => '5%'],
+                        ['label' => __('admin/history.lot_number'), 'align' => 'center', 'width' => '10%'],
+                        ['label' => __('common.tenant'), 'align' => 'left', 'width' => '14%'],
+                        ['label' => __('admin/history.start_overtime'), 'align' => 'center', 'width' => '14%'],
+                        ['label' => __('admin/history.end_overtime'), 'align' => 'center', 'width' => '14%'],
+                        ['label' => __('common.status'), 'align' => 'center', 'width' => '10%'],
+                        ['label' => __('common.description'), 'align' => 'left'],
+                    ],
+                    'rows' => $rows,
+                    'disclaimer' => $disclaimer,
+                ]);
+
+            default:
+                abort(404);
         }
-
-        
     }
 }

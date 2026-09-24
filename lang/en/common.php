@@ -25,6 +25,8 @@ return [
     'change'        => 'Change',
     'upload'        => 'Upload',
     'generate_pdf'  => 'Generate PDF',
+    'pdf_printed_at'=> 'Printed: :date',
+    'pdf_page'      => 'Page :page of :total',
     'read_more'     => 'Read More',
     'yes'           => 'Yes',
     'no'            => 'No',

@@ -12,6 +12,11 @@
         <div class="page-block">
             <div class="card">
                 <div class="card-body">
+
+                    {{-- sama dengan Proforma: tenant yang login (session tenant_df); mode semua tenant tanpa label --}}
+                    @unless (App\Support\TenantScope::all())
+                        <div id="tenantNoLabel"><span class="badge badge-soft-primary fs-6">{{ __('tenant/invoice.tenant_no', ['no' => $tenant_no]) }}</span></div>
+                    @endunless
                     <div class="table-responsive">
                         <?php
                             if(!empty($list_bill)) {
@@ -59,87 +64,23 @@
                 info: false,
                 lengthChange: false,
                 dom: 'Bfrtip',
+                // label Tenant No satu baris dengan kotak Search (kiri - kanan)
+                initComplete: function () {
+                    var $search = $('#tblBilling_wrapper .dt-search');
+                    var $row = $('<div class="d-flex flex-wrap align-items-center gap-2 mb-2"></div>');
+                    $search.before($row);
+                    $row.append($('#tenantNoLabel'), $search.addClass('ms-auto mb-0'));
+                },
 
+                // PDF: tampilan, orientasi & buka di tab baru diatur assets/app/js/pdf-export.js
                 buttons: [{
                     extend: 'pdfHtml5',
                     title: @json(__('tenant/invoice.pdf_title')),
-                    orientation: 'landscape',
-                    pageSize: 'A4',
                     className: 'btn btn-primary mb-2',
                     text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
-
-                    exportOptions: {
-                        columns: ':visible'
-                    },
-
-                    customize: function (doc) {
-
-                        // Margin
-                        doc.pageMargins = [20,20,20,20];
-
-                        // Style Header
-                        doc.styles.tableHeader = {
-                            bold: true,
-                            fontSize: 10,
-                            alignment: 'center',
-                            fillColor: '#101924',
-                            color: '#ffffff'
-                        };
-
-                        doc.styles.title = {
-                            fontSize: 16,
-                            bold: true,
-                            alignment: 'center'
-                        };
-
-                        // Cari object table
-                        var table = doc.content.find(function(item){
-                            return item.table;
-                        });
-
-                        // Border
-                        table.layout = {
-                            hLineWidth: function () { return 0.8; },
-                            vLineWidth: function () { return 0.8; },
-                            hLineColor: function () { return '#000'; },
-                            vLineColor: function () { return '#000'; },
-                            paddingLeft: function () { return 5; },
-                            paddingRight: function () { return 5; },
-                            paddingTop: function () { return 4; },
-                            paddingBottom: function () { return 4; }
-                        };
-
-                        // Lebar kolom
-                        table.table.widths = [
-                            '5%',   // No
-                            '20%',  // Document Number
-                            '12%',  // Doc Date
-                            '12%',  // Due Date
-                            '*',    // Description
-                            '12%',  // Periode
-                            '15%'   // Outstanding
-                        ];
-
-                        var body = table.table.body;
-
-                        // Alignment isi tabel
-                        for (var i = 1; i < body.length; i++) {
-
-                            body[i][0].alignment = 'center';
-                            body[i][1].alignment = 'center';
-                            body[i][2].alignment = 'center';
-                            body[i][3].alignment = 'center';
-                            body[i][4].alignment = 'left';
-                            body[i][5].alignment = 'center';
-                            body[i][6].alignment = 'right';
-                        }
-
-                    },
-
                     init: function(api, node){
                         $(node).removeClass('dt-button');
                     }
-
                 }]
             });
 

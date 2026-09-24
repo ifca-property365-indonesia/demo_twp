@@ -16,7 +16,7 @@
                     {{-- Mode semua tenant (akun admin di portal tenant): daftar berisi banyak tenant,
                          jadi label satu tenant tidak relevan. --}}
                     @unless (App\Support\TenantScope::all())
-                        <div class="mb-3"><span class="badge badge-soft-primary fs-6">{{ __('tenant/invoice.tenant_no', ['no' => $tenant_no]) }}</span></div>
+                        <div id="tenantNoLabel"><span class="badge badge-soft-primary fs-6">{{ __('tenant/invoice.tenant_no', ['no' => $tenant_no]) }}</span></div>
                     @endunless
                     <div class="table-responsive">
                         <?php
@@ -32,7 +32,7 @@
                                     <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/invoice.description') }}</th>
                                     <th class="sorting text-center" style="width: 110px; vertical-align: middle;">{{ __('tenant/invoice.period') }}</th>
                                     <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/invoice.outstanding') }}</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/invoice.check') }}</th>
+                                    <th class="sorting text-center no-export" style="vertical-align: middle;">{{ __('tenant/invoice.check') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -60,66 +60,20 @@
             $('#tblBilling').DataTable({
                 paging: false,
                 dom: "Bfrtip",
+                // label Tenant No satu baris dengan kotak Search (kiri - kanan)
+                initComplete: function () {
+                    var $search = $('#tblBilling_wrapper .dt-search');
+                    var $row = $('<div class="d-flex flex-wrap align-items-center gap-2 mb-2"></div>');
+                    $search.before($row);
+                    $row.append($('#tenantNoLabel'), $search.addClass('ms-auto mb-0'));
+                },
+                // PDF: tampilan, orientasi & buka di tab baru diatur assets/app/js/pdf-export.js
                 buttons: [
                     {
                         extend: 'pdf',
                         title: @json(__('tenant/invoice.proforma_title')),
-                        orientation: 'landscape',
-                        pageSize: 'A4',
                         className: 'btn btn-primary mb-2',
                         text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
-
-                        customize: function (doc) {
-
-                            // Border tabel
-                            doc.content[1].layout = {
-                                hLineWidth: function () { return 0.8; },
-                                vLineWidth: function () { return 0.8; },
-                                hLineColor: function () { return '#000'; },
-                                vLineColor: function () { return '#000'; },
-                                paddingLeft: function () { return 5; },
-                                paddingRight: function () { return 5; },
-                                paddingTop: function () { return 4; },
-                                paddingBottom: function () { return 4; }
-                            };
-
-                            // Style Header
-                            doc.styles.tableHeader = {
-                                bold: true,
-                                fontSize: 10,
-                                alignment: 'center',
-                                fillColor: '#101924',
-                                color: '#ffffff'
-                            };
-
-                            var body = doc.content[1].table.body;
-
-                            // Alignment tiap kolom
-                            for (var i = 1; i < body.length; i++) {
-
-                                body[i][0].alignment = 'center';
-                                body[i][1].alignment = 'center';
-                                body[i][2].alignment = 'center';
-                                body[i][3].alignment = 'center';
-                                body[i][4].alignment = 'left';
-                                body[i][5].alignment = 'center';
-                                body[i][6].alignment = 'right';
-
-                            }
-
-                            // Lebar kolom
-                            doc.content[1].table.widths = [
-                                '5%',
-                                '20%',
-                                '12%',
-                                '12%',
-                                '*',
-                                '12%',
-                                '15%'
-                            ];
-
-                        },
-
                         init: function(api, node, config) {
                             $(node).removeClass('dt-button');
                         }

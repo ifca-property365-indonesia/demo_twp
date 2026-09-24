@@ -164,7 +164,8 @@ class InvoiceController extends Controller
         return view('tenant.invoice.index', compact(
             'list_bill',
             'footer_bill',
-            'totalOutstanding'
+            'totalOutstanding',
+            'tenant_no'
         ));
     }
 

@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="{{ url('assets/vendor/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/vendor/cropperjs/cropper.min.css') }}">
     <!-- App -->
-    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.8') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.9') }}">
     @stack('styles')
 
     {{-- Script dimuat di <head> karena banyak halaman memakai jQuery/plugin langsung di dalam @section('content') --}}
@@ -44,6 +44,7 @@
     <script src="{{ url('assets/vendor/pdfmake/pdfmake.min.js') }}"></script>
     <script src="{{ url('assets/vendor/pdfmake/vfs_fonts.js') }}"></script>
     <script src="{{ url('assets/vendor/datatables/buttons.html5.min.js') }}"></script>
+    <script src="{{ url('assets/app/js/pdf-export.js?ver=1.0.2') }}"></script>
     <script src="{{ url('assets/vendor/select2/select2.full.min.js') }}"></script>
     <script src="{{ url('assets/vendor/sweetalert2/sweetalert2.all.min.js') }}"></script>
     <script src="{{ url('assets/vendor/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>

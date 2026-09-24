@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\NewsPicture;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,9 @@ class NewsPromoController extends Controller
     public function getTable()
     {
         $query = DB::connection('ifcaadm')->select("SELECT @rownum := @rownum + 1 AS row_number, t.* FROM newsfeed t, (SELECT @rownum := 0) r");
+        foreach ($query as $row) {
+            $row->picture_url = $row->attach_type === 'P' ? NewsPicture::url($row->picture) : null;
+        }
         return DataTables::of($query)->make(true);
     }
     public function addform($type='',$id=0)
@@ -33,78 +37,36 @@ class NewsPromoController extends Controller
         );
         return view('admin.news.add', $content);
     }
-    public function savePic()
+    /**
+     * Unggah gambar berita (dipanggil form saat Simpan, sebelum save()).
+     * Mengembalikan path relatif (disimpan ke newsfeed.picture) dan URL untuk preview.
+     */
+    public function savePic(Request $request)
     {
-        $picture = !empty($_FILES) ? $picture = $_FILES["userfile"] : '';
-        if (!empty($picture["name"])) {
-            $picname = str_replace(' ', '_', $picture["name"]);
-            $picture = $_FILES["userfile"];
-           
-            $psn = '';$url='';
-            $msg = '';
-            $picture = array_filter($picture);
-
-            $target_dir = "./images/newspromo/";
-            
-            if (!is_dir($target_dir)) {
-                mkdir($target_dir);
-            }
-            $target_file = $target_dir . str_replace(' ', '_', basename($_FILES["userfile"]["name"]));
-            $uploadOk = 1;
-            $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
-
-            if ($_FILES["userfile"]["size"] > 5000000) {
-                $msg = __('common.upload_max_size', ['size' => '5MB']);
-                $uploadOk = 0;
-                $psn = 'failed';
-                $res = array("pesan" => $msg, "status" => $psn);
-
-                echo json_encode($res);
-                exit();
-            }
-
-            $imageFileType = strtolower($imageFileType);
-            // Allow certain file formats
-            if (
-                $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
-                && $imageFileType != "gif" && $imageFileType != "JPG"
-            ) {
-                $msg = __('common.upload_only_image');
-                $uploadOk = 0;
-                $psn = 'failed';
-                $res = array("pesan" => $msg, "status" => $psn);
-
-                echo json_encode($res);
-                exit();
-            }
-            // Check if $uploadOk is set to 0 by an error
-            if ($uploadOk == 0) {
-                $msg = __('common.upload_not_saved');
-                $psn = "Failed";
-                // if everything is ok, try to upload file
-            } else {
-                if (move_uploaded_file($_FILES["userfile"]["tmp_name"], $target_file)) {
-                    $msg = __('common.upload_done', ['name' => basename($_FILES["userfile"]["name"])]);
-                    $psn = "OK";
-                    $descs = "/images/newspromo/" . $picname;
-                    $url = url('/admin') . $descs;
-                } else {
-                    $msg = __('common.upload_error');
-                    $psn = "Failed";
-                }
-            }
-        } else {
-            $msg = __('common.upload_error');
-            $psn = "Failed";
+        $file = $request->file('userfile');
+        if (!$file || !$file->isValid()) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('common.upload_error')]);
+        }
+        if (!in_array(strtolower($file->getClientOriginalExtension()), ['jpg', 'jpeg', 'png', 'gif'], true)
+            || !str_starts_with((string) $file->getMimeType(), 'image/')) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('common.upload_only_image')]);
+        }
+        if ($file->getSize() > 5000000) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('common.upload_max_size', ['size' => '5MB'])]);
         }
 
-        $res = array(
-            'pesan' => $msg,
-            'status' => $psn,
-            'url' => $url,
-            'picname' => $picname,
-        );
-        echo json_encode($res);
+        try {
+            $path = NewsPicture::store($file);
+        } catch (\Exception $e) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('common.upload_error')]);
+        }
+
+        return response()->json([
+            'status' => 'OK',
+            'pesan' => __('common.upload_done', ['name' => $file->getClientOriginalName()]),
+            'path' => $path,
+            'url' => NewsPicture::url($path),
+        ]);
     }
     public function getByID($id = '')
     {
@@ -113,6 +75,9 @@ class NewsPromoController extends Controller
             ->table('newsfeed')
             ->where($where)
             ->get();
+        foreach ($data as $row) {
+            $row->picture_url = NewsPicture::url($row->picture);
+        }
         echo json_encode($data);
     }
     public function save(Request $request)

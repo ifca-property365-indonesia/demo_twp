@@ -18,6 +18,14 @@
         many: @json(__('common.files_chosen'))
     };
 
+    // teks PDF tombol DataTables (assets/app/js/pdf-export.js)
+    window.PDF_EXPORT_LANG = {
+        button: @json(__('common.generate_pdf')),
+        printed: @json(__('common.pdf_printed_at')),
+        page: @json(__('common.pdf_page')),
+        empty: @json(__('common.no_data'))
+    };
+
     if ($.fn.dataTable) {
         $.extend(true, $.fn.dataTable.defaults, {
             language: {

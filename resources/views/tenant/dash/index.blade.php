@@ -49,7 +49,7 @@
                             <div class="carousel-item {{ $i === 0 ? 'active' : '' }}" onclick="window.location.href='{{ url('/tenant/news#news-' . $key->id) }}'">
                                 <div class="news-slide">
                                     @if (!empty($key->picture))
-                                        <img src="{{ $key->picture }}" alt="">
+                                        <img src="{{ \App\Support\NewsPicture::url($key->picture) }}" alt="">
                                     @endif
                                     <div class="transbox">
                                         <h5>{{ $key->subject }}</h5>
@@ -174,7 +174,7 @@
                                         <th class="text-center" style="width: 80px;">{{ __('common.lot_no') }}</th>
                                         <th class="text-center">{{ __('tenant/dashboard.col_ticket_type') }}</th>
                                         <th class="text-center">{{ __('tenant/dashboard.col_ticket_status') }}</th>
-                                        <th class="text-center" style="width: 90px;">{{ __('common.action') }}</th>
+                                        <th class="text-center no-export" style="width: 90px;">{{ __('common.action') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>{!! $list_hticket !!}</tbody>
@@ -245,11 +245,8 @@
                 buttons: [{
                     extend: 'pdf',
                     title: @json(__('tenant/dashboard.latest_ticket')),
-                    orientation: 'landscape',
-                    pageSize: 'A4',
                     className: 'btn btn-primary mb-2',
                     text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
-                    exportOptions: { columns: [0, 1, 2, 3, 4, 5, 6, 7, 8] },
                     init: function (api, node) { $(node).removeClass('dt-button'); }
                 }]
             });

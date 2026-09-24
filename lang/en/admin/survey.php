@@ -113,5 +113,5 @@ return [
     'dt_respondents_empty'    => 'Showing 0 respondents',
 
     // PDF
-    'pdf_disclaimer'          => 'WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal',
+    'pdf_disclaimer'          => 'Carstensz Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall Carstensz Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in Carstensz Tenant Web Portal',
 ];

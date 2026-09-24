@@ -35,6 +35,23 @@
     --cui-btn-active-bg: #4f5bd5;
     --cui-btn-active-border-color: #4f5bd5;
 }
+/* tombol Generate PDF (admin & tenant): aksen emas tema, beda dari tombol utama indigo */
+.btn-pdf {
+    --cui-btn-color: #1d2333;
+    --cui-btn-bg: #bda870;
+    --cui-btn-border-color: #bda870;
+    --cui-btn-hover-color: #1d2333;
+    --cui-btn-hover-bg: #ab9560;
+    --cui-btn-hover-border-color: #ab9560;
+    --cui-btn-active-color: #1d2333;
+    --cui-btn-active-bg: #9c8754;
+    --cui-btn-active-border-color: #9c8754;
+    --cui-btn-focus-shadow-rgb: 189, 168, 112;
+    --cui-btn-disabled-color: #1d2333;
+    --cui-btn-disabled-bg: #bda870;
+    --cui-btn-disabled-border-color: #bda870;
+    font-weight: 600;
+}
 .text-primary { color: #4f5bd5 !important; }
 .bg-primary { background-color: #4f5bd5 !important; }
 

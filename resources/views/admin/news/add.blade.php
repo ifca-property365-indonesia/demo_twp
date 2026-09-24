@@ -5,7 +5,11 @@
 @push('styles')
 <style>
     .ck-editor__editable { min-height: 300px; }
-    #picturebox { max-height: 220px; object-fit: contain; }
+    /* preview gambar / video, rasio 4:3 seperti resolusi yang disarankan (640 x 480) */
+    .news-preview { position: relative; aspect-ratio: 4 / 3; max-height: 260px; border: 1px solid var(--cui-border-color); border-radius: .375rem; background: #f8f9fb; overflow: hidden; }
+    .news-preview img, .news-preview iframe { width: 100%; height: 100%; object-fit: contain; border: 0; display: block; }
+    .news-preview-empty { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .35rem; color: var(--cui-secondary-color); font-size: .85rem; }
+    .news-preview-empty i { font-size: 2rem; opacity: .6; }
 </style>
 @endpush
 
@@ -83,21 +87,46 @@
                     <div class="col-md-8">
                         <div id="picture">
                             <label for="userfile" class="form-label">{{ __('admin/news.upload_picture') }}</label>
-                            <div class="mb-2">
-                                <img src="{{ url('images/PlProject/no_image.png') }}" id="picturebox" class="img-fluid rounded border" alt="">
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <input type="file" id="userfile" name="userfile" class="form-control" accept="image/png,image/jpeg,image/gif">
+                                    <div class="form-note">{!! __('admin/news.picture_note') !!}</div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="news-preview">
+                                        <div class="news-preview-empty" id="pictureEmpty">
+                                            <i class="cil-image"></i><span>{{ __('admin/news.no_picture') }}</span>
+                                        </div>
+                                        <img src="" id="picturebox" class="d-none" alt="">
+                                    </div>
+                                    <div class="mt-2 d-flex align-items-center gap-2 d-none" id="pictureBar">
+                                        <span class="form-note mt-0 text-truncate" id="pictureInfo"></span>
+                                        <button type="button" class="btn btn-sm btn-outline-danger ms-auto" id="btnRemovePicture"><i class="cil-trash"></i><span>{{ __('common.remove') }}</span></button>
+                                    </div>
+                                    <div class="form-note text-primary d-none" id="pictureHint">{{ __('admin/news.picture_hint') }}</div>
+                                </div>
                             </div>
-                            <input type="file" id="userfile" name="userfile" class="form-control" accept="image/*">
-                            <div class="form-note">{!! __('admin/news.picture_note') !!}</div>
                         </div>
                         <div id="youtube">
                             <label for="youtubelink" class="form-label">{{ __('admin/news.youtube_link') }}</label>
-                            <input type="text" id="youtubelink" name="youtubelink" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                            <div class="row g-3">
+                                <div class="col-lg-6">
+                                    <input type="text" id="youtubelink" name="youtubelink" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="news-preview">
+                                        <div class="news-preview-empty" id="youtubeEmpty">
+                                            <i class="cil-video"></i><span>{{ __('admin/news.no_video') }}</span>
+                                        </div>
+                                        <iframe id="youtubebox" class="d-none" src="" title="YouTube" allowfullscreen></iframe>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <input type="hidden" name="picturepath" id="picturepath" value="">
-                <input type="hidden" name="picturename" id="picturename">
 
                 <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
                     <button type="button" class="btn btn-secondary" id="btnBack">{{ __('common.back') }}</button>
@@ -155,11 +184,58 @@
             errorPlacement: function (error, element) { error.insertAfter(element); }
         });
 
+        // ------------------------------------------------------------------
+        // Gambar: dipilih -> hanya preview di browser. Unggah ke server baru
+        // saat Simpan (seperti form Ticket), jadi batal tidak meninggalkan file.
+        // ------------------------------------------------------------------
+        var pendingFile = null;
+
+        function showPicture(src, info, isNew) {
+            $('#picturebox').attr('src', src || '').toggleClass('d-none', !src);
+            $('#pictureEmpty').toggleClass('d-none', !!src);
+            $('#pictureBar').toggleClass('d-none', !src);
+            $('#pictureInfo').text(info || '');
+            $('#pictureHint').toggleClass('d-none', !isNew);
+        }
+
+        function clearPicture() {
+            pendingFile = null;
+            $('#userfile').val('');
+            $('#picturepath').val('');
+            showPicture('');
+        }
+
         $('#userfile').on('change', function () {
             var file = this.files[0];
             if (!file) { return; }
+            if (!/^image\/(png|jpe?g|gif)$/i.test(file.type)) {
+                Swal.fire({ title: @json(__('common.information')), text: @json(__('common.upload_only_image')), icon: 'warning' });
+                $(this).val('');
+                return;
+            }
+            if (file.size > 5000000) {
+                Swal.fire({ title: @json(__('common.information')), text: @json(__('common.upload_max_size', ['size' => '5MB'])), icon: 'warning' });
+                $(this).val('');
+                return;
+            }
+            pendingFile = file;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                showPicture(e.target.result, file.name + ' (' + Math.round(file.size / 1024) + ' KB)', true);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        $('#btnRemovePicture').on('click', clearPicture);
+
+        // Unggah gambar yang dipilih (dipanggil saat Simpan). Mengembalikan promise.
+        function uploadPicture() {
+            var d = $.Deferred();
+            if (!pendingFile || $('input[name=attach_type]:checked').val() !== 'P') {
+                return d.resolve().promise();
+            }
             var data = new FormData();
-            data.append('userfile', file);
+            data.append('userfile', pendingFile);
 
             $.ajax({
                 url: "{{ url('admin/news/savepic') }}",
@@ -170,44 +246,68 @@
                 dataType: 'json'
             }).done(function (res) {
                 if (res.status == 'OK') {
-                    $('#picturebox').attr('src', res.url);
-                    $('#picturepath').val(res.url);
-                    $('#picturename').val(res.picname);
+                    pendingFile = null;
+                    $('#picturepath').val(res.path);
+                    d.resolve();
                 } else {
-                    Swal.fire({ title: @json(__('common.error')), text: res.pesan, icon: 'error' });
+                    d.reject(res.pesan || @json(__('common.upload_error')));
                 }
             }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: @json(__('common.error')), text: textStatus + ' : ' + errorThrown, icon: 'error' });
+                d.reject(@json(__('common.upload_error')) + ' (' + textStatus + (errorThrown ? ': ' + errorThrown : '') + ')');
             });
-        });
+            return d.promise();
+        }
+
+        // ------------------------------------------------------------------
+        // Preview YouTube dari tautan yang diisi
+        // ------------------------------------------------------------------
+        function youtubeId(link) {
+            var m = String(link || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/i);
+            return m ? m[1] : null;
+        }
+        function showYoutube() {
+            var id = youtubeId($('#youtubelink').val());
+            var src = id ? 'https://www.youtube.com/embed/' + id : '';
+            if ($('#youtubebox').attr('src') !== src) {
+                $('#youtubebox').attr('src', src);
+            }
+            $('#youtubebox').toggleClass('d-none', !id);
+            $('#youtubeEmpty').toggleClass('d-none', !!id);
+        }
+        $('#youtubelink').on('input change', showYoutube);
 
         $('#btnSave').on('click', function () {
             if (!$('#frmEditor').valid()) { return; }
 
-            var datafrm = $('#frmEditor').serializeArray();
-            datafrm.push(
-                { name: 'action', value: '{{ $form }}' },
-                { name: 'id', value: '{{ $id }}' },
-                { name: 'news_descs', value: editorInstance ? editorInstance.getData() : $('#news_descs').val() }
-            );
-
             $('#btnSave').prop('disabled', true);
 
-            $.ajax({
-                url: "{{ url('/admin/news/save') }}",
-                type: 'POST',
-                data: datafrm,
-                dataType: 'json'
-            }).done(function (res) {
-                if (res.status == 'OK') {
-                    Swal.fire({ title: @json(__('common.information')), icon: 'success', text: res.pesan })
-                        .then(function () { window.location.href = "{{ url('/admin/news') }}"; });
-                } else {
-                    Swal.fire({ title: @json(__('common.information')), icon: 'error', text: res.pesan });
+            uploadPicture().then(function () {
+                var datafrm = $('#frmEditor').serializeArray();
+                datafrm.push(
+                    { name: 'action', value: '{{ $form }}' },
+                    { name: 'id', value: '{{ $id }}' },
+                    { name: 'news_descs', value: editorInstance ? editorInstance.getData() : $('#news_descs').val() }
+                );
+
+                $.ajax({
+                    url: "{{ url('/admin/news/save') }}",
+                    type: 'POST',
+                    data: datafrm,
+                    dataType: 'json'
+                }).done(function (res) {
+                    if (res.status == 'OK') {
+                        Swal.fire({ title: @json(__('common.information')), icon: 'success', text: res.pesan })
+                            .then(function () { window.location.href = "{{ url('/admin/news') }}"; });
+                    } else {
+                        Swal.fire({ title: @json(__('common.information')), icon: 'error', text: res.pesan });
+                        $('#btnSave').prop('disabled', false);
+                    }
+                }).fail(function (xhr, textStatus, errorThrown) {
+                    Swal.fire({ title: @json(__('common.error')), icon: 'error', text: textStatus + ' : ' + errorThrown });
                     $('#btnSave').prop('disabled', false);
-                }
-            }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: @json(__('common.error')), icon: 'error', text: textStatus + ' : ' + errorThrown });
+                });
+            }, function (msg) {
+                Swal.fire({ title: @json(__('common.error')), icon: 'error', text: msg });
                 $('#btnSave').prop('disabled', false);
             });
         });
@@ -222,12 +322,12 @@
 
                 $('#' + d.content_type).prop('checked', true);
                 $('#type-' + d.attach_type).prop('checked', true).trigger('change');
-                $('#youtubelink').val(d.youtube_link);
+                $('#youtubelink').val(d.youtube_link).trigger('change');
                 $('#news_title').val(d.subject).trigger('input');
 
                 if (d.picture) {
-                    $('#picturebox').attr('src', d.picture);
                     $('#picturepath').val(d.picture);
+                    showPicture(d.picture_url, @json(__('admin/news.current_picture')), false);
                 }
 
                 // tanggal dari DB "yyyy-mm-dd hh:mm:ss" -> dd/mm/yyyy

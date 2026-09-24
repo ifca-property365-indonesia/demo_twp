@@ -1,5 +1,10 @@
 @extends('admin.template.layout2.base')
 @section('title', __('admin/news.news_and_promo'))
+@push('styles')
+<style>
+    .news-thumb { width: 72px; height: 54px; object-fit: cover; border-radius: .25rem; border: 1px solid var(--cui-border-color); }
+</style>
+@endpush
 @section('content')
 <div class="page-body">
     <div>
@@ -19,7 +24,8 @@
                             <tr>
                                 <th style="padding-right: 20px;padding-left: 10px;">{{ __('admin/news.col_no') }}</th>
                                 <th>{{ __('admin/news.content_type') }}</th>
-                                <th width="45%">{{ __('common.title') }}</th>
+                                <th>{{ __('admin/news.col_picture') }}</th>
+                                <th width="40%">{{ __('common.title') }}</th>
                                 <th>{{ __('common.start_date') }}</th>
                                 <th>{{ __('common.end_date') }}</th>
                                 <th>{{ __('common.status') }}</th>
@@ -49,6 +55,20 @@
         columns: [
             { data: 'row_number', name: 'row_number' },
             { data:"content_type", name:"content_type", sortable: false},
+            // thumbnail gambar / ikon YouTube; klik gambar = lihat ukuran penuh
+            { data:"picture_url", name:"picture", sortable: false, searchable: false,
+                render: function (data, type, row) {
+                    if (type !== 'display') { return data || ''; }
+                    if (row.attach_type === 'Y') {
+                        return row.youtube_link
+                            ? '<a href="' + $('<div>').text(row.youtube_link).html() + '" target="_blank" rel="noopener" class="btn btn-sm btn-outline-danger"><i class="cil-media-play"></i><span>YouTube</span></a>'
+                            : '-';
+                    }
+                    if (!data) { return '-'; }
+                    var src = $('<div>').text(data).html();
+                    return '<a href="' + src + '" target="_blank" rel="noopener"><img src="' + src + '" alt="" class="news-thumb" onerror="this.parentNode.outerHTML=\'-\'"></a>';
+                }
+            },
             { data:"subject",name:"subject"},
             {
                 data: "start_date",
@@ -83,22 +103,25 @@
                 }
             },
             {
+                // sama dengan yang tampil di tenant (start_date <= hari ini <= end_date, per tanggal):
+                // belum mulai = Terjadwal, dalam periode = Aktif, lewat = Kedaluwarsa
                 data: "end_date",
                 name: "status",
                 orderable: false,
                 searchable: false,
-                render: function(data) {
-                    if (!data) return '';
+                render: function(data, type, row) {
+                    // "yyyy-mm-dd hh:mm:ss" -> "yyyymmdd" (dibandingkan sebagai teks, aman di semua browser)
+                    var day = function (v) { return v ? String(v).substr(0, 10).replace(/-/g, '') : ''; };
+                    var now = new Date();
+                    var today = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
+                    var start = day(row.start_date), end = day(row.end_date);
 
-                    const endDate = new Date(data);
-                    endDate.setHours(23,59,59,999);
-
-                    const today = new Date();
-
-                    if (today > endDate) {
+                    if (start && today < start) {
+                        return '<span class="badge text-bg-warning">' + @json(__('admin/news.scheduled')) + '</span>';
+                    }
+                    if (end && today > end) {
                         return '<span class="badge text-bg-danger">' + @json(__('admin/news.expired')) + '</span>';
                     }
-
                     return '<span class="badge text-bg-success">' + @json(__('admin/news.active')) + '</span>';
                 }
             }

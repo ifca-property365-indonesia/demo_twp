@@ -157,8 +157,6 @@ $(document).ready(function(){
     {
         extend: 'pdf',
         title: @json(__('tenant/history.billing_title')),
-        orientation: 'landscape', // <- ini yang bikin landscape
-        pageSize: 'A4',           // optional, biar jelas
         className: 'btn btn-primary mb-2',
         text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
         init: function(api, node, config) {
