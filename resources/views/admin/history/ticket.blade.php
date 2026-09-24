@@ -182,8 +182,12 @@
                             break;
                         case 'X':
                             status = "Cancel";
-                            label = "secondary";			
+                            label = "secondary";
                             break;
+                        default:
+                            // status di luar daftar (mis. 'O'): tampilkan kodenya
+                            status = $('<div>').text(data == null || String(data).trim() === '' ? '-' : String(data).trim()).html();
+                            label = "secondary";
                     }
                     return '<span class="badge badge-soft-'+label+'">'+status+'</span>';
              

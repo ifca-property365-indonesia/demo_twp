@@ -91,49 +91,31 @@
 		            {data:"work_requested"},
 		            {data:"reported_date",
 		            	render: function (data, type, row, meta) {
-			                if (data==null)
-			                {
-			                	date = ' - ';
-			                }
-			                return moment(data).format('DD MMMM YYYY');
+			                return data ? moment(data).format('DD MMMM YYYY') : '-';
 			            }
 		        	},
 		            {data:"serv_req_by"},
-		            {data:"lot_no"},
+		            {data:"lot_no", defaultContent: '-'},
 		            {data:"status",
 		                render: function (data, type, row) {
-		                    if (data=='A') {
-		                        status = "Accepted";
-		                        color = 'badge-soft-primary';
-		                    } else if (data=='S') {
-		                        status = "Survey";
-		                        color = 'badge-soft-primary';
-		                    } else if (data=='P') {
-		                        status = "Process";
-		                        color = 'badge-soft-primary';
-		                    } else if (data=='F') {
-		                        status = "Confirm";
-		                        color = 'badge-soft-primary';
-		                    } else if (data=='M') {
-		                        status = "Modify";
-		                        color = 'badge-soft-primary';
-		                    } else if (data=='Z') {
-		                        status = "Charged Approved";
-		                        color = 'badge-soft-warning';
-		                    } else if (data=='Y') {
-		                        status = "Approved";
-		                        color = 'badge-soft-success';
-		                    } else if (data=='C') {
-		                        status = "Closed";
-		                        color = 'badge-soft-success';
-		                    } else if (data=='R'){
-		                        status = 'Open';
-		                        color = 'badge-soft-info';
-		                    } else if (data=='X'){
-		                    	status = "Cancel";
-		                        color = 'badge-soft-secondary';
-		                    } 
-		                    return '<span class="badge '+color+'">'+status+'</span>'
+		                    // Status yang tidak ada di daftar (mis. 'O' dari sistem lain) tampil
+		                    // sebagai kodenya. Dulu status seperti itu membuat render error
+		                    // (variabel color tidak terisi) dan tabel macet di "Loading".
+		                    var map = {
+		                        A: ['Accepted', 'badge-soft-primary'],
+		                        S: ['Survey', 'badge-soft-primary'],
+		                        P: ['Process', 'badge-soft-primary'],
+		                        F: ['Confirm', 'badge-soft-primary'],
+		                        M: ['Modify', 'badge-soft-primary'],
+		                        Z: ['Charged Approved', 'badge-soft-warning'],
+		                        Y: ['Approved', 'badge-soft-success'],
+		                        C: ['Closed', 'badge-soft-success'],
+		                        R: ['Open', 'badge-soft-info'],
+		                        X: ['Cancel', 'badge-soft-secondary']
+		                    };
+		                    var code = data == null ? '' : String(data).trim();
+		                    var item = map[code] || [code || '-', 'badge-soft-secondary'];
+		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>';
 		                }
 		            },
 		        ],
