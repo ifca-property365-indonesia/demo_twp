@@ -5,7 +5,7 @@ return [
     'title'                 => 'Ticket',
     'new_ticket'            => 'New Ticket',
     'edit_ticket'           => 'Edit Ticket',
-    'page_desc'             => 'Submit a request or complaint to building management.',
+    'page_desc'             => 'Submit a request or complaint to Building Management.',
     'ticket_history'        => 'Ticket History',
 
     // field form

@@ -14,8 +14,8 @@ return [
     'choose'            => '-- Choose --',
 
     'incorrect'         => 'Incorrect email or password.',
-    'account_expired'   => 'Your account expired on :date. Please contact building management.',
-    'account_inactive'  => 'Your account is not active. Please contact building management.',
+    'account_expired'   => 'Your account expired on :date. Please contact Building Management.',
+    'account_inactive'  => 'Your account is not active. Please contact Building Management.',
     'no_admin_access'   => 'This account does not have Admin access.',
     'no_business_access'=> 'This account does not have access to the selected business.',
     'login_first'       => 'Please login first!',

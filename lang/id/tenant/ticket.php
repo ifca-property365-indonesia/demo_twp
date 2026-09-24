@@ -5,7 +5,7 @@ return [
     'title'                 => 'Tiket',
     'new_ticket'            => 'Tiket Baru',
     'edit_ticket'           => 'Ubah Tiket',
-    'page_desc'             => 'Ajukan permintaan atau keluhan kepada pengelola gedung.',
+    'page_desc'             => 'Ajukan permintaan atau keluhan kepada Pengelola Gedung.',
     'ticket_history'        => 'Riwayat Tiket',
 
     // field form
