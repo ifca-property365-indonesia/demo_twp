@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\TicketHd;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -302,15 +303,16 @@ class DashController extends Controller
 
     public function getTableTicket()
     {
-        $query = DB::connection('ifcapb')->select("
-            SELECT 
-                ROW_NUMBER() OVER (
-                    ORDER BY reported_date DESC, complain_no DESC
-                ) AS [row_number],
-                *
-            FROM mgr.v_sv_entry_multi_dash
-            ORDER BY reported_date DESC, complain_no DESC
-        ");
+        // work order di mgr.sv_entry_hd (lihat App\Support\TicketHd)
+        $query = TicketHd::query()
+            ->orderBy('t.reported_date', 'desc')
+            ->orderBy('t.report_no', 'desc')
+            ->get();
+
+        foreach ($query as $i => $row) {
+            $row->row_number = $i + 1;
+            $row->categoryname = $row->category_desc;
+        }
 
         return DataTables::of($query)->make(true);
     }

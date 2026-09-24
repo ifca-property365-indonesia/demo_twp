@@ -22,14 +22,14 @@
                             <label class="form-label" for="start">{{ __('admin/history.reported_date_from') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
+                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" data-date-end-date="0d" value="" placeholder="{{ __('common.select_date') }}" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="end">{{ __('admin/history.to') }}</label>
+                            <label class="form-label" for="end">{{ __('admin/history.reported_date_to') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
+                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" data-date-end-date="0d" value="" placeholder="{{ __('common.select_date') }}" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-4">
@@ -53,7 +53,7 @@
                             <thead>
                                 <tr>
                                     <th class="sorting_asc">{{ __('admin/history.col_no') }}</th>
-                                    <th>{{ __('admin/history.ticket_number') }}</th>
+                                    <th>{{ __('admin/history.wo_number') }}</th>
                                     <th>{{ __('common.category') }}</th>
                                     <th>{{ __('admin/history.tenant_name') }}</th>
                                     <th>{{ __('common.description') }}</th>
@@ -75,7 +75,15 @@
   var tblticket;
   var STATUS_LABELS = @json(__('admin/history.ticket_statuses'));
   $(function() {
-    $('.date-picker').datepicker('setEndDate', new Date());
+    // Tanggal (sama dengan form Letter Permit): end >= start, end kosong ikut start
+    $('#start').on('change', function () {
+        var start = $(this).val() ? $(this).datepicker('getDate') : null;
+        var end = $('#end').val() ? $('#end').datepicker('getDate') : null;
+        $('#end').datepicker('setStartDate', start || false);
+        if (start && (!end || end < start)) {
+            $('#end').datepicker('update', start);
+        }
+    });
     $('.select2').select2();
     tblticket = $('#tableLatestTickett').DataTable({
           processing: true,
@@ -85,37 +93,12 @@
             "type": "POST",
             data: {
               "_token": "{{ csrf_token() }}",
+              // dd/mm/yyyy dari datepicker (diurai server lewat TicketHd::toYmd), kosong = tanpa batas
               "date_end": function(d){
-                            var a = $('#end').val();
-
-                            var date = new Date(parseInt(a.substr(0,10)));
-                            var year =a.substr(6,4);
-                            var month=a.substr(3,2);
-                            var day =a.substr(0,2);
-                                       
-                            var aa1 = year+"/"+month+"/"+day;
-                            var b ="";
-                            if(aa1 == "//"){
-                                return b;
-                            }{
-                                return aa1;
-                            }
-                       
+                            return $('#end').val() || '';
                         },
                         "date_start": function(d){
-                            var a = $('#start').val();
-                            var date = new Date(parseInt(a.substr(0,10)));
-                            var year =a.substr(6,4);
-                            var month=a.substr(3,2);
-                            var day =a.substr(0,2);
-                                       
-                            var aa1 = year+"/"+month+"/"+day;
-                            var b ="";
-                            if(aa1 == "//"){
-                                return b;
-                            }{
-                                return aa1;
-                            }
+                            return $('#start').val() || '';
                         },
                         "debtor_acct": function (d) {
                             var search = $('#debtor').val();
@@ -130,7 +113,7 @@
             },
           columns: [
             {data: "row_number",name:"row_number", searchable:false},
-            {data:"complain_no",name:"complain_no", sortable: false},
+            {data:"report_no",name:"report_no", sortable: false},
             {data:"categoryname",name:"categoryname"},
             {data:"name",name:"name"},
             {data:"work_requested",name:"work_requested"},

@@ -207,6 +207,17 @@ var tbldraft;
             DeleteSurvey(data[0].id);
         });   
 
+        // Tanggal: field datepicker dd/mm/yyyy (sama dengan History Invoice), data yyyy-mm-dd
+        function isoToDmy(iso) {
+            return iso ? iso.substr(8, 2) + '/' + iso.substr(5, 2) + '/' + iso.substr(0, 4) : '';
+        }
+        function pickerIso(sel) {
+            var d = $(sel).val() ? $(sel).datepicker('getDate') : null;
+            if (!d) { return ''; }
+            var p = function (n) { return (n < 10 ? '0' : '') + n; };
+            return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+        }
+
         // ACTION: EDIT DATES (PUBLISHED SURVEY)
         $('#tblpublished').on('click', '.btn-edit-dates', function () {
             var id = $(this).data('id');
@@ -216,7 +227,8 @@ var tbldraft;
             
             var today = new Date();
             today.setHours(0,0,0,0);
-            var todayStr = today.toISOString().split('T')[0];
+            // tanggal lokal (toISOString memakai UTC, bisa mundur sehari di WIB)
+            var todayStr = moment(today).format('DD/MM/YYYY');
 
             var pubDate = new Date(publish_date);
             pubDate.setHours(0,0,0,0);
@@ -234,7 +246,10 @@ var tbldraft;
                     
                     <div class="mb-3">
                         <label class="form-label">{{ __('admin/survey.publish_date') }}</label>
-                        <input type="date" class="form-control" name="publish_date" id="edit_publish_date" value="${publish_date}" ${isPublishDisabled ? 'disabled style="background-color: #e9ecef; cursor: not-allowed;"' : ''} required>
+                        <div class="form-control-wrap">
+                            <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                            <input type="text" class="form-control date-picker" data-date-format="dd/mm/yyyy" autocomplete="off" name="publish_date" id="edit_publish_date" value="${isoToDmy(publish_date)}" ${isPublishDisabled ? 'disabled style="background-color: #e9ecef; cursor: not-allowed;"' : ''} required>
+                        </div>
                         
                         ${isPublishDisabled ? `
                             <div class="text-danger fw-bold mt-1" style="font-size: 12px;">
@@ -245,7 +260,10 @@ var tbldraft;
 
                     <div class="mb-3">
                         <label class="form-label">{{ __('admin/survey.expired_date') }}</label>
-                        <input type="date" class="form-control" name="expired_date" id="edit_expired_date" value="${expired_date}" min="${todayStr}" required>
+                        <div class="form-control-wrap">
+                            <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                            <input type="text" class="form-control date-picker" data-date-format="dd/mm/yyyy" autocomplete="off" name="expired_date" id="edit_expired_date" value="${isoToDmy(expired_date)}" required>
+                        </div>
                         
                         <!-- RED NOTIF REAL-TIME EXPIRED DATE -->
                         <div id="expired_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
@@ -260,12 +278,19 @@ var tbldraft;
             $('#modaltitlexl').addClass('white').html(@json(__('admin/survey.edit_published_dates')));
             $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="btnSaveUpdatedDates">{{ __('admin/survey.update_dates') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
             $('#modalxl').modal('show');
+
+            // datepicker (expired minimal hari ini, seperti atribut min sebelumnya)
+            $('#edit_publish_date, #edit_expired_date').datepicker({
+                format: 'dd/mm/yyyy', autoclose: true, todayHighlight: true, orientation: 'bottom auto'
+            });
+            $('#edit_expired_date').datepicker('setStartDate', today);
         });
 
         // EVENT LISTENER: CEK REAL-TIME SAAT USER UBAH EXPIRED DATE
         $(document).on('change input', '#edit_expired_date', function() {
-            var selectedDate = new Date($(this).val());
-            selectedDate.setHours(0,0,0,0);
+            var iso = pickerIso(this);
+            if (!iso) { return; }
+            var selectedDate = new Date(iso + 'T00:00:00');
 
             var today = new Date();
             today.setHours(0,0,0,0);
@@ -284,14 +309,14 @@ var tbldraft;
         // SUBMIT EDIT DATES VIA AJAX
         $(document).on('click', '#btnSaveUpdatedDates', function() {
             var id = $('input[name="id"]').val();
-            var publish_date = $('#edit_publish_date').val();
-            var expired_date = $('#edit_expired_date').val();
-            
+            // dikirim sebagai yyyy-mm-dd (field menampilkan dd/mm/yyyy)
+            var publish_date = pickerIso('#edit_publish_date');
+            var expired_date = pickerIso('#edit_expired_date');
+
             var today = new Date();
             today.setHours(0,0,0,0);
-            
-            var expDate = new Date(expired_date);
-            expDate.setHours(0,0,0,0);
+
+            var expDate = new Date(expired_date + 'T00:00:00');
 
             // Validasi Expired Date Minimal Hari Ini
             if (!expired_date) {
@@ -304,7 +329,7 @@ var tbldraft;
                 return;
             }
 
-            if (new Date(publish_date) > expDate) {
+            if (publish_date && new Date(publish_date + 'T00:00:00') > expDate) {
                 Swal.fire(@json(__('common.information')), @json(__('admin/survey.publish_after_expired')), "warning");
                 return;
             }

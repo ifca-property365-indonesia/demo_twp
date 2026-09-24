@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\DateInput;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -137,8 +138,9 @@ public function getDraftTable(Request $request)
     public function publishSubmit(Request $request)
     {
         try {
-            $publishDate = date('Y-m-d', strtotime($request->publish_date));
-            $expiredDate = date('Y-m-d', strtotime($request->expired_date));
+            // datepicker dd/mm/yyyy (lihat App\Support\DateInput)
+            $publishDate = DateInput::format($request->publish_date);
+            $expiredDate = DateInput::format($request->expired_date);
 
             DB::connection('ifcaadm')->table('surveys')->where('id', $request->survey_id)->update([
                 'status' => 'published',

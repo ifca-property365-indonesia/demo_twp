@@ -13,6 +13,7 @@ return [
     'ticket'           => 'Ticket',
     'col_no'           => 'No.',
     'ticket_number'    => 'Ticket Number',
+    'wo_number'        => 'WO Number',
     'tenant_name'      => 'Tenant Name',
     'reported_date'    => 'Reported Date',
     'request_by'       => 'Request By',

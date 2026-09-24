@@ -9,7 +9,10 @@
 
     <div class="mb-3">
         <label class="form-label">{{ __('admin/survey.publish_date') }} <span class="text-danger">*</span></label>
-        <input type="date" name="publish_date" id="publish_date" class="form-control" required>
+        <div class="form-control-wrap">
+            <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+            <input type="text" name="publish_date" id="publish_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" placeholder="{{ __('common.select_date') }}" autocomplete="off" required>
+        </div>
         <div id="publish_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
             <i class="cil-warning"></i> {{ __('admin/survey.publish_before_today') }}
         </div>
@@ -17,7 +20,10 @@
 
     <div class="mb-3">
         <label class="form-label">{{ __('admin/survey.expired_date') }} <span class="text-danger">*</span></label>
-        <input type="date" name="expired_date" id="expired_date" class="form-control" required>
+        <div class="form-control-wrap">
+            <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+            <input type="text" name="expired_date" id="expired_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" placeholder="{{ __('common.select_date') }}" autocomplete="off" required>
+        </div>
         <div id="expired_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
             <i class="cil-warning"></i> {{ __('admin/survey.expired_before_publish') }}
         </div>
@@ -28,10 +34,24 @@
     $(document).ready(function() {
         var today = new Date();
         today.setHours(0,0,0,0);
-        var todayStr = today.toISOString().split('T')[0];
 
-        $('#publish_date').attr('min', todayStr);
-        $('#expired_date').attr('min', todayStr);
+        // Datepicker dd/mm/yyyy (sama dengan History Invoice); minimal hari ini
+        $('#publish_date, #expired_date').datepicker({
+            format: 'dd/mm/yyyy', autoclose: true, todayHighlight: true,
+            orientation: 'bottom auto', startDate: today
+        });
+        // expired tidak bisa dipilih sebelum publish
+        $('#publish_date').on('change', function () {
+            var pub = $(this).datepicker('getDate');
+            $('#expired_date').datepicker('setStartDate', pub || today);
+        });
+
+        // tanggal dari datepicker (null kalau kosong)
+        function pickerDate(sel) {
+            var d = $(sel).val() ? $(sel).datepicker('getDate') : null;
+            if (d) { d.setHours(0,0,0,0); }
+            return d;
+        }
 
         // Validasi Real-time
         function validateDates() {
@@ -40,8 +60,7 @@
             var isValid = true;
 
             if (pubVal) {
-                var pubDate = new Date(pubVal);
-                pubDate.setHours(0,0,0,0);
+                var pubDate = pickerDate('#publish_date');
 
                 if (pubDate < today) {
                     $('#publish_date_error').slideDown();
@@ -54,10 +73,8 @@
             }
 
             if (expVal) {
-                var expDate = new Date(expVal);
-                expDate.setHours(0,0,0,0);
-                var comparePub = pubVal ? new Date(pubVal) : today;
-                comparePub.setHours(0,0,0,0);
+                var expDate = pickerDate('#expired_date');
+                var comparePub = pickerDate('#publish_date') || today;
 
                 if (expDate < comparePub) {
                     $('#expired_date_error').text(@json(__('admin/survey.expired_before_publish'))).slideDown();

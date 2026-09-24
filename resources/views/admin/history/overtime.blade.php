@@ -22,14 +22,14 @@
                             <label class="form-label" for="start">{{ __('admin/history.request_date_from') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
+                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="{{ __('common.select_date') }}" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="end">{{ __('admin/history.to') }}</label>
+                            <label class="form-label" for="end">{{ __('admin/history.reported_date_to') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
+                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="{{ __('common.select_date') }}" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-4">

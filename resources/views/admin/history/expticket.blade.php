@@ -18,7 +18,7 @@
         <thead  style="background:#ffa500;">
           <tr class="odd">
             <th class="sorting_asc" style="width: 6px;padding: 4px"> #</th>
-            <th  style="width: 10px;padding: 4px">{{ __('admin/history.ticket_number') }}</th>
+            <th  style="width: 10px;padding: 4px">{{ __('admin/history.wo_number') }}</th>
             <th style="width: 10px;padding: 4px">{{ __('common.category') }}</th>
             <th  style="width: 70px!important;padding: 4px">{{ __('admin/history.tenant_name') }}</th>
             <th class="sorting" style="width: 20px;padding: 4px">{{ __('common.description') }}</th>

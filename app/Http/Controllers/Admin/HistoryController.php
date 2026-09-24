@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Support\TicketHd;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -14,14 +15,53 @@ class HistoryController extends Controller
 {
 
     public function ticket(){
-       
-        $sqlad = "SELECT distinct debtor_acct,name from mgr.v_ticket_history WHERE status IN ('C','X','F','A')  ORDER BY name,debtor_acct asc";        
-        $dtDebtor = DB::connection('ifcapb')->select($sqlad);    
+
+        // tenant yang punya work order (mgr.sv_entry_hd) untuk pilihan filter
+        $dtDebtor = TicketHd::query()
+            ->select('t.debtor_acct', 'deb.name')
+            ->distinct()
+            ->orderBy('deb.name')
+            ->orderBy('t.debtor_acct')
+            ->get();
         $content = array(
             'datadebtor'=>$dtDebtor);
-        
+
         return view('admin.history.ticket',$content);
-    } 
+    }
+
+    /**
+     * Work order (mgr.sv_entry_hd) untuk tabel & PDF Ticket History: semua status,
+     * tanggal lapor $start..$end (termasuk; null = tanpa batas), opsional satu tenant. Hasil diberi
+     * row_number & categoryname seperti view lama v_ticket_history.
+     */
+    private function ticketRows($start, $end, $debtor)
+    {
+        // Semua status; tanggal hanya dibatasi kalau diisi (kosong = semua data)
+        $query = TicketHd::query();
+
+        // dd/mm/yyyy (datepicker) atau yyyy-mm-dd, lihat TicketHd::toYmd
+        $start = TicketHd::toYmd($start);
+        $end = TicketHd::toYmd($end);
+        if ($start) {
+            $query->where('t.reported_date', '>=', $start);
+        }
+        if ($end) {
+            $query->where('t.reported_date', '<', date('Ymd', strtotime($end . ' +1 day')));
+        }
+
+        if ($debtor !== '') {
+            $query->where('t.debtor_acct', $debtor);
+        }
+
+        $rows = $query->orderBy('t.reported_date', 'desc')->orderBy('t.report_no', 'desc')->get();
+
+        foreach ($rows as $i => $row) {
+            $row->row_number = $i + 1;
+            $row->categoryname = $row->category_desc;
+        }
+
+        return $rows;
+    }
     public function getTableTicket(Request $request)
     {
 
@@ -30,28 +70,10 @@ class HistoryController extends Controller
             $debtor='';
         }
 
-        $date_end = $request->date_end;
-        if(empty($date_end)){
-            $date_end=date('Y-m-d 23:59:59', time() + 86400);  
-        }else{
-            $date_end=$date_end." 23:59:59";
-        }
-
-        $date_start = $request->date_start;
-        if(empty($date_start)){
-            $date_start=date('Y-m-01 00:00:00', strtotime("-12 months"));
-        }else{
-            $date_start=$date_start." 00:00:00";
-        }
-        $where = '';
-
-        if($debtor!='' || !empty($debtor))
-        {
-            $where="AND debtor_acct='".$debtor."' ".$where;
-        }
-
-        $sql ="SELECT ROW_NUMBER() OVER (ORDER BY reported_date desc) AS [row_number], * from mgr.v_ticket_history where status in  ('C','X','F') and reported_date between CONVERT(DATETIME,'".$date_start."',110) and CONVERT(DATETIME,'".$date_end."',110)".$where;
-        $query = DB::connection('ifcapb')->select($sql);
+        // tanggal kosong = tanpa batas (semua work order)
+        $date_end = $request->date_end ?: null;
+        $date_start = $request->date_start ?: null;
+        $query = $this->ticketRows($date_start, $date_end, (string) $debtor);
         return DataTables::of($query)->make(true);
     }
     public function overtime(){
@@ -161,34 +183,24 @@ class HistoryController extends Controller
                     if(empty($debtor)){
                         $debtor='';
                     }
-                    $where = '';
-
-                    if($debtor!='' || !empty($debtor))
-                    {
-                        $where="AND debtor_acct='".$debtor."' ".$where;
-                    }
-
-                    
-                    $sql ="SELECT ROW_NUMBER() OVER (ORDER BY reported_date desc) AS [row_number], * from mgr.v_ticket_history where status in  ('C','X','F') and reported_date between CONVERT(DATETIME,'".$date_start."',110) and CONVERT(DATETIME,'".$date_end."',110)".$where;
-                    $dt_ticket = DB::connection('ifcapb')->select($sql);
-                    if(!empty($dt_ticket))
+                    // sama dengan tabel: tanggal filter apa adanya (dd/mm/yyyy), kosong = tanpa batas
+                    $dt_ticket = $this->ticketRows(
+                        Session::get('date_start') ?: null,
+                        Session::get('date_end') ?: null,
+                        (string) $debtor
+                    );
+                    if(count($dt_ticket) > 0)
                     {
                         
                         foreach ($dt_ticket as $ticket) {
-                            $descs = '';
-                            $status = $ticket->status;
-                            if($status=='R'){
-                                $descs = __('admin/history.pdf_open');
-                            }else if($status=='Z'){
-                                $descs = __('admin/history.pdf_process');
-                            }else if($status=='Y'){
-                                $descs = __('admin/history.pdf_process');
-                            }else{
-                                $descs = '';
-                            }
+                            // label status sama dengan tabel Ticket History (kode asli kalau tidak dikenal)
+                            $status = trim((string) $ticket->status);
+                            $descs = \Illuminate\Support\Facades\Lang::has('admin/history.ticket_statuses.' . $status)
+                                ? __('admin/history.ticket_statuses.' . $status)
+                                : $status;
                             $list_log.='<tr role="row" class="odd">';
                             $list_log.='<td style="padding: 4px">'.$i.'</td>';
-                            $list_log.='<td style="padding: 4px">'.$ticket->complain_no.'</td>';
+                            $list_log.='<td style="padding: 4px">'.$ticket->report_no.'</td>';
                             $list_log.='<td style="padding: 4px">'.$ticket->categoryname.'</td>';
                             $list_log.='<td style="padding: 4px">'.$ticket->name.'</td>';
                             $list_log.='<td style="padding: 4px">'.$ticket->work_requested.'</td>';

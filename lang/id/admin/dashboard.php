@@ -13,6 +13,7 @@ return [
     'ticket'           => 'Tiket',
     'col_no'           => 'No.',
     'ticket_number'    => 'Nomor Tiket',
+    'wo_number'        => 'No. WO',
     'tenant_name'      => 'Nama Tenant',
     'reported_date'    => 'Tanggal Lapor',
     'request_by'       => 'Diminta Oleh',

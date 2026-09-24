@@ -15,7 +15,7 @@
     $locked  = $locked ?? [];
     $type    = $isEdit ? $permit->complain_type : '';
     $base    = url($portal . '/permit');
-    $fmtDate = function ($v) { return $v ? date('Y-m-d', strtotime($v)) : ''; };
+    $fmtDate = function ($v) { return $v ? date('d/m/Y', strtotime($v)) : ''; };
     $fmtTime = function ($v) { return $v ? substr(trim($v), 0, 5) : ''; };
 
     // Atribut input bagian 3: terkunci -> hanya tampilan (tanpa name, tidak dikirim).
@@ -276,7 +276,8 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="start_date">{{ __('common.start_date') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="date" class="form-control" id="start_date" name="start_date" required data-label="{{ __('common.start_date') }}" value="{{ $fmtDate($permit->start_date ?? null) }}">
+                                            <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                            <input type="text" class="form-control date-picker" data-date-format="dd/mm/yyyy" placeholder="{{ __('common.select_date') }}" autocomplete="off" id="start_date" name="start_date" required data-label="{{ __('common.start_date') }}" value="{{ $fmtDate($permit->start_date ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -285,7 +286,8 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="end_date">{{ __('common.end_date') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="date" class="form-control" id="end_date" name="end_date" required data-label="{{ __('common.end_date') }}" value="{{ $fmtDate($permit->end_date ?? null) }}">
+                                            <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
+                                            <input type="text" class="form-control date-picker" data-date-format="dd/mm/yyyy" placeholder="{{ __('common.select_date') }}" autocomplete="off" id="end_date" name="end_date" required data-label="{{ __('common.end_date') }}" value="{{ $fmtDate($permit->end_date ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -749,11 +751,16 @@
     // ---------------------------------------------------------------
     // Tanggal: end >= start, default end = start
     // ---------------------------------------------------------------
+    // Datepicker dd/mm/yyyy (sama dengan History Invoice); nilai dibandingkan lewat getDate
+    function pickerDate(sel) {
+        return $(sel).val() ? $(sel).datepicker('getDate') : null;
+    }
+
     $('#start_date').on('change', function () {
-        var v = $(this).val();
-        $('#end_date').attr('min', v);
-        if (v && (!$('#end_date').val() || $('#end_date').val() < v)) {
-            $('#end_date').val(v);
+        var start = pickerDate('#start_date'), end = pickerDate('#end_date');
+        $('#end_date').datepicker('setStartDate', start || false);
+        if (start && (!end || end < start)) {
+            $('#end_date').datepicker('update', start);
         }
     });
 
@@ -943,7 +950,7 @@
             }
         });
 
-        var start = $('#start_date').val(), end = $('#end_date').val();
+        var start = pickerDate('#start_date'), end = pickerDate('#end_date');
         if (start && end && end < start) {
             fail($('#end_date'), LANG.end_date_before);
         }
@@ -1121,7 +1128,8 @@
             loadGrids();
             $('#work_shift_D').prop('checked', true);
             $('#noteCount').text('0');
-            $('#end_date').removeAttr('min');
+            $('#start_date, #end_date').datepicker('update', '');
+            $('#end_date').datepicker('setStartDate', false);
             applyType();
             autoSelectTenant();
             $('html, body').animate({ scrollTop: 0 }, 250);

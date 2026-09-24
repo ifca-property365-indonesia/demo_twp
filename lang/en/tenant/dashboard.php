@@ -47,6 +47,7 @@ return [
     'latest_ticket'          => 'Our Latest Ticket',
     'new_ticket'             => 'New Ticket',
     'col_ticket_number'      => 'Ticket Number',
+    'col_wo_number'          => 'WO Number',
     'col_reported_date'      => 'Reported Date',
     'col_request_by'         => 'Request By',
     'col_ticket_type'        => 'Ticket Type',

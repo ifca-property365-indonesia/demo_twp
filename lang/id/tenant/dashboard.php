@@ -47,6 +47,7 @@ return [
     'latest_ticket'          => 'Tiket Terbaru Kami',
     'new_ticket'             => 'Tiket Baru',
     'col_ticket_number'      => 'Nomor Tiket',
+    'col_wo_number'          => 'No. WO',
     'col_reported_date'      => 'Tanggal Lapor',
     'col_request_by'         => 'Diminta Oleh',
     'col_ticket_type'        => 'Jenis Tiket',

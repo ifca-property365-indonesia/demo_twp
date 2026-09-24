@@ -166,7 +166,7 @@
                                 <thead class="table-dark">
                                     <tr role="row">
                                         <th class="text-center" style="width: 48px;">{{ __('common.col_no') }}</th>
-                                        <th class="text-center">{{ __('tenant/dashboard.col_ticket_number') }}</th>
+                                        <th class="text-center">{{ __('tenant/dashboard.col_wo_number') }}</th>
                                         <th class="text-center">{{ __('common.category') }}</th>
                                         <th class="text-center">{{ __('common.description') }}</th>
                                         <th class="text-center" style="width: 110px;">{{ __('tenant/dashboard.col_reported_date') }}</th>

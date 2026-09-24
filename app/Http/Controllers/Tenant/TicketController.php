@@ -445,6 +445,12 @@ class TicketController extends Controller
                 'project_no'      => $project
             );
             if ($id > 0) {
+                // ===== start insert ke HD (edit tidak mengembalikan status O ke R, MySQL) =====
+                $oldStatus = DB::table('sv_entry_multi')->where($critedit)->value('status');
+                if (trim((string) $oldStatus) === 'O') {
+                    $data['status'] = 'O';
+                }
+                // ===== end insert ke HD =====
                 $updated = DB::table('sv_entry_multi')->where($critedit)->update($data);
             } else {
                 $updated = DB::table('sv_entry_multi')->insert($data);
@@ -484,11 +490,90 @@ class TicketController extends Controller
                 ->where($critedit2)
                 ->get();
 
+            $hdReportNo = null;   // report_no WO yang dibuat di blok "insert ke HD" (kalau berhasil)
+
             if (count($checkdataServ1) == 0) {
                 DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
                 ->insert($dataServ1);
+
+                // ===== start insert ke HD =====
+                // Ticket baru juga dibuat di mgr.sv_entry_hd dengan report_no WOyymmnnnn
+                // (nnnn = urutan dalam bulan berjalan, mulai 0001 setiap bulan baru).
+                // complain_no disimpan di note1 sebagai penghubung ke sv_entry_multi.
+                // Setelah berhasil, status sv_entry_multi (SQL Server & MySQL) -> O.
+                // Kalau gagal, ticket tetap tersimpan (status tetap R) dan error dicatat di log.
+                try {
+                    $hdReportNo = DB::connection('dblive')->transaction(function () use ($entity, $project, $data_tenant, $webuser, $req_by, $description, $location, $floor, $contact_no, $lot_no, $ticket_type, $category, $typeformat2, $critedit2) {
+                        $db = DB::connection('dblive');
+
+                        // report_no terakhir di bulan berjalan (WOyymm....); belum ada -> mulai 0001.
+                        // Baris dikunci sampai commit supaya dua submit bersamaan tidak
+                        // mendapat nomor yang sama.
+                        $prefix = 'WO' . date('ym');
+                        $lastReportNo = $db->table('mgr.sv_entry_hd')
+                            ->where('entity_cd', $entity)
+                            ->where('project_no', $project)
+                            ->where('report_no', 'like', $prefix . '%')
+                            ->orderBy('report_no', 'desc')
+                            ->lockForUpdate()
+                            ->value('report_no');
+
+                        $lastSeq = $lastReportNo ? (int) substr(trim($lastReportNo), -4) : 0;
+                        if ($lastSeq >= 9999) {
+                            throw new \RuntimeException('report_no ' . $prefix . ' sudah mencapai 9999');
+                        }
+                        $reportNo = $prefix . str_pad($lastSeq + 1, 4, '0', STR_PAD_LEFT);
+
+                        $now = date('d M Y H:i:s');
+                        $db->table('mgr.sv_entry_hd')->insert([
+                            'entity_cd'       => $entity,
+                            'project_no'      => $project,
+                            'debtor_acct'     => $data_tenant[0]->tenant_no,
+                            'report_no'       => $reportNo,
+                            'reported_by'     => $webuser,
+                            'reported_date'   => $now,
+                            'after_hr'        => ' ',
+                            'work_requested'  => mb_substr((string) $description, 0, 255),
+                            'location'        => $location,
+                            'floor'           => $floor,
+                            'serv_req_by'     => $req_by,
+                            'contact_no'      => $contact_no,
+                            'billing_type'    => 'T',
+                            'status'          => 'O',
+                            'audit_user'      => 'MGR',
+                            'audit_date'      => $now,
+                            'complain_source' => 'TWP',
+                            'lot_no'          => $lot_no,
+                            'request_type'    => $ticket_type,
+                            'category_cd'     => $category,
+                            'note1'           => $typeformat2,   // complain_no sv_entry_multi
+                        ]);
+
+                        $db->table('mgr.sv_entry_multi')
+                            ->where($critedit2)
+                            ->update(['status' => 'O']);
+
+                        \Log::info('Ticket masuk sv_entry_hd', ['complain_no' => $typeformat2, 'report_no' => $reportNo]);
+
+                        return $reportNo;
+                    });
+
+                    // salinan ticket di MySQL (demo_twp.sv_entry_multi) ikut -> O;
+                    // dijalankan setelah transaksi SQL Server commit (koneksi berbeda)
+                    DB::table('sv_entry_multi')
+                        ->where($critedit2)
+                        ->update(['status' => 'O']);
+                } catch (\Throwable $e) {
+                    \Log::error('Insert sv_entry_hd gagal: ' . $e->getMessage(), ['complain_no' => $typeformat2]);
+                }
+                // ===== end insert ke HD =====
             } else {
+                // ===== start insert ke HD (edit tidak mengembalikan status O ke R, SQL Server) =====
+                if (trim((string) $checkdataServ1[0]->status) === 'O') {
+                    $dataServ1['status'] = 'O';
+                }
+                // ===== end insert ke HD =====
                 DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
                 ->where($critedit2)
@@ -515,6 +600,12 @@ class TicketController extends Controller
                 'audit_user'     => 'MGR',
                 'audit_date'     => date('d M Y H:i:s')
             );
+
+            // ===== start insert ke HD (dt ikut menyimpan report_no, seperti sistem desktop) =====
+            if ($hdReportNo) {
+                $dataServ2['report_no'] = $hdReportNo;
+            }
+            // ===== end insert ke HD =====
 
             $checkdataServ2 = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi_dt')

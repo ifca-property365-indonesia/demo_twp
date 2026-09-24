@@ -54,6 +54,7 @@ return [
     'system_error'  => 'Kesalahan Sistem:',
     'required_fields' => 'Wajib diisi',
     'optional'      => 'Opsional',
+    'select_date'   => 'Pilih tanggal',
     'all'           => 'Semua',
     'modal_title'   => 'Judul',
     'footer'        => 'Portal Web Tenant',

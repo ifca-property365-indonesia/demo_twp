@@ -147,12 +147,101 @@
 .is-invalid + .select2-container--bootstrap-5 .select2-selection { border-color: var(--cui-form-invalid-border-color); }
 .is-invalid ~ .invalid-feedback { display: block; }
 
-/* bootstrap-datepicker */
+/* ---------- bootstrap-datepicker (popup pilihan tanggal) ---------- */
 .datepicker { z-index: 1060 !important; font-size: .85rem; }
+.datepicker.datepicker-dropdown {
+    padding: .75rem;
+    margin-top: .35rem;
+    border: 1px solid #e3e6ef;
+    border-radius: .75rem;
+    box-shadow: 0 .75rem 2rem rgba(31, 41, 55, .14), 0 .125rem .375rem rgba(31, 41, 55, .06);
+}
+/* segitiga penunjuk mengikuti warna border / latar popup */
+.datepicker-dropdown.datepicker-orient-top:before { border-top-color: #e3e6ef; }
+.datepicker-dropdown.datepicker-orient-bottom:before { border-bottom-color: #e3e6ef; }
+.datepicker table { border-collapse: separate; border-spacing: 2px; }
+.datepicker table tr td,
+.datepicker table tr th { border-radius: .5rem; transition: background-color .12s ease, color .12s ease; }
+
+/* header: < September 2026 >  (baris pertama thead = .datepicker-title yang tersembunyi) */
+.datepicker .datepicker-switch,
+.datepicker .prev,
+.datepicker .next { height: 2.25rem; font-weight: 700; color: var(--cui-emphasis-color); }
+.datepicker .datepicker-switch { font-size: .9rem; }
+.datepicker .datepicker-switch:hover,
+.datepicker .prev:hover,
+.datepicker .next:hover,
+.datepicker tfoot tr th:hover { background: #eef0ff; color: #4f5bd5; }
+.datepicker .prev, .datepicker .next { width: 2.25rem; color: #4f5bd5; font-size: 1.05rem; }
+.datepicker .prev.disabled, .datepicker .next.disabled { visibility: hidden; }
+
+/* nama hari */
+.datepicker .dow {
+    height: 2rem;
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--cui-secondary-color);
+}
+
+/* tanggal */
+.datepicker table tr td.day { width: 2.25rem; height: 2.25rem; font-weight: 500; color: var(--cui-body-color); }
+.datepicker table tr td.day:hover,
+.datepicker table tr td.focused { background: #eef0ff; color: #4f5bd5; }
+.datepicker table tr td.old,
+.datepicker table tr td.new { color: #b9bfcc; }
+.datepicker table tr td.today,
+.datepicker table tr td.today:hover {
+    background: transparent !important;
+    color: #4f5bd5 !important;
+    font-weight: 700;
+    box-shadow: inset 0 0 0 1.5px #4f5bd5;
+}
 .datepicker table tr td.active,
 .datepicker table tr td.active:hover,
-.datepicker table tr td.active.active { background: #4f5bd5 !important; border-color: #4f5bd5 !important; }
-.datepicker table tr td.today { background: #eef0ff !important; }
+.datepicker table tr td.active.active,
+.datepicker table tr td.active.today,
+.datepicker table tr td span.active,
+.datepicker table tr td span.active:hover,
+.datepicker table tr td span.active.active {
+    background: #4f5bd5 !important;
+    border-color: #4f5bd5 !important;
+    color: #fff !important;
+    font-weight: 700;
+    text-shadow: none;
+    box-shadow: 0 .25rem .6rem rgba(79, 91, 213, .35);
+}
+.datepicker table tr td.disabled,
+.datepicker table tr td.disabled:hover {
+    color: #d3d7e0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    cursor: not-allowed;
+}
+
+/* tampilan bulan / tahun (klik judul) */
+.datepicker table tr td span {
+    height: 2.75rem;
+    line-height: 2.75rem;
+    margin: 2px 1%;
+    width: 31%;
+    border-radius: .5rem;
+    font-weight: 500;
+}
+.datepicker table tr td span:hover,
+.datepicker table tr td span.focused { background: #eef0ff; color: #4f5bd5; }
+.datepicker table tr td span.old,
+.datepicker table tr td span.new { color: #b9bfcc; }
+.datepicker table tr td span.disabled,
+.datepicker table tr td span.disabled:hover { color: #d3d7e0; background: transparent; cursor: not-allowed; }
+
+/* tombol Today / Clear (kalau diaktifkan) */
+.datepicker tfoot tr th { height: 2.1rem; font-weight: 600; color: #4f5bd5; }
+
+/* field yang membuka popup: ikon kalender ikut berwarna saat aktif */
+.form-control-wrap .form-icon-left:has(~ .date-picker:focus) { color: #4f5bd5; }
+.form-control.date-picker { cursor: pointer; }
 
 /* ---------- ikon di tombol ---------- */
 .btn i[class^="cil-"], .btn i[class*=" cil-"] { vertical-align: -.1em; }

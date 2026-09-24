@@ -114,7 +114,7 @@
                     <thead>
                         <tr>
                             <th>{{ __('admin/dashboard.col_no') }}</th>
-                            <th>{{ __('admin/dashboard.ticket_number') }}</th>
+                            <th>{{ __('admin/dashboard.wo_number') }}</th>
                             <th>{{ __('common.category') }}</th>
                             <th>{{ __('admin/dashboard.tenant_name') }}</th>
                             <th>{{ __('common.description') }}</th>
@@ -248,7 +248,7 @@ $(function () {
         ajax: { url: "{{ url('/admin/dash/data/ticket') }}", type: 'POST' },
         columns: [
             { data: 'row_number', name: 'row_number', orderable: false, searchable: false },
-            { data: 'complain_no', name: 'complain_no' },
+            { data: 'report_no', name: 'report_no' },
             { data: 'categoryname', name: 'categoryname' },
             { data: 'name', name: 'name' },
             { data: 'work_requested', name: 'work_requested' },

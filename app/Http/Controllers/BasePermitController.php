@@ -322,6 +322,7 @@ abstract class BasePermitController extends Controller
     {
         $type = $request->input('permit_type');
 
+        $this->normalizeDates($request);
         $this->applyWorkShift($request, $type);
         $validator = $this->permitValidator($request, $type);
 
@@ -397,6 +398,7 @@ abstract class BasePermitController extends Controller
         // Field yang tidak boleh diubah portal ini: pakai nilai yang tersimpan.
         $locked = $this->lockedFields($type);
         $request->merge($this->storedValues($permit, $locked));
+        $this->normalizeDates($request);
         $this->applyWorkShift($request, $type);
 
         $validator = $this->permitValidator($request, $type, true, $locked);
@@ -982,6 +984,21 @@ abstract class BasePermitController extends Controller
      * Jam Kerja Work Permit: pilihan 10.00-22.00 / 22.00-10.00 mengisi start_time & end_time
      * dari WORK_SHIFTS (jam kiriman form diabaikan); 'O' (lain-lain) memakai jam yang diisi.
      */
+    /**
+     * start_date / end_date dari datepicker (dd/mm/yyyy) -> Y-m-d sebelum validasi, supaya
+     * aturan date / after_or_equal dan fmtDate() membaca tanggal yang benar.
+     * Tanggal tidak valid dibiarkan apa adanya sehingga validasi 'date' menolaknya.
+     */
+    private function normalizeDates(Request $request)
+    {
+        foreach (['start_date', 'end_date'] as $field) {
+            $ymd = \App\Support\DateInput::format($request->input($field));
+            if ($ymd) {
+                $request->merge([$field => $ymd]);
+            }
+        }
+    }
+
     private function applyWorkShift(Request $request, $type)
     {
         if ($type !== 'W') {

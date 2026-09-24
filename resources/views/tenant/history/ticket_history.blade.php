@@ -18,14 +18,14 @@
                             <label for="start" class="form-label">{{ __('common.start_date') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('01/m/Y') }}" required autocomplete="off">
+                                <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" data-date-end-date="0d" value="" placeholder="{{ __('common.select_date') }}" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-lg-3">
                             <label for="end" class="form-label">{{ __('common.end_date') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
+                                <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" data-date-end-date="0d" value="" placeholder="{{ __('common.select_date') }}" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-4 col-lg-2">
@@ -43,7 +43,7 @@
 		                            <thead class="table-dark">
 		                                <tr role="row">
 		                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">{{ __('tenant/history.col_no') }}</th>
-		                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.ticket_number') }}</th>
+		                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.wo_number') }}</th>
 		                                    <th class="sorting text-center" style="width: 24px; vertical-align: middle;">{{ __('tenant/history.category') }}</th>
 		                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/history.description') }}</th>
 		                                    <th class="sorting text-center" style="width: 100px; vertical-align: middle;">{{ __('tenant/history.reported_date') }}</th>
@@ -66,7 +66,15 @@
     	// 'O' (Open) dipakai sistem IFCA untuk ticket, tidak ada di common.statuses
     	var STATUS_LABELS = @json(__('common.statuses') + ['O' => __('tenant/history.ticket_status_open')]);
     	$(document).ready(function(){
-			$('.date-picker').datepicker('setEndDate', new Date());
+			// Tanggal (sama dengan form Letter Permit): end >= start, end kosong ikut start
+			$('#start').on('change', function () {
+				var start = $(this).val() ? $(this).datepicker('getDate') : null;
+				var end = $('#end').val() ? $('#end').datepicker('getDate') : null;
+				$('#end').datepicker('setStartDate', start || false);
+				if (start && (!end || end < start)) {
+					$('#end').datepicker('update', start);
+				}
+			});
 	    	$('#tblTicket').DataTable({
 	    		processing: true,
 	    		serverSide: true,
@@ -88,7 +96,7 @@
 			                return meta.row + meta.settings._iDisplayStart + 1 +'.';
 			            }
 		            },
-		            {data:"complain_no"},
+		            {data:"report_no"},
 		            {data:"category_desc"},
 		            {data:"work_requested"},
 		            {data:"reported_date",

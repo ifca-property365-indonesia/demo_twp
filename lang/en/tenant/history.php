@@ -45,6 +45,7 @@ return [
 
     // status ticket di luar common.statuses (kode dari sistem IFCA)
     'ticket_status_open' => 'Open',
+    'wo_number'          => 'WO Number',
 
     // pesan
     'search_error'    => ':status Search : :error',

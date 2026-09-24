@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Support\TenantScope;
+use App\Support\TicketHd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -28,11 +29,8 @@ class HistoryController extends Controller
                 // Jika kosong, ambil dari tanggal paling awal
                 $date_start = '19000101';
             } else {
-                $tglstart = explode('/', $date_start);
-                $date_start = date(
-                    'Ymd',
-                    strtotime($tglstart[2] . '-' . $tglstart[1] . '-' . $tglstart[0])
-                );
+                // dd/mm/yyyy (datepicker) atau yyyy-mm-dd, lihat TicketHd::toYmd
+                $date_start = TicketHd::toYmd($date_start) ?: '19000101';
             }
 
             // =========================
@@ -41,56 +39,23 @@ class HistoryController extends Controller
             $date_end = $request->date_end;
 
             if (empty($date_end)) {
-                // Jika kosong, gunakan hari ini
-                $date_end = date('Ymd');
+                // Jika kosong, tanpa batas akhir (semua work order)
+                $date_end = '29991231';
             } else {
-                $tglend = explode('/', $date_end);
-                $date_end = date(
-                    'Ymd',
-                    strtotime($tglend[2] . '-' . $tglend[1] . '-' . $tglend[0])
-                );
+                $date_end = TicketHd::toYmd($date_end) ?: '29991231';
             }
 
             // =========================
-            // QUERY
+            // QUERY: work order di mgr.sv_entry_hd (lihat App\Support\TicketHd)
             // =========================
-            $sql = "
-                SELECT
-                    dt.complain_no,
-                    m.category_cd,
-                    dt.work_requested,
-                    dt.reported_date,
-                    dt.serv_req_by,
-                    dt.lot_no,
-                    dt.status
-                FROM mgr.sv_entry_multi_dt AS dt
-                LEFT JOIN mgr.sv_entry_multi AS m
-                    ON m.entity_cd = dt.entity_cd
-                    AND m.project_no = dt.project_no
-                    AND m.complain_no = dt.complain_no
-                WHERE " . TenantScope::sqlTenantNo('dt.debtor_acct') . "
-                    AND YEAR(dt.reported_date) * 10000
-                        + MONTH(dt.reported_date) * 100
-                        + DAY(dt.reported_date) >= '$date_start'
-                    AND YEAR(dt.reported_date) * 10000
-                        + MONTH(dt.reported_date) * 100
-                        + DAY(dt.reported_date) <= '$date_end'
-                ORDER BY
-                    dt.reported_date DESC,
-                    dt.complain_no DESC
-            ";
-
-            $response = DB::connection('dblive')->select($sql);
-
-            // Ambil master category dari database TWP
-            $categories = DB::connection('dblive')
-                ->table('mgr.sv_category')
-                ->pluck('descs', 'category_cd');
-
-            // Tambahkan category_desc
-            foreach ($response as $row) {
-                $row->category_desc = $categories[$row->category_cd] ?? '';
-            }
+            $response = TicketHd::between(
+                TicketHd::query()->whereIn('t.debtor_acct', TenantScope::tenantNos()),
+                $date_start,
+                $date_end
+            )
+                ->orderBy('t.reported_date', 'desc')
+                ->orderBy('t.report_no', 'desc')
+                ->get();
 
             return Datatables::of($response)->make(true);
         }
@@ -105,17 +70,30 @@ class HistoryController extends Controller
             'Status' => 200
         );
         $id_tenant = Session::get('Tuser_id');
+
+        // tanggal kosong = tanpa batas (sama dengan ticketTable)
         $start = $request->start;
-        $tglstart = explode('/',$start);          
-        $start = date('Ymd',strtotime($tglstart[2].'-'.$tglstart[1].'-'.$tglstart[0]));
+        if (empty($start)) {
+            $start = '19000101';
+        } else {
+            // dd/mm/yyyy (datepicker) atau yyyy-mm-dd, lihat TicketHd::toYmd
+            $start = TicketHd::toYmd($start) ?: '19000101';
+        }
 
         $end = $request->end;
-        $tglend = explode('/',$end);
-        $end = date('Ymd',strtotime($tglend[2].'-'.$tglend[1].'-'.$tglend[0]));
+        if (empty($end)) {
+            $end = '29991231';
+        } else {
+            $end = TicketHd::toYmd($end) ?: '29991231';
+        }
 
-        $sql = "SELECT * FROM sv_entry_multi WHERE " . TenantScope::sqlTenantId('id_tenant') . " and year(reported_date)*10000+month(reported_date)*100+day(reported_date) >= '$start' AND year(reported_date)*10000+month(reported_date)*100+day(reported_date) <= '$end' ORDER BY reported_date DESC";
-        $query = DB::connection('mysql')->select($sql);
-        if (count($query) > 0)
+        // sama dengan isi tabel (ticketTable): work order di mgr.sv_entry_hd
+        $found = TicketHd::between(
+            TicketHd::query()->whereIn('t.debtor_acct', TenantScope::tenantNos()),
+            $start,
+            $end
+        )->exists();
+        if ($found)
         {
             $callback['Pesan'] = __('common.data_found');   
             $callback['Error'] = false;

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Support\TenantScope;
+use App\Support\TicketHd;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -121,16 +122,11 @@ class DashController extends Controller
         $list_hticket = "";
         $i = 1;
 
-        $htenants = DB::connection('dblive')
-    ->table('mgr.sv_entry_multi_dt as dt')
-    ->leftJoin('mgr.sv_entry_multi as m', 'm.complain_no', '=', 'dt.complain_no')
-    ->whereIn('m.debtor_acct', TenantScope::tenantNos())
-    ->orderBy('dt.reported_date', 'desc')
-    ->orderBy('dt.complain_no', 'desc')
-    ->select(
-        'dt.*',
-        'm.category_cd'
-    )
+        // work order di mgr.sv_entry_hd (lihat App\Support\TicketHd)
+        $htenants = TicketHd::query()
+    ->whereIn('t.debtor_acct', TenantScope::tenantNos())
+    ->orderBy('t.reported_date', 'desc')
+    ->orderBy('t.report_no', 'desc')
     ->get();
 
 if (!empty($htenants)) {
@@ -141,23 +137,15 @@ if (!empty($htenants)) {
         // =========================
         $billingType = __('tenant/dashboard.non_rechargeable');
 
-        $report = DB::connection('dblive')
-            ->table('mgr.sv_entry_multi_dt')
-            ->where('complain_no', $tenant->complain_no)
-            ->whereIn('debtor_acct', TenantScope::tenantNos())
-            ->where('reported_by', 'TWP')
+        $checkRecharge = DB::connection('dblive')
+            ->table('mgr.sv_entry_dt')
+            ->where('entity_cd', $tenant->entity_cd)
+            ->where('project_no', $tenant->project_no)
+            ->where('report_no', $tenant->report_no)
             ->first();
 
-        if ($report) {
-
-            $checkRecharge = DB::connection('dblive')
-                ->table('mgr.sv_entry_dt')
-                ->where('report_no', $report->report_no)
-                ->first();
-
-            if ($checkRecharge) {
-                $billingType = __('tenant/dashboard.rechargeable');
-            }
+        if ($checkRecharge) {
+            $billingType = __('tenant/dashboard.rechargeable');
         }
 
         // =========================
@@ -165,28 +153,8 @@ if (!empty($htenants)) {
         // =========================
         $list_hticket .= '<tr class="odd">';
         $list_hticket .= '<td>'.$i.'</td>';
-        $list_hticket .= '<td>'.$tenant->complain_no.'</td>';
-
-        $crit = array(
-            'category_cd' => $tenant->category_cd
-        );
-
-        $data_category = DB::connection('dblive')
-            ->table('mgr.sv_category')
-            ->where($crit)
-            ->get();
-
-        if (empty($data_category)) {
-            $list_hticket .= '<td>'.$tenant->category_cd.'</td>';
-        } else {
-            foreach ($data_category as $datacate) {
-                if ($datacate->descs == null) {
-                    $list_hticket .= '<td></td>';
-                } else {
-                    $list_hticket .= '<td>'.$datacate->descs.'</td>';
-                }
-            }
-        }
+        $list_hticket .= '<td>'.e($tenant->report_no).'</td>';
+        $list_hticket .= '<td>'.e($tenant->category_desc ?? $tenant->category_cd).'</td>';
 
         $list_hticket .= '<td>'.$tenant->work_requested.'</td>';
         $list_hticket .= '<td>'.date("d M Y", strtotime($tenant->reported_date)).'</td>';
@@ -201,8 +169,18 @@ if (!empty($htenants)) {
             .$data_status["status"].
             '</span></td>';
 
-        if ($tenant->status == 'R') {
-            $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''.url('tenant/ticket').'/'.$tenant->id.'/edit\'"> '.e(__('common.edit')).'</button></td>';
+        // Edit hanya untuk WO berstatus R yang berasal dari ticket TWP (id-nya di MySQL sv_entry_multi)
+        $editId = null;
+        if (trim((string) $tenant->status) === 'R' && $tenant->complain_no) {
+            $editId = DB::table('sv_entry_multi')
+                ->where('entity_cd', $tenant->entity_cd)
+                ->where('project_no', $tenant->project_no)
+                ->where('complain_no', $tenant->complain_no)
+                ->value('id');
+        }
+
+        if ($editId) {
+            $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''.url('tenant/ticket').'/'.$editId.'/edit\'"> '.e(__('common.edit')).'</button></td>';
         } else {
             $list_hticket .= '<td></td>'."\n";
         }
