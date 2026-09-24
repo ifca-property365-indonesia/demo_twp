@@ -60,11 +60,11 @@ class NewSurveyController extends Controller
             }
 
             DB::commit();
-            return response()->json(['status' => 'OK', 'message' => 'Survey berhasil dibuat!']);
+            return response()->json(['status' => 'OK', 'message' => 'Survey created successfully!']);
 
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'Failed', 'message' => 'Gagal menyimpan: ' . $e->getMessage()]);
+            return response()->json(['status' => 'Failed', 'message' => 'Save failed: ' . $e->getMessage()]);
         }
     }
 
@@ -149,7 +149,7 @@ public function getDraftTable(Request $request)
 
             return response()->json([
                 'status' => 'OK',
-                'message' => 'Survey berhasil di-publish!'
+                'message' => 'Survey published successfully!'
             ]);
         } catch (Exception $e) {
             return response()->json([
@@ -167,7 +167,7 @@ public function getDraftTable(Request $request)
         
         // Pastikan data survey ditemukan
         if (!$survey) {
-            return "Data survey tidak ditemukan.";
+            return "Survey data not found.";
         }
 
         $questions = DB::connection('ifcaadm')->table('survey_questions')
@@ -236,11 +236,11 @@ public function getDraftTable(Request $request)
             }
 
             DB::commit();
-            return response()->json(['status' => 'OK', 'message' => 'Survey berhasil diperbarui!']);
+            return response()->json(['status' => 'OK', 'message' => 'Survey updated successfully!']);
 
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'Failed', 'message' => 'Gagal mengupdate: ' . $e->getMessage()]);
+            return response()->json(['status' => 'Failed', 'message' => 'Update failed: ' . $e->getMessage()]);
         }
     }
 

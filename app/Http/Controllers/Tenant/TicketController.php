@@ -378,7 +378,7 @@ class TicketController extends Controller
             $data_tenant = DB::table('pm_tenancy')->where('id', $tenant_no)->get();
 
             if ($data_tenant->isEmpty()) {
-                throw new \Exception("Tenant tidak ditemukan: $tenant_no");
+                throw new \Exception("Tenant not found: $tenant_no");
             }
             
             $dataopen = DB::connection('dblive')
@@ -386,7 +386,7 @@ class TicketController extends Controller
                 ->where(['entity_cd' => $entity])
                 ->get();
             if ($dataopen->isEmpty()) {
-                throw new \Exception("Document control tidak ditemukan untuk $entity / $pre");
+                throw new \Exception("Document control not found for $entity / $pre");
             }
             
 
@@ -399,7 +399,7 @@ class TicketController extends Controller
                 ->get();
             
             if ($dataopen2->isEmpty()) {
-                throw new \Exception("Document format tidak ditemukan (rowId=$next_doc_noSave, type_format=$Type_format1)");
+                throw new \Exception("Document format not found (rowId=$next_doc_noSave, type_format=$Type_format1)");
             }
 
             $typeformat2 = $dataopen2[0]->format;
@@ -610,7 +610,7 @@ class TicketController extends Controller
             );
 
             return response()->json([
-                "pesan" => $msg ?: "Data berhasil disimpan",
+                "pesan" => $msg ?: "Data has been saved successfully",
                 "status" => $st ?? 'OK'
             ]);
         } catch (\Throwable $e) {
@@ -622,7 +622,7 @@ class TicketController extends Controller
 
             return response()->json([
                 'status' => 'Fail',
-                'pesan' => 'Terjadi kesalahan: ' . $e->getMessage(),
+                'pesan' => 'An error occurred: ' . $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ], 500);

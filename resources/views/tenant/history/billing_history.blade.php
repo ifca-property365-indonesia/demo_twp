@@ -47,7 +47,7 @@
 		                                    <th class="sorting text-center" style="width: 100px;">Doc Date</th>
 		                                    <th class="sorting text-center" style="width: 100px;">Due Date</th>
 		                                    <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-		                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Periode</th>
+		                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Period</th>
 		                                    <th class="sorting text-center" style="width: 1px; vertical-align: middle;">Currency</th>
 		                                    <th class="sorting" style="vertical-align: middle;">Amount</th>
 		                                    <th class="sorting" style="vertical-align: middle;">Paid</th>

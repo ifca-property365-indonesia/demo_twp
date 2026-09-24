@@ -24,7 +24,7 @@
                                         <th class="text-center" style="width: 110px;">Doc Date</th>
                                         <th class="text-center" style="width: 110px;">Due Date</th>
                                         <th class="text-center">Description</th>
-                                        <th class="text-center" style="width: 110px;">Periode</th>
+                                        <th class="text-center" style="width: 110px;">Period</th>
                                         <th class="text-center" style="width: 80px;">Currency</th>
                                         <th class="text-center">Outstanding</th>
                                     </tr>

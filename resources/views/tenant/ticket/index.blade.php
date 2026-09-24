@@ -129,7 +129,7 @@
 							buttons: [
 								{
 									extend: 'pdf',
-									title: 'Harga Item',
+									title: 'Item Price List',
 									className: 'btn btn-primary mb-2',
 									text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
 
@@ -174,7 +174,7 @@
 							buttons: [
 								{
 									extend: 'pdf',
-									title: 'Harga Item',
+									title: 'Service Price List',
 									className: 'btn btn-primary mb-2',
 									text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
 

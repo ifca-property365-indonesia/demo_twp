@@ -65,7 +65,7 @@
         function lockPassword(checking) {
             passwordEl.disabled = true;
             passwordEl.value = '';
-            passwordEl.placeholder = checking ? 'Memeriksa email...' : 'Isi email terlebih dahulu';
+            passwordEl.placeholder = checking ? 'Checking email...' : 'Enter your email first';
         }
         function unlockPassword() {
             passwordEl.disabled = false;

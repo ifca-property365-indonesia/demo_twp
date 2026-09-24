@@ -23,7 +23,7 @@
                                     <th class="sorting text-center" style="width: 100px;">Doc Date</th>
                                     <th class="sorting text-center" style="width: 100px;">Due Date</th>
                                     <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Periode</th>
+                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Period</th>
                                     <th class="sorting text-center" style="vertical-align: middle;">Outstanding</th>
                                 </tr>
                             </thead>

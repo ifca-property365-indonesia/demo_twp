@@ -1041,7 +1041,7 @@ abstract class BasePermitController extends Controller
             'line' => $e->getLine(),
         ]);
 
-        return $this->fail(config('app.debug') ? 'Terjadi kesalahan: ' . $e->getMessage() : $message, 500);
+        return $this->fail(config('app.debug') ? 'An error occurred: ' . $e->getMessage() : $message, 500);
     }
 
     // ------------------------------------------------------------------

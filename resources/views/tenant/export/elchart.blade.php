@@ -29,7 +29,7 @@
     <table>
         <thead>
             <tr>
-                <th class="text-center">Periode</th>
+                <th class="text-center">Period</th>
                 <th class="text-center">LWBP Usage (kWh)</th>
                 <th class="text-center">WBP Usage (kWh)</th>
             </tr>

@@ -100,7 +100,7 @@ class PortalLoginController extends Controller
         if (!$adminOk && count($tenantOptions) === 0) {
             return redirect('/')
                 ->withInput($request->only('email', 'bsn'))
-                ->with('alert', 'Email atau password salah.');
+                ->with('alert', 'Incorrect email or password.');
         }
 
         // portal yang boleh dibuka tanpa login ulang (menu pindah portal di header)
@@ -161,7 +161,7 @@ class PortalLoginController extends Controller
     {
         $portals = Session::get('portals', array());
         if (empty($portals['admin'])) {
-            abort(403, 'Akun ini tidak punya akses Admin.');
+            abort(403, 'This account does not have Admin access.');
         }
         return $this->enterAdmin($portals['admin']['id'], $portals['admin']['email']);
     }
@@ -172,7 +172,7 @@ class PortalLoginController extends Controller
         $portals = Session::get('portals', array());
         $ids = array_column($portals['tenants'] ?? array(), 'id');
         if (!in_array($id, $ids)) {
-            abort(403, 'Akun ini tidak punya akses ke business tersebut.');
+            abort(403, 'This account does not have access to the selected business.');
         }
         return $this->enterTenant($id);
     }
