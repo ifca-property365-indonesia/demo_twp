@@ -69,7 +69,7 @@
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('tenant/permit*') ? 'active' : '' }}" href="{{ url('/tenant/permit/history') }}">
+            <a class="nav-link {{ request()->is('tenant/permit*') ? 'active' : '' }}" href="{{ url('/tenant/permit/index') }}">
                 <i class="nav-icon cil-clipboard"></i> {{ __('tenant.menu.letter_permit') }}
             </a>
         </li>

@@ -49,7 +49,7 @@
                     </div>
                 </div>
                 <div class="page-head-content">
-                    <a href="{{ $base . '/history' }}" class="btn btn-outline-secondary d-none d-sm-inline-flex">
+                    <a href="{{ $base . '/index' }}" class="btn btn-outline-secondary d-none d-sm-inline-flex">
                         <i class="cil-history"></i><span>{{ __('shared/permit.permit_history') }}</span>
                     </a>
                     <a href="{{ $base . '/history' }}" class="btn btn-icon btn-outline-secondary d-inline-flex d-sm-none">
@@ -314,7 +314,8 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="start_time">{{ __('common.start_time') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="time" class="form-control" id="start_time" name="start_time" required data-label="{{ __('common.start_time') }}" value="{{ $fmtTime($permit->start_time ?? null) }}">
+                                            <div class="form-icon form-icon-left"><i class="cil-clock"></i></div>
+                                            <input type="text" class="form-control time-picker" placeholder="{{ __('common.select_time') }}" maxlength="5" inputmode="numeric" autocomplete="off" id="start_time" name="start_time" required data-label="{{ __('common.start_time') }}" value="{{ $fmtTime($permit->start_time ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -323,7 +324,8 @@
                                     <div class="mb-3">
                                         <label class="form-label" for="end_time">{{ __('common.end_time') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="time" class="form-control" id="end_time" name="end_time" required data-label="{{ __('common.end_time') }}" value="{{ $fmtTime($permit->end_time ?? null) }}">
+                                            <div class="form-icon form-icon-left"><i class="cil-clock"></i></div>
+                                            <input type="text" class="form-control time-picker" placeholder="{{ __('common.select_time') }}" maxlength="5" inputmode="numeric" autocomplete="off" id="end_time" name="end_time" required data-label="{{ __('common.end_time') }}" value="{{ $fmtTime($permit->end_time ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>

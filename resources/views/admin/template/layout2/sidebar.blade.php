@@ -72,7 +72,7 @@
         @endif
 
         <li class="nav-item">
-            <a class="nav-link {{ request()->is('admin/permit*') ? 'active' : '' }}" href="{{ url('/admin/permit/history') }}">
+            <a class="nav-link {{ request()->is('admin/permit*') ? 'active' : '' }}" href="{{ url('/admin/permit/index') }}">
                 <i class="nav-icon cil-clipboard"></i> {{ __('admin.menu.letter_permit') }}
             </a>
         </li>

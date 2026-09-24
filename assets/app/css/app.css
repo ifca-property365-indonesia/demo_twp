@@ -110,6 +110,8 @@
 .form-control, .form-select, .form-check-input, textarea.form-control,
 .select2-container--bootstrap-5 .select2-selection,
 .datepicker, .input-group-text { background-color: #fff; }
+/* saat fokus juga tetap putih (CoreUI memakai --cui-body-bg yang abu-abu -> mirip field terkunci) */
+.form-control:focus, .form-select:focus { background-color: #fff; }
 .form-control:disabled, .form-select:disabled,
 .form-control[readonly], .form-select[readonly],
 .form-control[readonly]:focus, .form-control:disabled:focus,
@@ -239,9 +241,89 @@
 /* tombol Today / Clear (kalau diaktifkan) */
 .datepicker tfoot tr th { height: 2.1rem; font-weight: 600; color: #4f5bd5; }
 
-/* field yang membuka popup: ikon kalender ikut berwarna saat aktif */
-.form-control-wrap .form-icon-left:has(~ .date-picker:focus) { color: #4f5bd5; }
-.form-control.date-picker { cursor: pointer; }
+/* field yang membuka popup: ikon kalender / jam ikut berwarna saat aktif */
+.form-control-wrap .form-icon-left:has(~ .date-picker:focus),
+.form-control-wrap .form-icon-left:has(~ .time-picker:focus) { color: #4f5bd5; }
+.form-control.date-picker,
+.form-control.time-picker:not([readonly]):not(:disabled) { cursor: pointer; }
+
+/* ---------- pemilih jam (assets/app/js/timepicker.js), gaya sama dengan datepicker ---------- */
+.timepicker-dropdown {
+    position: absolute;
+    z-index: 1060;
+    width: 17rem;
+    padding: .75rem;
+    font-size: .85rem;
+    background: #fff;
+    border: 1px solid #e3e6ef;
+    border-radius: .75rem;
+    box-shadow: 0 .75rem 2rem rgba(31, 41, 55, .14), 0 .125rem .375rem rgba(31, 41, 55, .06);
+}
+.timepicker-dropdown .tp-head { display: flex; align-items: center; gap: .25rem; margin-bottom: .5rem; }
+.timepicker-dropdown .tp-back,
+.timepicker-dropdown .tp-back-spacer { flex: 0 0 2.25rem; height: 2.25rem; }
+.timepicker-dropdown .tp-back {
+    border: 0;
+    border-radius: .5rem;
+    background: transparent;
+    color: #4f5bd5;
+    font-size: 1.05rem;
+    font-weight: 700;
+    visibility: hidden;
+}
+.timepicker-dropdown.tp-view-minute .tp-back { visibility: visible; }
+.timepicker-dropdown .tp-back:hover { background: #eef0ff; }
+.timepicker-dropdown .tp-title {
+    flex: 1;
+    text-align: center;
+    font-size: 1.05rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    color: var(--cui-emphasis-color);
+    font-variant-numeric: tabular-nums;
+}
+.timepicker-dropdown .tp-title .tp-sep { margin: 0 .15rem; color: var(--cui-secondary-color); }
+/* bagian yang sedang dipilih diberi warna */
+.timepicker-dropdown:not(.tp-view-minute) .tp-h,
+.timepicker-dropdown.tp-view-minute .tp-m { color: #4f5bd5; }
+.timepicker-dropdown.tp-view-minute .tp-h { cursor: pointer; border-radius: .35rem; padding: 0 .15rem; }
+.timepicker-dropdown.tp-view-minute .tp-h:hover { background: #eef0ff; }
+
+.timepicker-dropdown .tp-grid { display: grid; gap: 2px; }
+.timepicker-dropdown .tp-grid-hour { grid-template-columns: repeat(6, 1fr); }
+.timepicker-dropdown .tp-grid-minute { grid-template-columns: repeat(4, 1fr); }
+.timepicker-dropdown .tp-cell {
+    height: 2.25rem;
+    border: 0;
+    border-radius: .5rem;
+    background: transparent;
+    color: var(--cui-body-color);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: background-color .12s ease, color .12s ease;
+}
+.timepicker-dropdown .tp-grid-minute .tp-cell { height: 2.75rem; }
+.timepicker-dropdown .tp-cell:hover { background: #eef0ff; color: #4f5bd5; }
+.timepicker-dropdown .tp-cell.now { color: #4f5bd5; font-weight: 700; box-shadow: inset 0 0 0 1.5px #4f5bd5; }
+.timepicker-dropdown .tp-cell.active,
+.timepicker-dropdown .tp-cell.active:hover {
+    background: #4f5bd5;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 .25rem .6rem rgba(79, 91, 213, .35);
+}
+/* segitiga penunjuk, seperti datepicker */
+.timepicker-dropdown:before,
+.timepicker-dropdown:after {
+    content: '';
+    position: absolute;
+    left: 1rem;
+    border: 7px solid transparent;
+}
+.timepicker-dropdown:before { top: -14px; border-bottom-color: #e3e6ef; }
+.timepicker-dropdown:after { top: -13px; border-bottom-color: #fff; }
+.timepicker-dropdown.tp-above:before { top: auto; bottom: -14px; border-bottom-color: transparent; border-top-color: #e3e6ef; }
+.timepicker-dropdown.tp-above:after { top: auto; bottom: -13px; border-bottom-color: transparent; border-top-color: #fff; }
 
 /* ---------- ikon di tombol ---------- */
 .btn i[class^="cil-"], .btn i[class*=" cil-"] { vertical-align: -.1em; }

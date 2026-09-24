@@ -55,6 +55,7 @@ return [
     'required_fields' => 'Required fields',
     'optional'      => 'Optional',
     'select_date'   => 'Select date',
+    'select_time'   => 'Select time',
     'all'           => 'All',
     'modal_title'   => 'Modal Title',
     'footer'        => 'Tenant Web Portal',
