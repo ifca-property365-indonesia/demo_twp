@@ -28,7 +28,7 @@
         <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Default Password</h3>
+                        <h3 class="page-title">{{ __('admin/sysspec.default_password') }}</h3>
                     </div>
                 </div>
             </div>
@@ -40,12 +40,12 @@
                     <div class="row g-4">
                         <div class="col-12 col-sm-12">
 
-                            <h5>Set default password for new user</h5>
+                            <h5>{{ __('admin/sysspec.set_default_desc') }}</h5>
 
                             {{-- Current Password --}}
                             <div class="mb-3">
                                 <label class="form-label" for="oldpass">
-                                    Current Password
+                                    {{ __('admin/sysspec.current_password') }}
                                 </label>
 
                                 <input
@@ -62,7 +62,7 @@
                             {{-- New Password --}}
                             <div class="mb-3">
                                 <label class="form-label" for="newpass">
-                                    New Password
+                                    {{ __('admin/sysspec.new_password') }}
                                 </label>
 
                                 <input
@@ -70,14 +70,14 @@
                                     class="form-control"
                                     name="newpass"
                                     id="newpass"
-                                    placeholder="Enter new password"
+                                    placeholder="{{ __('admin/sysspec.enter_new_password') }}"
                                 >
                             </div>
 
                             {{-- Confirm New Password --}}
                             <div class="mb-3">
                                 <label class="form-label" for="confirmpass">
-                                    Confirm New Password
+                                    {{ __('admin/sysspec.confirm_new_password') }}
                                 </label>
 
                                 <input
@@ -85,15 +85,15 @@
                                     class="form-control"
                                     name="confirmpass"
                                     id="confirmpass"
-                                    placeholder="Confirm new password"
+                                    placeholder="{{ __('admin/sysspec.confirm_placeholder') }}"
                                 >
 
                                 <div id="passwordError" class="password-error">
-                                    New Password and Confirm New Password do not match.
+                                    {{ __('admin/sysspec.password_mismatch') }}
                                 </div>
 
                                 <div id="passwordSuccess" class="password-success">
-                                    Password matched.
+                                    {{ __('admin/sysspec.password_matched') }}
                                 </div>
                             </div>
 
@@ -102,7 +102,7 @@
                                 class="btn btn-primary mt-2"
                                 id="btnsave"
                             >
-                                Save
+                                {{ __('common.save') }}
                             </button>
 
                         </div>
@@ -130,7 +130,7 @@
         justify-content:center;
      ">
     <div class="spinner-border text-light" role="status">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">{{ __('common.loading') }}</span>
     </div>
 </div>
 <script type = "text/javascript"> 
@@ -164,30 +164,30 @@ $(document).ready(function() {
         var confirmPassword = $('#confirmpass').val();
         if (newPassword === '') {
             Swal.fire({
-                title: "Information",
+                title: @json(__('common.information')),
                 icon: "warning",
-                text: "New Password is required.",
-                confirmButtonText: "OK"
+                text: @json(__('admin/sysspec.new_required')),
+                confirmButtonText: @json(__('common.ok'))
             });
             $('#newpass').focus();
             return;
         }
         if (confirmPassword === '') {
             Swal.fire({
-                title: "Information",
+                title: @json(__('common.information')),
                 icon: "warning",
-                text: "Confirm New Password is required.",
-                confirmButtonText: "OK"
+                text: @json(__('admin/sysspec.confirm_required')),
+                confirmButtonText: @json(__('common.ok'))
             });
             $('#confirmpass').focus();
             return;
         }
         if (!checkPassword()) {
             Swal.fire({
-                title: "Information",
+                title: @json(__('common.information')),
                 icon: "error",
-                text: "New Password and Confirm New Password do not match.",
-                confirmButtonText: "OK"
+                text: @json(__('admin/sysspec.password_mismatch')),
+                confirmButtonText: @json(__('common.ok'))
             });
             $('#confirmpass').focus();
             return;
@@ -211,20 +211,20 @@ $(document).ready(function() {
                     $('#overlaySpinner').hide();
                     if (response.success) {
                         Swal.fire({
-                            title: "Information",
+                            title: @json(__('common.information')),
                             icon: "success",
                             text: response.message,
-                            confirmButtonText: "OK"
+                            confirmButtonText: @json(__('common.ok'))
                         }).then(function() {
                             window.location.reload();
                         });
                     } else {
                         $('#btnsave').prop('disabled', false);
                         Swal.fire({
-                            title: "Information",
+                            title: @json(__('common.information')),
                             icon: "error",
-                            text: response.message || "Failed to update default password.",
-                            confirmButtonText: "OK"
+                            text: response.message || @json(__('admin/sysspec.update_failed')),
+                            confirmButtonText: @json(__('common.ok'))
                         });
                     }
                 }, remaining);
@@ -235,7 +235,7 @@ $(document).ready(function() {
                 setTimeout(function() {
                     $('#overlaySpinner').hide();
                     $('#btnsave').prop('disabled', false);
-                    var message = "Failed to update default password.";
+                    var message = @json(__('admin/sysspec.update_failed'));
                     if (jqXHR.responseJSON) {
                         if (jqXHR.responseJSON.message) {
                             message = jqXHR.responseJSON.message;
@@ -249,10 +249,10 @@ $(document).ready(function() {
                         }
                     }
                     Swal.fire({
-                        title: "Error",
+                        title: @json(__('common.error')),
                         icon: "error",
                         html: message,
-                        confirmButtonText: "OK"
+                        confirmButtonText: @json(__('common.ok'))
                     });
                 }, remaining);
             }

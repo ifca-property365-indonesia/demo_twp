@@ -26,18 +26,18 @@ class AccountController extends Controller
 
         if (!$file) {
             // $_FILES kosong: tidak ada file, atau melebihi post_max_size / upload_max_filesize
-            return response()->json(['status' => 'Failed', 'pesan' => 'No file received (check upload size limit).']);
+            return response()->json(['status' => 'Failed', 'pesan' => __('tenant/account.no_file')]);
         }
         if (!$file->isValid()) {
-            return response()->json(['status' => 'Failed', 'pesan' => 'Upload error: ' . $file->getErrorMessage()]);
+            return response()->json(['status' => 'Failed', 'pesan' => __('tenant/account.upload_error', ['message' => $file->getErrorMessage()])]);
         }
         if ($file->getSize() > 5000000) {
-            return response()->json(['status' => 'Failed', 'pesan' => 'Maximum file size is 5MB']);
+            return response()->json(['status' => 'Failed', 'pesan' => __('tenant/account.max_size_server')]);
         }
 
         $ext = strtolower($file->getClientOriginalExtension() ?: $file->extension());
         if (!in_array($ext, ['jpg', 'jpeg', 'png', 'gif'], true)) {
-            return response()->json(['status' => 'Failed', 'pesan' => 'Sorry, only JPG, JPEG, PNG & GIF files are allowed.']);
+            return response()->json(['status' => 'Failed', 'pesan' => __('common.upload_only_image')]);
         }
 
         // nama unik supaya tidak menimpa file lain dan tidak kena cache browser
@@ -52,12 +52,12 @@ class AccountController extends Controller
             }
             $file->move($target, $picname);
         } catch (\Throwable $e) {
-            return response()->json(['status' => 'Failed', 'pesan' => 'Sorry, there was an error uploading your file: ' . $e->getMessage()]);
+            return response()->json(['status' => 'Failed', 'pesan' => __('tenant/account.upload_failed', ['message' => $e->getMessage()])]);
         }
 
         return response()->json([
             'status'  => 'OK',
-            'pesan'   => 'The file ' . $picname . ' has been uploaded.',
+            'pesan'   => __('common.upload_done', ['name' => $picname]),
             'url'     => url('img/user/' . $picname),
             'picname' => $picname,
         ]);
@@ -99,11 +99,11 @@ class AccountController extends Controller
                     }
                 }
                 
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st  = 'OK';
              
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Save failed: " . $ex->getMessage();
+            $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
         return response()->json([
@@ -125,11 +125,11 @@ class AccountController extends Controller
                     ->where($criteria)
                     ->update($data);
                 
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st  = 'OK';
              
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Save failed: " . $ex->getMessage();
+            $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
         return response()->json([

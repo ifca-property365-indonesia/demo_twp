@@ -1,5 +1,5 @@
 @extends('admin.template.layout2.base')
-@section('title', 'Reset Password')
+@section('title', __('admin/account.reset_password'))
 
 @section('content')
 <div class="page-body">
@@ -8,8 +8,8 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Reset Password</h3>
-                        <div class="page-desc">Reset a user password to the default password.</div>
+                        <h3 class="page-title">{{ __('admin/account.reset_password') }}</h3>
+                        <div class="page-desc">{{ __('admin/account.reset_desc') }}</div>
                     </div>
                 </div>
             </div>
@@ -19,11 +19,11 @@
                         <table class="table table-hover table-bordered w-100" id="tblresett">
                             <thead>
                             <tr>
-                                <th>No</th>
-                                <th>Business Name</th>
-								<th>Group Access</th>
-                                <th>Email</th>
-                                <th>Action</th>
+                                <th>{{ __('admin/account.col_no') }}</th>
+                                <th>{{ __('admin/account.business_name') }}</th>
+								<th>{{ __('admin/account.group_access') }}</th>
+                                <th>{{ __('common.email') }}</th>
+                                <th>{{ __('common.action') }}</th>
                             </tr>
                             </thead>
                         </table>
@@ -54,7 +54,7 @@
               { data: 'email', name: 'email' },
               { data: 'email', name: 'email' , 
                 render:function(data,type,row){
-                    return '<button onclick="resetpass(\''+data+'\',\''+row.name+'\')" class="btn btn-sm btn-primary"><i class="cil-reload"></i> Reset</button>';
+                    return '<button onclick="resetpass(\''+data+'\',\''+row.name+'\')" class="btn btn-sm btn-primary"><i class="cil-reload"></i> ' + @json(__('admin/account.reset')) + '</button>';
               }},
           ],
       });
@@ -73,13 +73,13 @@
     function resetpass(email,namee) {
         block(true,'div.card');
         Swal.fire({
-                title: 'Are you sure?',
-                text: 'You won\'t be able to revert this!',
+                title: @json(__('common.are_you_sure')),
+                text: @json(__('admin/account.cannot_revert')),
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes'
+                confirmButtonText: @json(__('common.yes'))
             })
             .then(function(a){
                 if (a.value==true) {
@@ -92,7 +92,7 @@
                             if (event.status == 'OK')
                           {
                               Swal.fire({
-                                  title: "Information",
+                                  title: @json(__('common.information')),
                                   icon:"success",
                                   text: event.pesan
                               }).then(function(a){
@@ -103,13 +103,13 @@
                               if (event.status == "warning")
                               {
                                 Swal.fire({
-                                      title: "Information",
+                                      title: @json(__('common.information')),
                                       icon:"warning",
                                       text: event.pesan
                                   });
                               } else {
                                   Swal.fire({
-                                      title: "Information",
+                                      title: @json(__('common.information')),
                                       icon:"error",
                                       text: event.pesan
                                   });
@@ -119,7 +119,7 @@
                             block(false,'div.card');
                         },
                         error: function(jqXHR, textStatus, errorThrown){
-                            Swal.fire("Information",textStatus+' Save : '+errorThrown,"warning");
+                            Swal.fire(@json(__('common.information')),@json(__('admin/account.request_error')).replace(':status', textStatus).replace(':error', errorThrown),"warning");
                             block(false,'div.card');
                         }
                     });

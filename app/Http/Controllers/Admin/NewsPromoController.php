@@ -19,10 +19,10 @@ class NewsPromoController extends Controller
     {
         if($type == 'A')
         {
-            $jdl  = 'Add News and Promo';
+            $jdl  = __('admin/news.add_title');
             $form ='add';
         } else if($type == 'E') {
-            $jdl  = 'Edit News and Promo';
+            $jdl  = __('admin/news.edit_title');
             $form ='edit';
         }
 
@@ -54,7 +54,7 @@ class NewsPromoController extends Controller
             $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
 
             if ($_FILES["userfile"]["size"] > 5000000) {
-                $msg = "Maximum file size is 5MB";
+                $msg = __('common.upload_max_size', ['size' => '5MB']);
                 $uploadOk = 0;
                 $psn = 'failed';
                 $res = array("pesan" => $msg, "status" => $psn);
@@ -69,7 +69,7 @@ class NewsPromoController extends Controller
                 $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
                 && $imageFileType != "gif" && $imageFileType != "JPG"
             ) {
-                $msg = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+                $msg = __('common.upload_only_image');
                 $uploadOk = 0;
                 $psn = 'failed';
                 $res = array("pesan" => $msg, "status" => $psn);
@@ -79,22 +79,22 @@ class NewsPromoController extends Controller
             }
             // Check if $uploadOk is set to 0 by an error
             if ($uploadOk == 0) {
-                $msg = "Sorry, your file was not uploaded.";
+                $msg = __('common.upload_not_saved');
                 $psn = "Failed";
                 // if everything is ok, try to upload file
             } else {
                 if (move_uploaded_file($_FILES["userfile"]["tmp_name"], $target_file)) {
-                    $msg = "The file " . basename($_FILES["userfile"]["name"]) . " has been uploaded.";
+                    $msg = __('common.upload_done', ['name' => basename($_FILES["userfile"]["name"])]);
                     $psn = "OK";
                     $descs = "/images/newspromo/" . $picname;
                     $url = url('/admin') . $descs;
                 } else {
-                    $msg = "Sorry, there was an error uploading your file.";
+                    $msg = __('common.upload_error');
                     $psn = "Failed";
                 }
             }
         } else {
-            $msg = "Sorry, there was an error uploading your file.";
+            $msg = __('common.upload_error');
             $psn = "Failed";
         }
 
@@ -146,7 +146,7 @@ class NewsPromoController extends Controller
                     ->where($criteria)
                     ->update($data);
                 
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st  = 'OK';
                 
             } else {//create
@@ -155,13 +155,13 @@ class NewsPromoController extends Controller
                     ->table('newsfeed')
                     ->insert($data);
                 
-                $msg = "Data has been saved successfully";
+                $msg = __('common.saved');
                 $st = 'OK';
                 
                 
             }
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Save failed: " . $ex->getMessage();
+            $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
         return response()->json([
@@ -178,10 +178,10 @@ class NewsPromoController extends Controller
             ->table('newsfeed')
             ->where($criteria)
             ->delete();
-            $msg = "Data has been deleted successfully";
+            $msg = __('common.deleted');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Delete failed: " . $ex->getMessage();
+            $msg = __('common.delete_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }
         return response()->json([

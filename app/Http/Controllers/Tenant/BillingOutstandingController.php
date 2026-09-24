@@ -91,7 +91,7 @@ class BillingOutstandingController extends Controller
                 }
 
                 if($sumBilling['RP']!=0) {
-                    $footer_bill .= '<tr><td colspan="6" align="center"><b>TOTAL</b></td><td><b><span>RP</span></b></td><td align="right"><b><span>'.number_format($sumBilling['RP'],2,",",".").'</span></b></td></tr>';
+                    $footer_bill .= '<tr><td colspan="6" align="center"><b>'.e(__('tenant/billing.total')).'</b></td><td><b><span>RP</span></b></td><td align="right"><b><span>'.number_format($sumBilling['RP'],2,",",".").'</span></b></td></tr>';
                 }
 
                 if($sumBilling['USD']!=0) {
@@ -145,7 +145,7 @@ class BillingOutstandingController extends Controller
                 $list_hticket .= '<td><span class="badge '.$data_status["color"].'">'.$data_status["status"]. '</span></td>';
 
                 if($tenant->status=='R') {
-                    $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''. url('tenant/ticket').'/'.$tenant->id.'/'.'edit'.'\'"> Edit</button></td>';
+                    $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''. url('tenant/ticket').'/'.$tenant->id.'/'.'edit'.'\'"> '.e(__('common.edit')).'</button></td>';
                 } else {
                     $list_hticket .= '<td></td>'."\n";
                 }
@@ -174,9 +174,9 @@ class BillingOutstandingController extends Controller
                 $data_status = $this->get_statusOT($overtime->status);
                 $list_hovertime .= '<td><span class="badge '.$data_status["color"].'">'.$data_status["status"]. '</span></td>';
                 if($overtime->start_overtime > $today && $overtime->status=='N') {
-                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">'.e(__('common.cancel')).'</button></td>'."\n";
                 } else {
-                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100 disabled">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100 disabled">'.e(__('common.cancel')).'</button></td>'."\n";
                 }
                 $list_hovertime .= '</tr>' . "\n";
                 $i++;
@@ -202,18 +202,7 @@ class BillingOutstandingController extends Controller
         {
             $tenant_no = Session::get('tenant_df');
             $lot_no = $request->lot_no;
-            $m = array(1=>'Jan',
-                2=>'Feb',
-                3=>'Mar',
-                4=>'Apr',
-                5=>'May',
-                6=>'Jun',
-                7=>'Jul',
-                8=>'Aug',
-                9=>'Sep',
-                10=>'Oct',
-                11=>'Nov',
-                12=>'Dec');
+            $m = __('tenant/dashboard.months');
             $idm = array();
             $lm = array();
             $lu = array();
@@ -361,7 +350,7 @@ class BillingOutstandingController extends Controller
         $status = '';
         switch ($statusid) {
             case 'R':
-                $status = "Open";
+                $status = __('tenant/ticket.statuses.O');
                 $color = "badge-soft-info";
                 break;
             case 'A':
@@ -370,19 +359,19 @@ class BillingOutstandingController extends Controller
             case 'F':
             case 'M':
             case 'Z':
-                $status = "Process";
+                $status = __('tenant/ticket.statuses.P');
                 $color = "badge-soft-warning";
                 break;
             case 'Y':
-                $status = "Approve";
+                $status = __('tenant/ticket.statuses.Y');
                 $color = "badge-soft-success";         
                 break;      
             case 'C':
-                $status = "Close";
+                $status = __('tenant/ticket.statuses.C');
                 $color = "badge-soft-success";
                 break;
             case 'X':
-                $status = "Cancel";
+                $status = __('tenant/ticket.statuses.X');
                 $color = "badge-soft-secondary";         
                 break;
         }
@@ -405,19 +394,19 @@ class BillingOutstandingController extends Controller
         switch ($statusid) {
             case 'N':
                 $color = "badge-soft-info";
-                $status ="Waiting to be activated";
+                $status = __('tenant/dashboard.ot_statuses.waiting');
                 break;
             case 'A':
                 $color = "badge-soft-success";
-                $status ="Activated";
+                $status = __('tenant/dashboard.ot_statuses.activated');
                 break;
             case 'X':
                 $color = "badge-soft-warning";
-                $status = "Canceled";
+                $status = __('tenant/dashboard.ot_statuses.canceled');
                 break;
             case 'Z':
                 $color = "badge-soft-danger";
-                $status = "Closed";
+                $status = __('tenant/dashboard.ot_statuses.closed');
                 break;
         }
         
@@ -469,7 +458,7 @@ class BillingOutstandingController extends Controller
                 {
                     $le = '';
                     foreach ($dtaGra as $Eusage) {
-                        $mn = date('M', mktime(0,0,0,$Eusage->Monthly,10)). ' '. $Eusage->Yearly;
+                        $mn = __('tenant/dashboard.months.'.(int) $Eusage->Monthly). ' '. $Eusage->Yearly;
                         $le.='<tr class="odd">';
                         $le.='<td align="center">'.$mn.'</td>';
                         $le.='<td align="center">'.number_format($Eusage->usages,2).'</td>';
@@ -517,7 +506,7 @@ class BillingOutstandingController extends Controller
                 $msg = $query;
                 $st  = 'Fail';
             } else {
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st  = 'OK';
             }
         }

@@ -69,7 +69,7 @@ class OnlineSurveyController extends Controller
                                 $lsP .= ' '.e($option->options).'</label>';
 
                                 if ($option->flag_remark == 1) {
-                                    $lsP .= '<textarea class="form-control form-control-sm mt-2" rows="2" name="remarks" placeholder="Remarks"></textarea>';
+                                    $lsP .= '<textarea class="form-control form-control-sm mt-2" rows="2" name="remarks" placeholder="'.e(__('common.remarks')).'"></textarea>';
                                 }
 
                                 $lsP .= '</div>';
@@ -83,7 +83,7 @@ class OnlineSurveyController extends Controller
                     $lsP .= '<input name="q" type="hidden" value="'.$k.'"/>';
 
                     $lsP .= '<div class="text-end mt-3">';
-                    $lsP .= '<button type="button" id="btnSave'.$publish->id.'" data-p="'.$publish->id.'" data-q="'.$k.'" class="btn btn-primary">Submit</button>';
+                    $lsP .= '<button type="button" id="btnSave'.$publish->id.'" data-p="'.$publish->id.'" data-q="'.$k.'" class="btn btn-primary">'.e(__('common.submit')).'</button>';
                     $lsP .= '</div></form>';
                 }
             }
@@ -125,7 +125,7 @@ class OnlineSurveyController extends Controller
                 $msg = $query;
                 $st = 'Fail';
             } else {
-                $msg = "Data has been saved successfully";
+                $msg = __('common.saved');
                 $st = 'OK';
             }
         }

@@ -50,6 +50,7 @@
     <script src="{{ url('assets/vendor/chartjs/chart.umd.min.js') }}"></script>
     <script src="{{ url('assets/vendor/cropperjs/cropper.min.js') }}"></script>
     <script src="{{ url('assets/app/js/app.js?ver=1.0.0') }}"></script>
+    @include('partials.i18n_plugins')
     @stack('head-scripts')
 </head>
 
@@ -66,7 +67,7 @@
         </div>
 
         <footer class="footer">
-            <div>&copy; {{ date('Y') }} IFCA &middot; Tenant Web Portal</div>
+            <div>&copy; {{ date('Y') }} IFCA &middot; {{ __('common.footer') }}</div>
         </footer>
     </div>
 
@@ -74,14 +75,14 @@
     <div class="modal fade" tabindex="-1" id="modal">
         <div class="modal-dialog modal-lg" id="modaldialog">
             <div class="modal-content">
-                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
                 <div class="modal-header" id="modalheader">
-                    <h5 class="modal-title" id="modaltitle">Modal Title</h5>
+                    <h5 class="modal-title" id="modaltitle">{{ __('common.modal_title') }}</h5>
                 </div>
                 <div class="modal-body" id="modalbody"></div>
                 <div class="modal-footer bg-body-tertiary" id="modalfooter">
-                    <button type="button" class="btn btn-primary" id="savefrm">Save</button>
-                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="savefrm">{{ __('common.save') }}</button>
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>
                 </div>
             </div>
         </div>
@@ -90,14 +91,14 @@
     <div class="modal fade" tabindex="-1" id="modalsm">
         <div class="modal-dialog modal-sm" id="modaldialogsm">
             <div class="modal-content">
-                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
                 <div class="modal-header" id="modalheadersm">
-                    <h5 class="modal-title" id="modaltitlesm">Modal Title</h5>
+                    <h5 class="modal-title" id="modaltitlesm">{{ __('common.modal_title') }}</h5>
                 </div>
                 <div class="modal-body" id="modalbodysm"></div>
                 <div class="modal-footer bg-body-tertiary" id="modalfootersm">
-                    <button type="button" class="btn btn-primary" id="savefrm-sm">Save</button>
-                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="savefrm-sm">{{ __('common.save') }}</button>
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>
                 </div>
             </div>
         </div>
@@ -106,7 +107,7 @@
     <div class="modal fade" tabindex="-1" id="modallg">
         <div class="modal-dialog modal-lg" id="modaldialoglg">
             <div class="modal-content">
-                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
                 <div class="modal-header" id="modalheaderlg">
                     <h5 class="modal-title" id="modaltitlelg"></h5>
                 </div>
@@ -119,14 +120,14 @@
     <div class="modal fade" tabindex="-1" id="modalxl">
         <div class="modal-dialog modal-xl" id="modaldialogxl">
             <div class="modal-content">
-                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-coreui-dismiss="modal" aria-label="{{ __('common.close') }}"></button>
                 <div class="modal-header" id="modalheaderxl">
-                    <h5 class="modal-title" id="modaltitlexl">Modal Title</h5>
+                    <h5 class="modal-title" id="modaltitlexl">{{ __('common.modal_title') }}</h5>
                 </div>
                 <div class="modal-body" id="modalbodyxl"></div>
                 <div class="modal-footer bg-body-tertiary" id="modalfooterxl">
-                    <button type="button" class="btn btn-primary" id="savefrmxl">Save</button>
-                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="savefrmxl">{{ __('common.save') }}</button>
+                    <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>
                 </div>
             </div>
         </div>
@@ -135,7 +136,7 @@
     <div id="overlaySpinner" class="spinner-overlay">
         <div class="spinner-box">
             <div class="spinner"></div>
-            <div class="loading-text" id="overlaySpinnerText">Processing, please wait...</div>
+            <div class="loading-text" id="overlaySpinnerText">{{ __('common.processing') }}</div>
         </div>
     </div>
 

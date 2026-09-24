@@ -1,5 +1,5 @@
 @extends('admin.template.layout2.base')
-@section('title', 'Log User History')
+@section('title', __('admin/history.log_user_history'))
 
 @section('content')
 <div class="page-body">
@@ -8,10 +8,10 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Log User History</h3>
+                        <h3 class="page-title">{{ __('admin/history.log_user_history') }}</h3>
                     </div>
                     <div class="page-head-content">
-                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>Generate PDF</span></button>
+                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>{{ __('common.generate_pdf') }}</span></button>
                     </div>
                 </div>
             </div>
@@ -19,31 +19,31 @@
                 <div class="card-body">
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="start">Login Date From</label>
+                            <label class="form-label" for="start">{{ __('admin/history.login_date_from') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="end">To</label>
+                            <label class="form-label" for="end">{{ __('admin/history.to') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-4 col-md-2">
-                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>Search</span></button>
+                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>{{ __('common.search') }}</span></button>
                         </div>
                     </div>
 <div class="table-responsive">
                         <table class="table table-hover table-bordered w-100" id="tbllog">
                             <thead>
                                 <tr>
-                                    <th class="sorting_asc">No.</th>
-                                    <th>Login Date</th>
-                                    <th>User Name</th>
-                                    <th>Login From</th>
+                                    <th class="sorting_asc">{{ __('admin/history.col_no') }}</th>
+                                    <th>{{ __('admin/history.login_date') }}</th>
+                                    <th>{{ __('admin/history.user_name') }}</th>
+                                    <th>{{ __('admin/history.login_from') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -122,7 +122,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            Swal.fire('Warning', 'Please choose end date', 'warning');
+            Swal.fire(@json(__('common.warning')), @json(__('admin/history.choose_end_date')), 'warning');
             return;
         }
         tbluser.ajax.reload(null,true);
@@ -133,7 +133,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            Swal.fire('Warning', 'Please choose end date', 'warning');
+            Swal.fire(@json(__('common.warning')), @json(__('admin/history.choose_end_date')), 'warning');
             return;
         }
         var debtor = $('#debtor').val();
@@ -146,9 +146,9 @@
                         window.open(data);
                     }else{
                         Swal.fire({
-                                    title: "Information",
+                                    title: @json(__('common.information')),
                                     icon:"error",
-                                    text: "Failed generating pdf file."
+                                    text: @json(__('admin/history.pdf_failed'))
                                 });
                     }
             });

@@ -14,13 +14,13 @@
     <div class="col-md-5">
         {{-- Tahap 1: preview foto --}}
         <div class="text-center" id="avatarStage">
-            <img id="picturebox" class="avatar-preview mb-3 pictured" src="{{ url('img/defaultUser.png') }}" alt="Profile picture">
+            <img id="picturebox" class="avatar-preview mb-3 pictured" src="{{ url('img/defaultUser.png') }}" alt="{{ __('tenant/account.profile_picture') }}">
             <div class="mb-2">
-                <label for="userfile" class="btn btn-outline-primary btn-sm"><i class="cil-cloud-upload"></i><span>Change Picture</span></label>
+                <label for="userfile" class="btn btn-outline-primary btn-sm"><i class="cil-cloud-upload"></i><span>{{ __('tenant/account.change_picture') }}</span></label>
                 <input type="file" id="userfile" name="userfile" class="d-none" accept="image/png,image/jpeg,image/gif">
             </div>
-            <div class="form-note">JPG, PNG or GIF, max 5 MB.</div>
-            <div class="form-note text-primary d-none" id="pictureHint"><i class="cil-info"></i> New picture applied &mdash; click <strong>Save</strong> to keep it.</div>
+            <div class="form-note">{{ __('tenant/account.picture_note') }}</div>
+            <div class="form-note text-primary d-none" id="pictureHint"><i class="cil-info"></i> {!! __('tenant/account.picture_hint') !!}</div>
             <input type="hidden" name="image" id="image" value="">
             <input type="hidden" name="labelimage" id="labelimage">
         </div>
@@ -35,10 +35,10 @@
                     <i class="cil-plus"></i>
                 </div>
             </div>
-            <div class="form-note mt-2">Drag the picture to position it inside the frame; use the slider or mouse wheel to zoom.</div>
+            <div class="form-note mt-2">{{ __('tenant/account.crop_help') }}</div>
             <div class="d-flex justify-content-center gap-2 mt-3">
-                <button type="button" class="btn btn-sm btn-secondary" id="btnCropCancel">Cancel</button>
-                <button type="button" class="btn btn-sm btn-primary" id="btnCropApply"><i class="cil-check"></i><span>Use Photo</span></button>
+                <button type="button" class="btn btn-sm btn-secondary" id="btnCropCancel">{{ __('common.cancel') }}</button>
+                <button type="button" class="btn btn-sm btn-primary" id="btnCropApply"><i class="cil-check"></i><span>{{ __('tenant/account.use_photo') }}</span></button>
             </div>
         </div>
     </div>
@@ -46,10 +46,10 @@
     <div class="col-md-7">
         <ul class="nav nav-underline-border mb-3" role="tablist">
             <li class="nav-item">
-                <a class="nav-link active" data-coreui-toggle="tab" href="#tabPersonal" role="tab"><i class="cil-user"></i> Personal</a>
+                <a class="nav-link active" data-coreui-toggle="tab" href="#tabPersonal" role="tab"><i class="cil-user"></i> {{ __('tenant/account.tab_personal') }}</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" data-coreui-toggle="tab" href="#tabPassword" role="tab"><i class="cil-lock-locked"></i> Password</a>
+                <a class="nav-link" data-coreui-toggle="tab" href="#tabPassword" role="tab"><i class="cil-lock-locked"></i> {{ __('common.password') }}</a>
             </li>
         </ul>
 
@@ -58,21 +58,21 @@
                 <form id="frmEditor" method="post" action="" novalidate>
                     @csrf
                     <div class="mb-3">
-                        <label for="name" class="form-label">Name <span class="text-danger">*</span></label>
+                        <label for="name" class="form-label">{{ __('common.name') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="name" name="name">
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
+                        <label for="email" class="form-label">{{ __('common.email') }}</label>
                         <input type="text" class="form-control" id="email" name="email" readonly>
                     </div>
                     <div class="mb-3">
-                        <label for="handphone" class="form-label">Handphone <span class="text-danger">*</span></label>
+                        <label for="handphone" class="form-label">{{ __('tenant/account.handphone') }} <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="handphone" name="handphone">
-                        <div class="form-note">Format: 6221995500 | 021995500</div>
+                        <div class="form-note">{{ __('tenant/account.phone_format') }}</div>
                     </div>
                     <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Back</button>
-                        <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-save"></i><span>Save</span></button>
+                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">{{ __('common.back') }}</button>
+                        <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-save"></i><span>{{ __('common.save') }}</span></button>
                     </div>
                 </form>
             </div>
@@ -81,16 +81,16 @@
                 <form id="frmchangepass" method="post" action="" novalidate>
                     @csrf
                     <div class="mb-3">
-                        <label for="password1" class="form-label">New Password <span class="text-danger">*</span></label>
+                        <label for="password1" class="form-label">{{ __('tenant/account.new_password') }} <span class="text-danger">*</span></label>
                         <input type="password" class="form-control" id="password1" name="password1" required autocomplete="new-password">
                     </div>
                     <div class="mb-3">
-                        <label for="password2" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <label for="password2" class="form-label">{{ __('tenant/account.confirm_password') }} <span class="text-danger">*</span></label>
                         <input type="password" class="form-control" id="password2" name="password2" required autocomplete="new-password">
                     </div>
                     <div class="d-flex justify-content-end gap-2 pt-2 border-top">
-                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">Back</button>
-                        <button type="button" id="btnSavepass" class="btn btn-primary"><i class="cil-lock-locked"></i><span>Change</span></button>
+                        <button type="button" class="btn btn-secondary" data-coreui-dismiss="modal">{{ __('common.back') }}</button>
+                        <button type="button" id="btnSavepass" class="btn btn-primary"><i class="cil-lock-locked"></i><span>{{ __('common.change') }}</span></button>
                     </div>
                 </form>
             </div>
@@ -111,7 +111,7 @@
 
     $.validator.addMethod('confirmpass', function () {
         return $('#password1').val() === $('#password2').val();
-    }, 'Password does not match');
+    }, @json(__('tenant/account.password_mismatch')));
 
     $('#frmEditor').validate($.extend({}, validateOpts, {
         rules: { name: { required: true }, handphone: { required: true } }
@@ -144,12 +144,12 @@
         var file = this.files[0];
         if (!file) { return; }
         if (!/^image\/(png|jpe?g|gif)$/i.test(file.type)) {
-            Swal.fire({ title: 'Information', text: 'Only JPG, PNG or GIF files are allowed.', icon: 'warning' });
+            Swal.fire({ title: @json(__('common.information')), text: @json(__('tenant/account.only_image')), icon: 'warning' });
             this.value = '';
             return;
         }
         if (file.size > 5000000) {
-            Swal.fire({ title: 'Information', text: 'Maximum file size is 5 MB.', icon: 'warning' });
+            Swal.fire({ title: @json(__('common.information')), text: @json(__('tenant/account.max_size')), icon: 'warning' });
             this.value = '';
             return;
         }
@@ -223,10 +223,10 @@
                     $('#pictureHint').removeClass('d-none');
                     destroyCropper();
                 } else {
-                    Swal.fire({ title: 'Error', text: res.pesan, icon: 'error' });
+                    Swal.fire({ title: @json(__('common.error')), text: res.pesan, icon: 'error' });
                 }
             }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
+                Swal.fire({ title: @json(__('common.error')), text: textStatus + ' : ' + errorThrown, icon: 'error' });
             }).always(function () {
                 $btn.prop('disabled', false);
             });
@@ -242,10 +242,10 @@
         // Foto masih di tahap crop (belum "Use Photo") -> ingatkan dulu
         if (cropper) {
             Swal.fire({
-                title: 'Picture not applied yet',
-                text: 'Click "Use Photo" first to keep the new picture, or Cancel to discard it.',
+                title: @json(__('tenant/account.picture_not_applied')),
+                text: @json(__('tenant/account.picture_not_applied_text')),
                 icon: 'warning',
-                confirmButtonText: 'OK'
+                confirmButtonText: @json(__('common.ok'))
             });
             return;
         }
@@ -266,10 +266,10 @@
                 $('#picturebox').removeClass('profile-changed');
                 $('#pictureHint').addClass('d-none');
             }
-            Swal.fire({ title: 'Information', text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
+            Swal.fire({ title: @json(__('common.information')), text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
                 .then(function () { if (res.status === 'OK') { $('#modal').modal('hide'); } });
         }).fail(function (xhr, textStatus, errorThrown) {
-            Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
+            Swal.fire({ title: @json(__('common.error')), text: textStatus + ' : ' + errorThrown, icon: 'error' });
         });
     });
 
@@ -285,10 +285,10 @@
             data: dataform,
             dataType: 'json'
         }).done(function (res) {
-            Swal.fire({ title: 'Information', text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
+            Swal.fire({ title: @json(__('common.information')), text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
                 .then(function () { if (res.status === 'OK') { $('#modal').modal('hide'); } });
         }).fail(function (xhr, textStatus, errorThrown) {
-            Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
+            Swal.fire({ title: @json(__('common.error')), text: textStatus + ' : ' + errorThrown, icon: 'error' });
         });
     });
 

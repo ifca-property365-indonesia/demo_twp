@@ -139,7 +139,7 @@ if (!empty($htenants)) {
         // =========================
         // CEK RECHARGEABLE / NON
         // =========================
-        $billingType = 'Non-Rechargeable';
+        $billingType = __('tenant/dashboard.non_rechargeable');
 
         $report = DB::connection('dblive')
             ->table('mgr.sv_entry_multi_dt')
@@ -156,7 +156,7 @@ if (!empty($htenants)) {
                 ->first();
 
             if ($checkRecharge) {
-                $billingType = 'Rechargeable';
+                $billingType = __('tenant/dashboard.rechargeable');
             }
         }
 
@@ -202,7 +202,7 @@ if (!empty($htenants)) {
             '</span></td>';
 
         if ($tenant->status == 'R') {
-            $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''.url('tenant/ticket').'/'.$tenant->id.'/edit\'"> Edit</button></td>';
+            $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''.url('tenant/ticket').'/'.$tenant->id.'/edit\'"> '.e(__('common.edit')).'</button></td>';
         } else {
             $list_hticket .= '<td></td>'."\n";
         }
@@ -237,9 +237,9 @@ if (!empty($htenants)) {
                 );
                 $list_hovertime .= '<td><span class="badge '.$data_status["color"].'">'.$data_status["status"]. '</span></td>';
                 if($overtime->start_overtime > $today && $overtime->status=='N') {
-                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100" onclick="changeStatus('.$overtime->id.')" data-ot="'.$overtime->id.'">'.e(__('common.cancel')).'</button></td>'."\n";
                 } else {
-                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100 disabled">Cancel</button></td>'."\n";
+                    $list_hovertime .= '<td><button class="btn btn-danger btn-sm w-100 disabled">'.e(__('common.cancel')).'</button></td>'."\n";
                 }
                 $list_hovertime .= '</tr>' . "\n";
                 $i++;
@@ -268,18 +268,7 @@ if (!empty($htenants)) {
             $tenant_no = Session::get('tenant_df');
             
             $lot_no = $request->lot_no;
-            $m = array(1=>'Jan',
-                2=>'Feb',
-                3=>'Mar',
-                4=>'Apr',
-                5=>'May',
-                6=>'Jun',
-                7=>'Jul',
-                8=>'Aug',
-                9=>'Sep',
-                10=>'Oct',
-                11=>'Nov',
-                12=>'Dec');
+            $m = __('tenant/dashboard.months');
             $idm = array();
             $lm = array();
             $lu = array();
@@ -347,18 +336,7 @@ if (!empty($htenants)) {
         $yearcombo = $request->yearcombo;
         $utility = $request->utility;
         
-        $m = array(1=>'Jan',
-            2=>'Feb',
-            3=>'Mar',
-            4=>'Apr',
-            5=>'May',
-            6=>'Jun',
-            7=>'Jul',
-            8=>'Aug',
-            9=>'Sep',
-            10=>'Oct',
-            11=>'Nov',
-            12=>'Dec');
+        $m = __('tenant/dashboard.months');
         $idm = array();
         $lm = array();
         $lu = array();
@@ -391,7 +369,7 @@ if (!empty($htenants)) {
             }
             $aDs = array(
                 array(
-                    'label' => 'Monthly Usage',
+                    'label' => __('tenant/dashboard.monthly_usage'),
             
                     // warna utama area & bar
                     'backgroundColor' => '#D1BF8F',
@@ -534,47 +512,47 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
         $status = '';
         switch ($statusid) {
             case 'R':
-                $status = "Submit";
+                $status = __('tenant/ticket.statuses.R');
                 $color = "badge-soft-info";
                 break;
             case 'O':
-                $status = "Open";
+                $status = __('tenant/ticket.statuses.O');
                 $color = "badge-soft-info";
                 break;
             case 'A':
-                $status = "Accepted";
+                $status = __('tenant/ticket.statuses.A');
                 $color = "badge-soft-info";
                 break;
             case 'S':
-                $status = "Survey";
+                $status = __('tenant/ticket.statuses.S');
                 $color = "badge-soft-info";
                 break;
             case 'P':
-                $status = "Process";
+                $status = __('tenant/ticket.statuses.P');
                 $color = "badge-soft-info";
                 break;
             case 'F':
-                $status = "Confirm";
+                $status = __('tenant/ticket.statuses.F');
                 $color = "badge-soft-info";
                 break;
             case 'M':
-                $status = "Modify";
+                $status = __('tenant/ticket.statuses.M');
                 $color = "badge-soft-info";
                 break;
             case 'Z':
-                $status = "Charged Approved";
+                $status = __('tenant/ticket.statuses.Z');
                 $color = "badge-soft-warning";
                 break;
             case 'Y':
-                $status = "Approve";
+                $status = __('tenant/ticket.statuses.Y');
                 $color = "badge-soft-success";         
                 break;      
             case 'C':
-                $status = "Close";
+                $status = __('tenant/ticket.statuses.C');
                 $color = "badge-soft-success";
                 break;
             case 'X':
-                $status = "Cancel";
+                $status = __('tenant/ticket.statuses.X');
                 $color = "badge-soft-secondary";         
                 break;
         }
@@ -599,7 +577,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
             case 'N':
                 return [
                     'color'  => 'badge-soft-info',
-                    'status' => 'Process'
+                    'status' => __('tenant/dashboard.ot_statuses.process')
                 ];
 
             case 'A':
@@ -607,32 +585,32 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
                 if ($now >= $startOvertime && $now <= $endOvertime) {
                     return [
                         'color'  => 'badge-soft-primary',
-                        'status' => 'Activated'
+                        'status' => __('tenant/dashboard.ot_statuses.activated')
                     ];
                 }
 
                 if ($now > $endOvertime) {
                     return [
                         'color'  => 'badge-soft-dark',
-                        'status' => 'Ended'
+                        'status' => __('tenant/dashboard.ot_statuses.ended')
                     ];
                 }
 
                 return [
                     'color'  => 'badge-soft-success',
-                    'status' => 'Scheduled'
+                    'status' => __('tenant/dashboard.ot_statuses.scheduled')
                 ];
 
             case 'X':
                 return [
                     'color'  => 'badge-soft-warning',
-                    'status' => 'Canceled'
+                    'status' => __('tenant/dashboard.ot_statuses.canceled')
                 ];
 
             case 'Z':
                 return [
                     'color'  => 'badge-soft-danger',
-                    'status' => 'Closed'
+                    'status' => __('tenant/dashboard.ot_statuses.closed')
                 ];
         }
 
@@ -676,7 +654,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
                 {
                     $le = '';
                     foreach ($dtaGra as $Eusage) {
-                        $mn = date('M', mktime(0,0,0,$Eusage->Monthly,10)). ' '. $Eusage->Yearly;
+                        $mn = __('tenant/dashboard.months.'.(int) $Eusage->Monthly). ' '. $Eusage->Yearly;
                         $le.='<tr class="odd">';
                         $le.='<td align="center">'.$mn.'</td>';
                         $le.='<td align="center">'.number_format($Eusage->usages,2).'</td>';
@@ -724,7 +702,7 @@ public function getEusagehis_by_lotmeter($entity="", $tenant_no="", $meterId="",
                 $msg = $query;
                 $st  = 'Fail';
             } else {
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st  = 'OK';
             }
         }

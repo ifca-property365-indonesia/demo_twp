@@ -3,23 +3,23 @@
     <input type="hidden" name="survey_id" value="{{ $survey->id }}">
     
     <div class="mb-3">
-        <label class="form-label">Survey Title</label>
+        <label class="form-label">{{ __('admin/survey.survey_title') }}</label>
         <input type="text" class="form-control" value="{{ $survey->title }}" readonly>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Publish Date <span class="text-danger">*</span></label>
+        <label class="form-label">{{ __('admin/survey.publish_date') }} <span class="text-danger">*</span></label>
         <input type="date" name="publish_date" id="publish_date" class="form-control" required>
         <div id="publish_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
-            <i class="cil-warning"></i> Publish date cannot be earlier than today!
+            <i class="cil-warning"></i> {{ __('admin/survey.publish_before_today') }}
         </div>
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Expired Date <span class="text-danger">*</span></label>
+        <label class="form-label">{{ __('admin/survey.expired_date') }} <span class="text-danger">*</span></label>
         <input type="date" name="expired_date" id="expired_date" class="form-control" required>
         <div id="expired_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
-            <i class="cil-warning"></i> Expired date cannot be earlier than Publish date!
+            <i class="cil-warning"></i> {{ __('admin/survey.expired_before_publish') }}
         </div>
     </div>
 </form>
@@ -60,7 +60,7 @@
                 comparePub.setHours(0,0,0,0);
 
                 if (expDate < comparePub) {
-                    $('#expired_date_error').text('Expired date cannot be earlier than Publish date!').slideDown();
+                    $('#expired_date_error').text(@json(__('admin/survey.expired_before_publish'))).slideDown();
                     $('#expired_date').addClass('is-invalid');
                     isValid = false;
                 } else {
@@ -84,7 +84,7 @@
             var expVal = $('#expired_date').val();
 
             if (!pubVal || !expVal) {
-                Swal.fire("Information", "Please select both Publish and Expired dates!", "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.select_both_dates')), "warning");
                 return;
             }
 
@@ -95,16 +95,16 @@
                 success: function(res) {
                     if(res.status == 'OK'){
                         $('#modalxl').modal('hide');
-                        Swal.fire("Information", res.message || "Survey published successfully!", "success");
+                        Swal.fire(@json(__('common.information')), res.message || @json(__('admin/survey.survey_published')), "success");
                         
                         if (typeof tbldraft !== 'undefined') tbldraft.ajax.reload(null, false);
                         if (typeof tblpublished !== 'undefined') tblpublished.ajax.reload(null, false);
                     } else {
-                        Swal.fire("Information", res.message || "Failed to publish survey", "error");
+                        Swal.fire(@json(__('common.information')), res.message || @json(__('admin/survey.publish_survey_failed')), "error");
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    Swal.fire("Failed (" + jqXHR.status + ")", "An error occurred: " + errorThrown, "error");
+                    Swal.fire(@json(__('admin/survey.failed_status')).replace(':status', jqXHR.status), @json(__('common.error_occurred')).replace(':message', errorThrown), "error");
                 }
             });
         });

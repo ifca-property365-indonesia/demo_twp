@@ -15,7 +15,7 @@ class AdminAuth
     public function handle(Request $request, Closure $next)
     {
         if (!Session::get('is_login')) {
-            return redirect('/')->with('alert', 'Please login first!');
+            return redirect('/')->with('alert', __('admin/login.login_first'));
         }
 
         return $next($request);

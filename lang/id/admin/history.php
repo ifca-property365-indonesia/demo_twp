@@ -1,0 +1,53 @@
+<?php
+
+// Admin: History (ticket, overtime, log user) & ekspor PDF-nya.
+return [
+    'ticket_history'     => 'Riwayat Tiket',
+    'overtime_history'   => 'Riwayat Lembur',
+    'log_user_history'   => 'Riwayat Log Pengguna',
+    'request_date_from'  => 'Tanggal Permintaan Dari',
+    'reported_date_from' => 'Tanggal Lapor Dari',
+    'login_date_from'    => 'Tanggal Masuk Dari',
+    'to'                 => 'Sampai',
+    'choose_tenant'      => 'Pilih Tenant',
+    'col_no'             => 'No.',
+    'lot_number'         => 'No. Lot',
+    'start_overtime'     => 'Mulai Lembur',
+    'end_overtime'       => 'Selesai Lembur',
+    'ticket_number'      => 'Nomor Tiket',
+    'tenant_name'        => 'Nama Tenant',
+    'reported_date'      => 'Tanggal Lapor',
+    'request_by'         => 'Diminta Oleh',
+    'ticket_status'      => 'Status Tiket',
+    'login_date'         => 'Tanggal Masuk',
+    'user_name'          => 'Nama Pengguna',
+    'login_from'         => 'Masuk Dari',
+    'activated'          => 'Aktif',
+    'closed'             => 'Selesai',
+    'choose_end_date'    => 'Silakan pilih tanggal akhir',
+    'pdf_failed'         => 'Gagal membuat file PDF.',
+
+    // label status ticket di tabel Ticket History (kunci = kode status)
+    'ticket_statuses' => [
+        'R' => 'Baru',
+        'A' => 'Diterima',
+        'S' => 'Survei',
+        'P' => 'Diproses',
+        'M' => 'Diubah',
+        'Z' => 'Disetujui (Berbayar)',
+        'Y' => 'Disetujui',
+        'C' => 'Selesai',
+        'F' => 'Konfirmasi',
+        'X' => 'Dibatalkan',
+    ],
+
+    // PDF
+    'pdf_overtime_title' => 'Riwayat Lembur',
+    'pdf_log_title'      => 'Riwayat Login Pengguna',
+    'pdf_ticket_title'   => 'Riwayat Tiket',
+    'pdf_no_data'        => 'Data Tidak Tersedia',
+    'pdf_no_data_row'    => 'Tidak Ada Data',
+    'pdf_open'           => 'Baru',
+    'pdf_process'        => 'Diproses',
+    'pdf_disclaimer'     => 'Portal Web Tenant WINDAS dapat memuat informasi yang dibuat dan dikelola oleh berbagai sumber, baik internal maupun eksternal. WINDAS Building Management tidak bertanggung jawab, baik secara langsung maupun tidak langsung, atas kerusakan atau kerugian apa pun yang timbul atau diduga timbul akibat penggunaan atau ketergantungan pada konten tersebut di Portal Web Tenant WINDAS',
+];

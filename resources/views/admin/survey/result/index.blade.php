@@ -6,7 +6,7 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Survey Results</h3>
+                        <h3 class="page-title">{{ __('admin/survey.survey_results') }}</h3>
                     </div>
                 </div>
             </div>
@@ -16,11 +16,11 @@
                         <table class="table table-hover table-bordered w-100" id="tblpublished">
                             <thead>
                                 <tr>
-                                    <th>No.</th>          
-                                    <th class="sorting_asc">Survey Title</th>
-                                    <th>Subject</th>
-                                    <th>Publish Date</th>
-                                    <th>Expired Date</th>
+                                    <th>{{ __('admin/survey.no') }}</th>          
+                                    <th class="sorting_asc">{{ __('admin/survey.survey_title') }}</th>
+                                    <th>{{ __('admin/survey.subject') }}</th>
+                                    <th>{{ __('admin/survey.publish_date') }}</th>
+                                    <th>{{ __('admin/survey.expired_date') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -83,7 +83,7 @@
           
         });
         $("div.tblpublished").html(
-            '<button id="btnresult" class="btn btn-sm btn-primary">Result</button>&nbsp;'
+            '<button id="btnresult" class="btn btn-sm btn-primary">{{ __('admin/survey.result') }}</button>&nbsp;'
         );
         tblpublishedd.on('click', 'tr', function() {
             if ($(this).hasClass('selected')) {
@@ -96,7 +96,7 @@
         $('#btnresult').click(function(){
             var rows = tblpublishedd.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information",'Please select a row',"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.select_row')),"warning");
                 return;
             } 
             var data = tblpublishedd.rows(rows).data();

@@ -1,0 +1,63 @@
+<?php
+
+// Pesan validasi Laravel dalam bahasa Indonesia. Aturan yang tidak ada di sini
+// memakai versi bahasa Inggris bawaan framework (fallback_locale = en).
+return [
+    'accepted'         => ':Attribute harus diterima.',
+    'after'            => ':Attribute harus tanggal setelah :date.',
+    'after_or_equal'   => ':Attribute harus tanggal setelah atau sama dengan :date.',
+    'alpha_num'        => ':Attribute hanya boleh berisi huruf dan angka.',
+    'array'            => ':Attribute harus berupa daftar.',
+    'before'           => ':Attribute harus tanggal sebelum :date.',
+    'before_or_equal'  => ':Attribute harus tanggal sebelum atau sama dengan :date.',
+    'between'          => [
+        'numeric' => ':Attribute harus di antara :min dan :max.',
+        'file'    => ':Attribute harus di antara :min dan :max kilobyte.',
+        'string'  => ':Attribute harus di antara :min dan :max karakter.',
+        'array'   => ':Attribute harus berisi :min sampai :max item.',
+    ],
+    'boolean'          => ':Attribute harus benar atau salah.',
+    'confirmed'        => 'Konfirmasi :attribute tidak cocok.',
+    'date'             => ':Attribute bukan tanggal yang valid.',
+    'date_format'      => ':Attribute tidak sesuai format :format.',
+    'different'        => ':Attribute dan :other harus berbeda.',
+    'digits'           => ':Attribute harus :digits digit.',
+    'digits_between'   => ':Attribute harus di antara :min dan :max digit.',
+    'email'            => ':Attribute harus alamat email yang valid.',
+    'exists'           => ':Attribute yang dipilih tidak valid.',
+    'file'             => ':Attribute harus berupa file.',
+    'image'            => ':Attribute harus berupa gambar.',
+    'in'               => ':Attribute yang dipilih tidak valid.',
+    'integer'          => ':Attribute harus berupa bilangan bulat.',
+    'max'              => [
+        'numeric' => ':Attribute tidak boleh lebih dari :max.',
+        'file'    => ':Attribute tidak boleh lebih dari :max kilobyte.',
+        'string'  => ':Attribute tidak boleh lebih dari :max karakter.',
+        'array'   => ':Attribute tidak boleh lebih dari :max item.',
+    ],
+    'mimes'            => ':Attribute harus file bertipe: :values.',
+    'min'              => [
+        'numeric' => ':Attribute minimal :min.',
+        'file'    => ':Attribute minimal :min kilobyte.',
+        'string'  => ':Attribute minimal :min karakter.',
+        'array'   => ':Attribute minimal berisi :min item.',
+    ],
+    'numeric'          => ':Attribute harus berupa angka.',
+    'present'          => ':Attribute harus ada.',
+    'regex'            => 'Format :attribute tidak valid.',
+    'required'         => ':Attribute wajib diisi.',
+    'required_if'      => ':Attribute wajib diisi bila :other adalah :value.',
+    'required_with'    => ':Attribute wajib diisi bila :values ada.',
+    'same'             => ':Attribute dan :other harus sama.',
+    'size'             => [
+        'numeric' => ':Attribute harus berukuran :size.',
+        'file'    => ':Attribute harus berukuran :size kilobyte.',
+        'string'  => ':Attribute harus berisi :size karakter.',
+        'array'   => ':Attribute harus berisi :size item.',
+    ],
+    'string'           => ':Attribute harus berupa teks.',
+    'unique'           => ':Attribute sudah dipakai.',
+    'url'              => 'Format :attribute tidak valid.',
+
+    'attributes' => [],
+];

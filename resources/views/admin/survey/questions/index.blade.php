@@ -6,7 +6,7 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Question Template Entry</h3>
+                        <h3 class="page-title">{{ __('admin/survey.question_template_entry') }}</h3>
                     </div>
                 </div>
             </div>
@@ -16,11 +16,11 @@
                         <table class="table table-hover table-bordered w-100" id="tblgroup">
                             <thead>
                             <tr>
-                                <th>No.</th>
-                                <th>Subject</th>
-                                <th>Question</th>
-                                <th>Optional Answers</th>
-                                <th>Date Created</th>
+                                <th>{{ __('admin/survey.no') }}</th>
+                                <th>{{ __('admin/survey.subject') }}</th>
+                                <th>{{ __('admin/survey.question') }}</th>
+                                <th>{{ __('admin/survey.optional_answers') }}</th>
+                                <th>{{ __('admin/survey.date_created') }}</th>
                             </tr>
                             </thead>
                         </table>
@@ -71,9 +71,9 @@
           dom: '<"toolbar group">frtip'
       });
       $("div.group").html(
-        '<button id="addgroup" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
-        '<button id="editgroup" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
-        '<button id="deletegroup" class="btn btn-sm btn-danger">Delete</button>&nbsp;'
+        '<button id="addgroup" class="btn btn-sm btn-primary">{{ __('common.add') }}</button>&nbsp;'+
+        '<button id="editgroup" class="btn btn-sm btn-info">{{ __('common.edit') }}</button>&nbsp;'+
+        '<button id="deletegroup" class="btn btn-sm btn-danger">{{ __('common.delete') }}</button>&nbsp;'
 
       );
       tblgroupp.on('click', 'tr', function() {
@@ -88,7 +88,7 @@
 
       $('#addgroup').click(function(){
         $('#modaltitlexl').addClass('white');
-        $('#modaltitlexl').html('Question Template Entry');
+        $('#modaltitlexl').html(@json(__('admin/survey.question_template_entry')));
         $('#modalbodyxl').load("{{ url('/admin/survey/questions/form') }}");
         $('#modalxl').data('id', 0);
         $('#modalxl').data('form', 'add');
@@ -99,14 +99,14 @@
       $('#editgroup').click(function(){
         var rows = tblgroupp.rows('.selected').indexes();
         if (rows.length < 1) {
-            Swal.fire("Information",'Please select a row',"warning");
+            Swal.fire(@json(__('common.information')),@json(__('admin/survey.select_row')),"warning");
             return;
         }
         var data = tblgroupp.rows(rows).data();
         var rowid = data[0].tmpsurvey_id;
 
         $('#modaltitlexl').addClass('white');
-        $('#modaltitlexl').html('Question Template Edit');
+        $('#modaltitlexl').html(@json(__('admin/survey.question_template_edit')));
         $('#modalbodyxl').load("{{ url('/admin/survey/questions/form') }}");
         $('#modalxl').data('id', rowid);
         $('#modalxl').data('form', 'edit');
@@ -116,20 +116,20 @@
         $('#deletegroup').click(function(){
             var rows = tblgroupp.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information",'Please select a row',"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.select_row')),"warning");
                 return;
             }
             var data = tblgroupp.rows(rows).data();
             var id = data[0].tmpsurvey_id;
             block(true,'.page-body');
             Swal.fire({
-                title: 'Are you sure?',
-                text: 'You won\'t be able to revert this!',
+                title: @json(__('common.are_you_sure')),
+                text: @json(__('admin/survey.revert_warning')),
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: @json(__('admin/survey.yes_delete'))
             })
             .then(function(a){
                 if (a.value==true) {
@@ -149,12 +149,12 @@
             data: { id: id,"_token": "{{ csrf_token() }}" },
             dataType:"json",
             success:function(event, data){
-                Swal.fire("Information",event.pesan,"success");
+                Swal.fire(@json(__('common.information')),event.pesan,"success");
                 tblgroupp.ajax.reload(null,true);
                 block(false,'.page-body');
             },
             error: function(jqXHR, textStatus, errorThrown){
-                Swal.fire("Information",textStatus+' delete : '+errorThrown,"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.status_delete_error')).replace(':status', textStatus).replace(':error', errorThrown),"warning");
                 block(false,'.page-body');
             }
         });

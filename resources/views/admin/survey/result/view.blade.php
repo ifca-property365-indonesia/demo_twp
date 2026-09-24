@@ -6,7 +6,7 @@
         <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Survey Result 
+                        <h3 class="page-title">{{ __('admin/survey.survey_result') }} 
             </h3>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
                         $e=$key->title;
                         if ($e!= $r) {
                             echo '<h5 style="margin-top:10px;">'.$key->title.'</h5>
-                                Total Respondents : '.$res;
+                                '.e(__('admin/survey.total_respondents_count', ['count' => $res]));
                         }
                         $r=$e;
 
@@ -68,7 +68,7 @@
                                             </div>
 
                                             <strong>
-        Respondents: '.$key->jumlah.' people 
+        '.e(__('admin/survey.respondents_people', ['count' => $key->jumlah])).' 
         <span class="badge rounded-pill text-bg-info" style="margin-left:10px;">
             '.$percent.'%
         </span>

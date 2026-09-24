@@ -41,6 +41,9 @@ class PortalLoginController extends Controller
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
+        ], [], [
+            'email' => __('shared/login.attributes.email'),
+            'password' => __('shared/login.attributes.password'),
         ]);
 
         $email = $request->email;
@@ -100,7 +103,7 @@ class PortalLoginController extends Controller
         if (!$adminOk && count($tenantOptions) === 0) {
             return redirect('/')
                 ->withInput($request->only('email', 'bsn'))
-                ->with('alert', 'Incorrect email or password.');
+                ->with('alert', __('shared/login.incorrect'));
         }
 
         // portal yang boleh dibuka tanpa login ulang (menu pindah portal di header)
@@ -161,7 +164,7 @@ class PortalLoginController extends Controller
     {
         $portals = Session::get('portals', array());
         if (empty($portals['admin'])) {
-            abort(403, 'This account does not have Admin access.');
+            abort(403, __('shared/login.no_admin_access'));
         }
         return $this->enterAdmin($portals['admin']['id'], $portals['admin']['email']);
     }
@@ -172,7 +175,7 @@ class PortalLoginController extends Controller
         $portals = Session::get('portals', array());
         $ids = array_column($portals['tenants'] ?? array(), 'id');
         if (!in_array($id, $ids)) {
-            abort(403, 'This account does not have access to the selected business.');
+            abort(403, __('shared/login.no_business_access'));
         }
         return $this->enterTenant($id);
     }

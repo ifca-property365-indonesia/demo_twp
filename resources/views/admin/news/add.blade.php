@@ -19,10 +19,10 @@
         <div class="page-head-row">
             <div class="page-head-content">
                 <h3 class="page-title">{{ $jdl }}</h3>
-                <div class="page-desc">News or promo shown on the tenant portal.</div>
+                <div class="page-desc">{{ __('admin/news.desc') }}</div>
             </div>
             <div class="page-head-content">
-                <a href="{{ url('admin/news') }}" class="btn btn-outline-secondary"><i class="cil-arrow-left"></i><span>Back to list</span></a>
+                <a href="{{ url('admin/news') }}" class="btn btn-outline-secondary"><i class="cil-arrow-left"></i><span>{{ __('admin/news.back_to_list') }}</span></a>
             </div>
         </div>
     </div>
@@ -33,25 +33,25 @@
                 @csrf
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label d-block">Content Type</label>
+                        <label class="form-label d-block">{{ __('admin/news.content_type') }}</label>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="content_type" id="news" value="news" checked>
-                            <label class="form-check-label" for="news">News</label>
+                            <label class="form-check-label" for="news">{{ __('admin/news.news') }}</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="content_type" id="promo" value="promo">
-                            <label class="form-check-label" for="promo">Promo</label>
+                            <label class="form-check-label" for="promo">{{ __('admin/news.promo') }}</label>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="start_date">Start Date</label>
+                        <label class="form-label" for="start_date">{{ __('common.start_date') }}</label>
                         <div class="form-control-wrap">
                             <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                             <input type="text" id="start_date" name="start_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}">
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label" for="end_date">End Date</label>
+                        <label class="form-label" for="end_date">{{ __('common.end_date') }}</label>
                         <div class="form-control-wrap">
                             <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                             <input type="text" id="end_date" name="end_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}">
@@ -59,38 +59,38 @@
                     </div>
 
                     <div class="col-12">
-                        <label for="news_title" class="form-label">Title</label>
-                        <input type="text" class="form-control" name="news_title" id="news_title" placeholder="Title" maxlength="160">
+                        <label for="news_title" class="form-label">{{ __('common.title') }}</label>
+                        <input type="text" class="form-control" name="news_title" id="news_title" placeholder="{{ __('common.title') }}" maxlength="160">
                         <div class="form-note text-end"><span id="news_length">0</span>/160</div>
                     </div>
 
                     <div class="col-12">
-                        <label for="news_descs" class="form-label">Content</label>
-                        <textarea class="form-control" name="news_descs" id="news_descs" placeholder="Place content newsfeed here" rows="12"></textarea>
+                        <label for="news_descs" class="form-label">{{ __('admin/news.content') }}</label>
+                        <textarea class="form-control" name="news_descs" id="news_descs" placeholder="{{ __('admin/news.content_placeholder') }}" rows="12"></textarea>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label d-block">Attachment Type</label>
+                        <label class="form-label d-block">{{ __('admin/news.attachment_type') }}</label>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="attach_type" id="type-P" value="P" checked>
-                            <label class="form-check-label" for="type-P">Picture</label>
+                            <label class="form-check-label" for="type-P">{{ __('common.picture') }}</label>
                         </div>
                         <div class="form-check form-check-inline">
                             <input class="form-check-input" type="radio" name="attach_type" id="type-Y" value="Y">
-                            <label class="form-check-label" for="type-Y">Youtube</label>
+                            <label class="form-check-label" for="type-Y">{{ __('admin/news.youtube') }}</label>
                         </div>
                     </div>
                     <div class="col-md-8">
                         <div id="picture">
-                            <label for="userfile" class="form-label">Upload Picture</label>
+                            <label for="userfile" class="form-label">{{ __('admin/news.upload_picture') }}</label>
                             <div class="mb-2">
                                 <img src="{{ url('images/PlProject/no_image.png') }}" id="picturebox" class="img-fluid rounded border" alt="">
                             </div>
                             <input type="file" id="userfile" name="userfile" class="form-control" accept="image/*">
-                            <div class="form-note">JPG, JPEG, PNG or GIF. Recommended resolution 640 &times; 480 px so the image stays sharp.</div>
+                            <div class="form-note">{!! __('admin/news.picture_note') !!}</div>
                         </div>
                         <div id="youtube">
-                            <label for="youtubelink" class="form-label">Youtube Link</label>
+                            <label for="youtubelink" class="form-label">{{ __('admin/news.youtube_link') }}</label>
                             <input type="text" id="youtubelink" name="youtubelink" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
                         </div>
                     </div>
@@ -100,8 +100,8 @@
                 <input type="hidden" name="picturename" id="picturename">
 
                 <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                    <button type="button" class="btn btn-secondary" id="btnBack">Back</button>
-                    <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-save"></i><span>Save</span></button>
+                    <button type="button" class="btn btn-secondary" id="btnBack">{{ __('common.back') }}</button>
+                    <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-save"></i><span>{{ __('common.save') }}</span></button>
                 </div>
             </form>
         </div>
@@ -174,10 +174,10 @@
                     $('#picturepath').val(res.url);
                     $('#picturename').val(res.picname);
                 } else {
-                    Swal.fire({ title: 'Error', text: res.pesan, icon: 'error' });
+                    Swal.fire({ title: @json(__('common.error')), text: res.pesan, icon: 'error' });
                 }
             }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: 'Error', text: textStatus + ' : ' + errorThrown, icon: 'error' });
+                Swal.fire({ title: @json(__('common.error')), text: textStatus + ' : ' + errorThrown, icon: 'error' });
             });
         });
 
@@ -200,14 +200,14 @@
                 dataType: 'json'
             }).done(function (res) {
                 if (res.status == 'OK') {
-                    Swal.fire({ title: 'Information', icon: 'success', text: res.pesan })
+                    Swal.fire({ title: @json(__('common.information')), icon: 'success', text: res.pesan })
                         .then(function () { window.location.href = "{{ url('/admin/news') }}"; });
                 } else {
-                    Swal.fire({ title: 'Information', icon: 'error', text: res.pesan });
+                    Swal.fire({ title: @json(__('common.information')), icon: 'error', text: res.pesan });
                     $('#btnSave').prop('disabled', false);
                 }
             }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: 'Error', icon: 'error', text: textStatus + ' : ' + errorThrown });
+                Swal.fire({ title: @json(__('common.error')), icon: 'error', text: textStatus + ' : ' + errorThrown });
                 $('#btnSave').prop('disabled', false);
             });
         });

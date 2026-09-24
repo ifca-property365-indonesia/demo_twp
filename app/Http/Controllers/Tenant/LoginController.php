@@ -59,7 +59,7 @@ class LoginController extends Controller
             return redirect('/tenant/dash');
         }
 
-        return redirect('/')->with('alert', 'User not found');
+        return redirect('/')->with('alert', __('tenant/login.user_not_found'));
     }
 
     /**
@@ -155,7 +155,7 @@ class LoginController extends Controller
     {
         $results2 = $this->activeTenants($crit['email']);
         // start making combo
-        $combo[] = '<option value=0>-- Choose --</option>';
+        $combo[] = '<option value=0>' . e(__('tenant/login.choose')) . '</option>';
         $combo[] = "\n";
         if (count($results2) === 1) {
             $selected_id = $results2[0]->id;

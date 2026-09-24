@@ -1,0 +1,25 @@
+<?php
+
+// Halaman login satu pintu (admin & tenant) dan pesan otentikasi.
+return [
+    'page_title'        => 'Log in',
+    'log_in'            => 'Log In',
+    'portal_name'       => 'Carstensz Tenant Portal',
+    'business_name'     => 'Business Name',
+    'ph_email'          => 'Enter your email address',
+    'ph_password'       => 'Enter your password',
+    'toggle_password'   => 'Show / hide password',
+    'checking_email'    => 'Checking email...',
+    'enter_email_first' => 'Enter your email first',
+    'choose'            => '-- Choose --',
+
+    'incorrect'         => 'Incorrect email or password.',
+    'no_admin_access'   => 'This account does not have Admin access.',
+    'no_business_access'=> 'This account does not have access to the selected business.',
+    'login_first'       => 'Please login first!',
+
+    'attributes' => [
+        'email'    => 'email',
+        'password' => 'password',
+    ],
+];

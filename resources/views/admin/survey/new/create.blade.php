@@ -14,9 +14,9 @@
     @csrf
     <!-- Header Survey -->
     <div class="mb-3">
-      <label class="form-label">Survey Title <span class="text-danger">*</span></label>
+      <label class="form-label">{{ __('admin/survey.survey_title') }} <span class="text-danger">*</span></label>
       <div class="col-12">
-        <input type="text" class="form-control" name="title" id="title" placeholder="Input Survey Title" required>
+        <input type="text" class="form-control" name="title" id="title" placeholder="{{ __('admin/survey.input_survey_title') }}" required>
       </div>
     </div>
 
@@ -31,7 +31,7 @@
     <div class="mb-3">
       <div class="col-12">
         <button type="button" class="btn btn-info btn-sm" onclick="addQuestion()">
-          <i class="cil-plus"></i> Add Question
+          <i class="cil-plus"></i> {{ __('admin/survey.add_question') }}
         </button>
       </div>
     </div>
@@ -88,11 +88,11 @@
           success:function(data, status){
             if(data.status == 'OK'){
               Swal.fire({
-                title: "Information",
+                title: @json(__('common.information')),
                 animation: false,
                 icon: "success",
                 text: data.message || data.pesan,
-                confirmButtonText: "OK"
+                confirmButtonText: @json(__('common.ok'))
               });
               $('#modalxl').modal('hide');
               
@@ -103,18 +103,18 @@
               $('#modalxl #savefrmxl').attr("disabled", false); 
             } else {
               Swal.fire({
-                title: "Information",
+                title: @json(__('common.information')),
                 animation: false,
                 icon: "error",
                 text: data.message || data.pesan,
-                confirmButtonText: "OK"
+                confirmButtonText: @json(__('common.ok'))
               });
               if (typeof block === "function") block(false, '#formSurvey');
               $('#modalxl #savefrmxl').attr("disabled", false);  
             }
           },                    
           error: function(jqXHR, textStatus, errorThrown){
-            Swal.fire("Save Error: " + textStatus + " - " + errorThrown, "", "error");
+            Swal.fire(@json(__('admin/survey.save_error')).replace(':status', textStatus).replace(':error', errorThrown), "", "error");
             if (typeof block === "function") block(false, '#formSurvey');
             $('#modalxl #savefrmxl').attr("disabled", false); 
           }
@@ -132,24 +132,24 @@
     let html = `
       <div class="question-block" id="qb-${qIndex}">
         <div class="mb-3">
-          <label class="form-label">Question <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" name="questions[${qIndex}][text]" placeholder="Enter question..." required>
+          <label class="form-label">{{ __('admin/survey.question') }} <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="questions[${qIndex}][text]" placeholder="{{ __('admin/survey.enter_question') }}" required>
         </div>
         
         <div class="mb-3">
-          <label class="form-label">Question Type</label>
+          <label class="form-label">{{ __('admin/survey.question_type') }}</label>
           <select class="form-select" name="questions[${qIndex}][type]" onchange="toggleOptions(this, ${qIndex})">
-            <option value="multiple_choice">Multiple Choice</option>
-            <option value="essay">Questionnaire</option>
+            <option value="multiple_choice">{{ __('admin/survey.multiple_choice') }}</option>
+            <option value="essay">{{ __('admin/survey.questionnaire') }}</option>
           </select>
         </div>
 
         <div id="options-area-${qIndex}">
-          <label class="form-label">Answer Options <span class="text-danger">*</span></label>
+          <label class="form-label">{{ __('admin/survey.answer_options') }} <span class="text-danger">*</span></label>
           <div class="more-options-${qIndex}">
             <!-- Option form using Bootstrap Input Group -->
             <div class="input-group mb-2">
-              <input type="text" class="form-control" name="questions[${qIndex}][options][]" placeholder="Option 1" required>
+              <input type="text" class="form-control" name="questions[${qIndex}][options][]" placeholder="{{ __('admin/survey.option_n', ['number' => 1]) }}" required>
               <button type="button" class="btn btn-sm btn-success" onclick="addOption(${qIndex})"><i class="cil-plus"></i></button>
             </div>
           </div>
@@ -157,7 +157,7 @@
 
         <div class="text-end mt-2">
             <button type="button" class="btn btn-danger btn-sm" onclick="$('#qb-${qIndex}').remove()">
-                <i class="cil-trash"></i> Delete Question
+                <i class="cil-trash"></i> {{ __('admin/survey.delete_question') }}
             </button>
         </div>
       </div>
@@ -169,7 +169,7 @@
   function addOption(index) {
     let optHtml = `
       <div class="input-group mb-2">
-        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Next option..." required>
+        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="{{ __('admin/survey.next_option') }}" required>
         <button type="button" class="btn btn-sm btn-danger" onclick="$(this).closest('.input-group').remove()"><i class="cil-minus"></i></button>
       </div>`;
     $(`.more-options-${index}`).append(optHtml);

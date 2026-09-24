@@ -1,5 +1,5 @@
 @extends('admin.template.layout2.base')
-@section('title', 'Ticket History')
+@section('title', __('admin/history.ticket_history'))
 
 @section('content')
 <div class="page-body">
@@ -8,10 +8,10 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Ticket History</h3>
+                        <h3 class="page-title">{{ __('admin/history.ticket_history') }}</h3>
                     </div>
                     <div class="page-head-content">
-                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>Generate PDF</span></button>
+                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>{{ __('common.generate_pdf') }}</span></button>
                     </div>
                 </div>
             </div>
@@ -19,24 +19,24 @@
                 <div class="card-body">
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="start">Reported Date From</label>
+                            <label class="form-label" for="start">{{ __('admin/history.reported_date_from') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="end">To</label>
+                            <label class="form-label" for="end">{{ __('admin/history.to') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="debtor">Tenant</label>
-                            <select name="debtor" id="debtor" data-placeholder="Choose Tenant" class="form-control select2">
+                            <label class="form-label" for="debtor">{{ __('common.tenant') }}</label>
+                            <select name="debtor" id="debtor" data-placeholder="{{ __('admin/history.choose_tenant') }}" class="form-control select2">
                                     <option value=""></option>
-                                    <option value="all">All</option>
+                                    <option value="all">{{ __('common.all') }}</option>
                                     <?php if(!empty($datadebtor)) {
                                         foreach($datadebtor as $key){
                                             echo "<option value='".$key->debtor_acct."'>".$key->name."</option>";
@@ -45,22 +45,22 @@
                                 </select>
                         </div>
                         <div class="col-sm-4 col-md-2">
-                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>Search</span></button>
+                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>{{ __('common.search') }}</span></button>
                         </div>
                     </div>
 <div class="table-responsive">
                         <table class="table table-hover table-bordered w-100" id="tableLatestTickett">
                             <thead>
                                 <tr>
-                                    <th class="sorting_asc">No.</th>
-                                    <th>Ticket Number</th>
-                                    <th>Category</th>
-                                    <th>Tenant Name</th>
-                                    <th>Description</th>
-                                    <th>Reported Date</th>
-                                    <th>Request By</th>
-                                    <th>Lot Number</th>
-                                    <th>Ticket Status</th>
+                                    <th class="sorting_asc">{{ __('admin/history.col_no') }}</th>
+                                    <th>{{ __('admin/history.ticket_number') }}</th>
+                                    <th>{{ __('common.category') }}</th>
+                                    <th>{{ __('admin/history.tenant_name') }}</th>
+                                    <th>{{ __('common.description') }}</th>
+                                    <th>{{ __('admin/history.reported_date') }}</th>
+                                    <th>{{ __('admin/history.request_by') }}</th>
+                                    <th>{{ __('admin/history.lot_number') }}</th>
+                                    <th>{{ __('admin/history.ticket_status') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -73,6 +73,7 @@
 
 <script type="text/javascript">
   var tblticket;
+  var STATUS_LABELS = @json(__('admin/history.ticket_statuses'));
   $(function() {
     $('.date-picker').datepicker('setEndDate', new Date());
     $('.select2').select2();
@@ -145,43 +146,43 @@
                     var label,status;
                     switch (data) {
                         case 'R':
-                            status = "Open";
+                            status = STATUS_LABELS.R;
                             label = "info";
                             break;
                         case 'A':
-                            status = "Accepted";
+                            status = STATUS_LABELS.A;
                             label = "info";
                             break;
                         case 'S':
-                            status = "Survey";
+                            status = STATUS_LABELS.S;
                             label = "info";
                             break;
                         case 'P':
-                            status = "Process";
+                            status = STATUS_LABELS.P;
                             label = "info";
                             break;
                         case 'M':
-                            status = "Modify";
+                            status = STATUS_LABELS.M;
                             label = "info";
                             break;
                         case 'Z':
-                            status = "Charged Approved";
+                            status = STATUS_LABELS.Z;
                             label = "warning";
                             break;
                         case 'Y':
-                            status = "Approve";
+                            status = STATUS_LABELS.Y;
                             label = "success";			
                             break;		
                         case 'C':
-                            status = "Close";
+                            status = STATUS_LABELS.C;
                             label = "success";			
                             break;
                         case 'F':
-                            status = "Confirm";
+                            status = STATUS_LABELS.F;
                             label = "success";
                             break;
                         case 'X':
-                            status = "Cancel";
+                            status = STATUS_LABELS.X;
                             label = "secondary";
                             break;
                         default:
@@ -203,7 +204,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            Swal.fire('Warning', 'Please choose end date', 'warning');
+            Swal.fire(@json(__('common.warning')), @json(__('admin/history.choose_end_date')), 'warning');
             return;
         }
         tblticket.ajax.reload(null,true);
@@ -214,7 +215,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            Swal.fire('Warning', 'Please choose end date', 'warning');
+            Swal.fire(@json(__('common.warning')), @json(__('admin/history.choose_end_date')), 'warning');
             return;
         }
         var debtor = $('#debtor').val();
@@ -227,9 +228,9 @@
                         window.open(data);
                     }else{
                         Swal.fire({
-                                    title: "Information",
+                                    title: @json(__('common.information')),
                                     icon:"error",
-                                    text: "Failed generating pdf file."
+                                    text: @json(__('admin/history.pdf_failed'))
                                 });
                     }
             });

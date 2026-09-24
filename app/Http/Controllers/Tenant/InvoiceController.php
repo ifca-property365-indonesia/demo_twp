@@ -73,7 +73,7 @@ class InvoiceController extends Controller
                     target="_blank"
                     class="btn btn-sm btn-success">
                         <i class="cil-file"></i>
-                        PDF
+                        ' . e(__('tenant/invoice.pdf')) . '
                     </a>
                 ';
 
@@ -92,7 +92,7 @@ class InvoiceController extends Controller
 
             $footer_bill = '
                 <tr style="font-weight:bold;background:#f5f6fa">
-                    <td colspan="6" class="text-end">TOTAL</td>
+                    <td colspan="6" class="text-end">'.e(__('tenant/invoice.total')).'</td>
                     <td class="text-end">'.number_format($totalOutstanding,2).'</td>
                 </tr>';
         }
@@ -156,7 +156,7 @@ class InvoiceController extends Controller
 
             $footer_bill = '
                 <tr style="font-weight:bold;background:#f5f6fa">
-                    <td colspan="6" class="text-end">TOTAL</td>
+                    <td colspan="6" class="text-end">'.e(__('tenant/invoice.total')).'</td>
                     <td class="text-end">'.number_format($totalOutstanding,2).'</td>
                 </tr>';
         }
@@ -173,7 +173,7 @@ class InvoiceController extends Controller
         $file = basename($file);
 
         if (!Storage::disk('ftp')->exists($file)) {
-            abort(404, 'File not found on FTP Server.');
+            abort(404, __('tenant/invoice.file_not_found'));
         }
 
         $content = Storage::disk('ftp')->get($file);

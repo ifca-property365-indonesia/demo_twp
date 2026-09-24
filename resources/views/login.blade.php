@@ -1,9 +1,9 @@
 @extends('layouts.auth')
 
-@section('title', 'Log in')
+@section('title', __('shared/login.page_title'))
 
 @section('content')
-    <h1 class="login-title">Log In</h1>
+    <h1 class="login-title">{{ __('shared/login.log_in') }}</h1>
 
     @if (session('alert'))
         <div class="alert alert-danger d-flex align-items-center" role="alert">
@@ -19,17 +19,17 @@
     <form action="{{ url('/login') }}" method="POST" id="formlogin" novalidate autocomplete="on">
         @csrf
         <div class="mb-3">
-            <label class="form-label" for="email">Email</label>
+            <label class="form-label" for="email">{{ __('common.email') }}</label>
             <div class="form-control-wrap">
                 <div class="form-icon form-icon-left"><i class="cil-envelope-closed"></i></div>
                 <input type="email" class="form-control form-control-lg" name="email" id="email"
-                       placeholder="Enter your email address" value="{{ old('email') }}" required autofocus autocomplete="username">
+                       placeholder="{{ __('shared/login.ph_email') }}" value="{{ old('email') }}" required autofocus autocomplete="username">
             </div>
         </div>
 
         {{-- muncul otomatis kalau email adalah tenant (diisi via /login/businesses) --}}
         <div class="mb-3" id="bsn-group" style="display:none">
-            <label class="form-label" for="bsn">Business Name</label>
+            <label class="form-label" for="bsn">{{ __('shared/login.business_name') }}</label>
             <div class="form-control-wrap">
                 <div class="form-icon form-icon-left"><i class="cil-building"></i></div>
                 <select class="form-select" name="bsn" id="bsn" data-old="{{ old('bsn') }}"></select>
@@ -37,15 +37,15 @@
         </div>
 
         <div class="mb-4">
-            <label class="form-label" for="password">Password</label>
+            <label class="form-label" for="password">{{ __('common.password') }}</label>
             <div class="password-wrap">
                 <input type="password" class="form-control form-control-lg" name="password" id="password"
-                       placeholder="Enter your password" required autocomplete="current-password">
-                <span class="toggle-password" data-target="password" title="Show / hide password"><i class="cil-lock-locked"></i></span>
+                       placeholder="{{ __('shared/login.ph_password') }}" required autocomplete="current-password">
+                <span class="toggle-password" data-target="password" title="{{ __('shared/login.toggle_password') }}"><i class="cil-lock-locked"></i></span>
             </div>
         </div>
 
-        <button type="submit" class="btn btn-lg btn-primary w-100">Log In</button>
+        <button type="submit" class="btn btn-lg btn-primary w-100">{{ __('shared/login.log_in') }}</button>
     </form>
 @endsection
 
@@ -65,7 +65,7 @@
         function lockPassword(checking) {
             passwordEl.disabled = true;
             passwordEl.value = '';
-            passwordEl.placeholder = checking ? 'Checking email...' : 'Enter your email first';
+            passwordEl.placeholder = checking ? @json(__('shared/login.checking_email')) : @json(__('shared/login.enter_email_first'));
         }
         function unlockPassword() {
             passwordEl.disabled = false;
@@ -91,7 +91,7 @@
             if (list.length > 1) {
                 var ph = document.createElement('option');
                 ph.value = '';
-                ph.textContent = '-- Choose --';
+                ph.textContent = @json(__('shared/login.choose'));
                 select.appendChild(ph);
             }
             list.forEach(function (b) {

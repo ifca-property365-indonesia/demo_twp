@@ -13,13 +13,13 @@
   </head>
   <body>
     <section class="invoice">
-      <h4>History User Login</h4><hr/>
+      <h4>{{ __('admin/history.pdf_log_title') }}</h4><hr/>
       <table id="tbLog" class="table table-bordered table-striped" style="width:534px">
         <thead  style="background:#ffa500;">
           <tr class="odd">
-          <th class="sorting" style="width:150px;">Login Date</th>
-            <th class="sorting" >User Name</th>
-            <th class="sorting" style="width:24px;">Login From</th>
+          <th class="sorting" style="width:150px;">{{ __('admin/history.login_date') }}</th>
+            <th class="sorting" >{{ __('admin/history.user_name') }}</th>
+            <th class="sorting" style="width:24px;">{{ __('admin/history.login_from') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -27,13 +27,13 @@
           if(!empty($listD)) {
             echo $listD;
           } else {
-            echo "Data Not Available";
+            echo e(__('admin/history.pdf_no_data'));
           }
           ?>
         </tbody>
       </table>
       <div class="footer">
-        <p style="font-size:8px">WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal</p>
+        <p style="font-size:8px">{{ __('admin/history.pdf_disclaimer') }}</p>
       </div> 
     </section>
   </body>

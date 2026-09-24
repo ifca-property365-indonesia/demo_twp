@@ -6,7 +6,7 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Publish Survey</h3>
+                        <h3 class="page-title">{{ __('admin/survey.publish_survey') }}</h3>
                     </div>
                 </div>
             </div>
@@ -14,10 +14,10 @@
                 <div class="card-body">
                     <ul class="nav nav-underline-border mb-3">
                         <li class="nav-item">
-                            <a class="nav-link active" data-coreui-toggle="tab" href="#t_new"><i class="cil-pencil"></i> &nbsp;New Survey</a>
+                            <a class="nav-link active" data-coreui-toggle="tab" href="#t_new"><i class="cil-pencil"></i> &nbsp;{{ __('admin/survey.new_survey') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-coreui-toggle="tab" href="#t_published"><i class="cil-task"></i> &nbsp; Published Survey</a>
+                            <a class="nav-link" data-coreui-toggle="tab" href="#t_published"><i class="cil-task"></i> &nbsp; {{ __('admin/survey.published_survey') }}</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -26,9 +26,9 @@
                                 <table class="table table-hover table-bordered w-100" id="tblsurveyy">
                                     <thead>
                                     <tr>
-                                        <th>No.</th>          
-                                        <th class="sorting_asc">Survey Title</th>
-                                        <th>Subject</th>
+                                        <th>{{ __('admin/survey.no') }}</th>          
+                                        <th class="sorting_asc">{{ __('admin/survey.survey_title') }}</th>
+                                        <th>{{ __('admin/survey.subject') }}</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -39,12 +39,12 @@
                                 <table class="table table-hover table-bordered w-100" id="tblpublished">
                                     <thead>
                                     <tr>
-                                        <th>No.</th>          
-                                        <th class="sorting_asc">Survey Title</th>
-                                        <th>Subject</th>
-                                        <th>Publish Date</th>
-                                        <th>Expired Date</th>
-                                        <th>Action</th>
+                                        <th>{{ __('admin/survey.no') }}</th>          
+                                        <th class="sorting_asc">{{ __('admin/survey.survey_title') }}</th>
+                                        <th>{{ __('admin/survey.subject') }}</th>
+                                        <th>{{ __('admin/survey.publish_date') }}</th>
+                                        <th>{{ __('admin/survey.expired_date') }}</th>
+                                        <th>{{ __('common.action') }}</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -105,7 +105,7 @@
                 render: function (data, type, row) {
                     return FormatDateNew(data);
                 }},
-               { data: null, name: "action", searchable: false, orderable: false, render: function (data, type, row) { return '<button type="button" class="btn btn-danger btn-sm btn-delete-published" ' + 'data-id="' + row.publish_id + '">' + '<i class="cil-trash"></i> Delete' + '</button>'; } }
+               { data: null, name: "action", searchable: false, orderable: false, render: function (data, type, row) { return '<button type="button" class="btn btn-danger btn-sm btn-delete-published" ' + 'data-id="' + row.publish_id + '">' + '<i class="cil-trash"></i> {{ __('common.delete') }}' + '</button>'; } }
             ]
           
         });
@@ -152,10 +152,10 @@
           
         });
         $("div.tblsurvey").html(
-            '<button id="addparam" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
-            '<button id="editparam" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
-            '<button id="deleteparam" class="btn btn-sm btn-danger">Delete</button>&nbsp;'+
-            '<button id="publishparam" class="btn btn-sm btn-secondary">Publish</button>&nbsp;'
+            '<button id="addparam" class="btn btn-sm btn-primary">{{ __('common.add') }}</button>&nbsp;'+
+            '<button id="editparam" class="btn btn-sm btn-info">{{ __('common.edit') }}</button>&nbsp;'+
+            '<button id="deleteparam" class="btn btn-sm btn-danger">{{ __('common.delete') }}</button>&nbsp;'+
+            '<button id="publishparam" class="btn btn-sm btn-secondary">{{ __('common.publish') }}</button>&nbsp;'
         );
         tblsurvey.on('click', 'tr', function() {
             if ($(this).hasClass('selected')) {
@@ -193,8 +193,8 @@
                 block(true,'#modalbodyxl');
                 $('#modalxl').modal({backdrop: 'static', keyboard: false});
                 $('#modaltitlexl').addClass('white');
-                $('#modaltitlexl').html('Add New Survey');
-                $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
+                $('#modaltitlexl').html(@json(__('admin/survey.add_new_survey')));
+                $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">{{ __('common.save') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
                 $('#modalbodyxl').html("");
                 $('#modalbodyxl').load("{{ url('/admin/survey/publish/form') }}");
                 
@@ -207,7 +207,7 @@
         $('#editparam').click(function(){
             var rows = tblsurvey.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information",'Please select a row',"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.select_row')),"warning");
                 return;
             } 
             var data = tblsurvey.rows(rows).data();
@@ -218,9 +218,9 @@
             $('#modalxl').modal({backdrop: 'static', keyboard: false})  
          
             $('#modaltitlexl').addClass('white');
-            $('#modaltitlexl').html('Edit Survey');
+            $('#modaltitlexl').html(@json(__('admin/survey.edit_survey')));
             $('.modal-footer').html("");
-            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">{{ __('common.save') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
             $('#modalbodyxl').load("{{ url('/admin/survey/publish/form') }}");
             $('#modalxl').data('id', publish_id);
             $('#modalxl').data('form', 'edit');
@@ -230,20 +230,20 @@
         $('#publishparam').click(function(){
             var rows = tblsurvey.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information",'Please select a row',"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.select_row')),"warning");
                 return;
             } 
             var data = tblsurvey.rows(rows).data();
             var publish_id = data[0].publish_id;
             var title  = data[0].title;
             Swal.fire({
-                    title: 'Do you want to publish this survey?',
-                    text: 'Please input expired date to proceed.',
+                    title: @json(__('admin/survey.publish_confirm')),
+                    text: @json(__('admin/survey.input_expired_proceed')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes'
+                    confirmButtonText: @json(__('common.yes'))
                 })
                 .then(function(a){
                     if (a.value==true) {
@@ -251,9 +251,9 @@
                         $('#modalbodyxl').html("");
                         $('#modalxl').modal({backdrop: 'static', keyboard: false})  
                         $('.modal-footer').html("");
-                        $('.modal-footer').html('<button type="button" class="btn btn-sm btn-danger" id="savefrm_publish">Publish</button><button type="button" class="btn grey btn-secondary" data-coreui-dismiss="modal">Close</button>');
+                        $('.modal-footer').html('<button type="button" class="btn btn-sm btn-danger" id="savefrm_publish">{{ __('common.publish') }}</button><button type="button" class="btn grey btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
                         $('#modaltitlexl').addClass('white');
-                        $('#modaltitlexl').html('Publish Survey');
+                        $('#modaltitlexl').html(@json(__('admin/survey.publish_survey')));
                         $('#modalbodyxl').load("{{ url('/admin/survey/publish/add') }}");
                         
                         $('#modalxl').data('id', publish_id);
@@ -271,7 +271,7 @@
             block(true,'.page-body');
             var rows = tblsurvey.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information",'Please select a row',"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.select_row')),"warning");
                 block(false,'.page-body');
                 return;
                 
@@ -279,13 +279,13 @@
             var data = tblsurvey.rows(rows).data();
             var publish_id = data[0].publish_id;
             Swal.fire({
-                    title: 'Are you sure?',
-                    text: 'You won\'t be able to revert this!',
+                    title: @json(__('common.are_you_sure')),
+                    text: @json(__('admin/survey.revert_warning')),
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#3085d6',
                     cancelButtonColor: '#d33',
-                    confirmButtonText: 'Yes, delete it!'
+                    confirmButtonText: @json(__('admin/survey.yes_delete'))
                 })
                 .then(function(a){
                     if (a.value==true) {
@@ -309,14 +309,14 @@
                 block(false,'.page-body');
                 tblsurvey.ajax.reload(null,true); 
                 if(event.status =='OK'){
-                    Swal.fire("Information",event.pesan,"success");
+                    Swal.fire(@json(__('common.information')),event.pesan,"success");
                     tblsurvey.ajax.reload(null,true); 
                 } else {
-                    Swal.fire("Information",event.pesan,"error");
+                    Swal.fire(@json(__('common.information')),event.pesan,"error");
                 }
             },                    
             error: function(jqXHR, textStatus, errorThrown){        
-                Swal.fire("Information",textStatus+' Save : '+errorThrown,"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/survey.status_save_error')).replace(':status', textStatus).replace(':error', errorThrown),"warning");
                 block(false,'.page-body');
             }
         });
@@ -326,13 +326,13 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
     var publish_id = $(this).data('id');
 
     Swal.fire({
-        title: 'Are you sure?',
-        text: 'You won\'t be able to revert this!',
+        title: @json(__('common.are_you_sure')),
+        text: @json(__('admin/survey.revert_warning')),
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        confirmButtonText: 'Yes, delete it!'
+        confirmButtonText: @json(__('admin/survey.yes_delete'))
     }).then(function(result) {
 
         if (result.value == true) {
@@ -353,7 +353,7 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
                     if (event.status == 'OK') {
 
                         Swal.fire(
-                            "Information",
+                            @json(__('common.information')),
                             event.pesan,
                             "success"
                         );
@@ -363,7 +363,7 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
                     } else {
 
                         Swal.fire(
-                            "Information",
+                            @json(__('common.information')),
                             event.pesan,
                             "error"
                         );
@@ -374,8 +374,8 @@ $('#tblpublished').on('click', '.btn-delete-published', function () {
                     block(false, '.page-body');
 
                     Swal.fire(
-                        "Information",
-                        textStatus + ' Delete : ' + errorThrown,
+                        @json(__('common.information')),
+                        @json(__('admin/survey.status_delete_error')).replace(':status', textStatus).replace(':error', errorThrown),
                         "warning"
                     );
                 }

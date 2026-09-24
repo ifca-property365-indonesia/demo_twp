@@ -74,7 +74,7 @@ class SurveyTemplateController extends Controller
                 DB::connection('ifcaadm')
                     ->table('pm_tmpsurvey_dtl')
                     ->insert($datadtl);
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st = 'OK';
             } else {//create
                 
@@ -104,13 +104,13 @@ class SurveyTemplateController extends Controller
                 DB::connection('ifcaadm')
                     ->table('pm_tmpsurvey_dtl')
                     ->insert($datadtl);
-                $msg = "Data has been saved successfully";
+                $msg = __('common.saved');
                 $st = 'OK';
                 
                 
             }
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Save failed: " . $ex->getMessage();
+            $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
         return response()->json([
@@ -133,10 +133,10 @@ class SurveyTemplateController extends Controller
             ->table('pm_tmpsurvey_dtl')
             ->where($criteriadt)
             ->delete();
-            $msg = "Data has been deleted successfully";
+            $msg = __('common.deleted');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Delete failed: " . $ex->getMessage();
+            $msg = __('common.delete_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }
         return response()->json([

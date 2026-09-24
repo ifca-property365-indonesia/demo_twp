@@ -1,5 +1,5 @@
 @extends('admin.template.layout2.base')
-@section('title', 'Overtime History')
+@section('title', __('admin/history.overtime_history'))
 
 @section('content')
 <div class="page-body">
@@ -8,10 +8,10 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Overtime History</h3>
+                        <h3 class="page-title">{{ __('admin/history.overtime_history') }}</h3>
                     </div>
                     <div class="page-head-content">
-                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>Generate PDF</span></button>
+                        <button type="button" class="btn btn-outline-secondary" id="btngenpdf"><i class="cil-cloud-download"></i><span>{{ __('common.generate_pdf') }}</span></button>
                     </div>
                 </div>
             </div>
@@ -19,24 +19,24 @@
                 <div class="card-body">
                     <div class="row g-3 align-items-end mb-3">
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="start">Request Date From</label>
+                            <label class="form-label" for="start">{{ __('admin/history.request_date_from') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-3">
-                            <label class="form-label" for="end">To</label>
+                            <label class="form-label" for="end">{{ __('admin/history.to') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="" placeholder="dd/mm/yyyy" autocomplete="off">
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="debtor">Tenant</label>
-                            <select name="debtor" id="debtor" data-placeholder="Choose Tenant" class="form-control select2">
+                            <label class="form-label" for="debtor">{{ __('common.tenant') }}</label>
+                            <select name="debtor" id="debtor" data-placeholder="{{ __('admin/history.choose_tenant') }}" class="form-control select2">
                                     <option value=""></option>
-                                    <option value="all">All</option>
+                                    <option value="all">{{ __('common.all') }}</option>
                                     <?php if(!empty($datadebtor)) {
                                         foreach($datadebtor as $key){
                                             echo "<option value='".$key->debtor_acct."'>".$key->debtor_acct."</option>";
@@ -45,20 +45,20 @@
                                 </select>
                         </div>
                         <div class="col-sm-4 col-md-2">
-                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>Search</span></button>
+                            <button type="button" class="btn btn-primary w-100" id="btnsearch"><i class="cil-search"></i><span>{{ __('common.search') }}</span></button>
                         </div>
                     </div>
 <div class="table-responsive">
                         <table class="table table-hover table-bordered w-100" id="tblovertimee">
                             <thead>
                                 <tr>
-                                    <th class="sorting_asc">No.</th>
-                                    <th>Lot Number</th>
-                                    <th>Tenant</th>
-                                    <th>Start Overtime</th>
-                                    <th>End Overtime</th>
-                                    <th>Status</th>
-                                    <th>Description</th>
+                                    <th class="sorting_asc">{{ __('admin/history.col_no') }}</th>
+                                    <th>{{ __('admin/history.lot_number') }}</th>
+                                    <th>{{ __('common.tenant') }}</th>
+                                    <th>{{ __('admin/history.start_overtime') }}</th>
+                                    <th>{{ __('admin/history.end_overtime') }}</th>
+                                    <th>{{ __('common.status') }}</th>
+                                    <th>{{ __('common.description') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -141,9 +141,9 @@
             {data:"status",name:"status",
                 render:function (data,type,row) {
                    if(data=='N'){
-                        return '<span class="badge text-bg-success"> Activated </span>';
+                        return '<span class="badge text-bg-success"> ' + @json(__('admin/history.activated')) + ' </span>';
                    } else if(data=='P'){
-                        return '<span class="badge text-bg-danger"> Closed </span>';
+                        return '<span class="badge text-bg-danger"> ' + @json(__('admin/history.closed')) + ' </span>';
                    } else {
                         return '';
                    }
@@ -159,7 +159,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            Swal.fire('Warning', 'Please choose end date', 'warning');
+            Swal.fire(@json(__('common.warning')), @json(__('admin/history.choose_end_date')), 'warning');
             return;
         }
         tblovertime.ajax.reload(null,true);
@@ -170,7 +170,7 @@
 
         if (date_start!='' && date_end=='')
         {
-            Swal.fire('Warning', 'Please choose end date', 'warning');
+            Swal.fire(@json(__('common.warning')), @json(__('admin/history.choose_end_date')), 'warning');
             return;
         }
         var debtor = $('#debtor').val();
@@ -183,9 +183,9 @@
                         window.open(data);
                     }else{
                         Swal.fire({
-                                    title: "Information",
+                                    title: @json(__('common.information')),
                                     icon:"error",
-                                    text: "Failed generating pdf file."
+                                    text: @json(__('admin/history.pdf_failed'))
                                 });
                     }
             });

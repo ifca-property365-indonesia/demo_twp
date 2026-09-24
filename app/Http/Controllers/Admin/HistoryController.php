@@ -178,11 +178,11 @@ class HistoryController extends Controller
                             $descs = '';
                             $status = $ticket->status;
                             if($status=='R'){
-                                $descs = 'Open';
+                                $descs = __('admin/history.pdf_open');
                             }else if($status=='Z'){
-                                $descs = 'Process';
+                                $descs = __('admin/history.pdf_process');
                             }else if($status=='Y'){
-                                $descs = 'Process';
+                                $descs = __('admin/history.pdf_process');
                             }else{
                                 $descs = '';
                             }
@@ -201,7 +201,7 @@ class HistoryController extends Controller
                         }
                     }else{
                         $list_log.='<tr class="odd">';
-                        $list_log.='<td colspan="9" style="text-align:center">No Data Available</td>';
+                        $list_log.='<td colspan="9" style="text-align:center">'.e(__('admin/history.pdf_no_data_row')).'</td>';
                         $list_log.='</tr>';
                     }
                     
@@ -225,14 +225,14 @@ class HistoryController extends Controller
                     {
                         foreach ($dtUsers as $logUsers) {
                             $list_log.='<tr class="odd">';
-                            $list_log.='<td>'.date('d M Y H:i:s',strtotime($logUsers->logintime)).'</td>';
+                            $list_log.='<td>'.\Carbon\Carbon::parse($logUsers->logintime)->translatedFormat('d M Y H:i:s').'</td>';
                             $list_log.='<td>'.$logUsers->name.'</td>';
                             $list_log.='<td>'.$logUsers->ipaddress.'</td>';
                             $list_log.='</tr>';
                         }
                     }else{
                         $list_log.='<tr class="odd">';
-                        $list_log.='<td colspan="3" style="text-align:center">No Data Available</td>';
+                        $list_log.='<td colspan="3" style="text-align:center">'.e(__('admin/history.pdf_no_data_row')).'</td>';
                         $list_log.='</tr>';
                     }
                     $content = array('listD'=>$list_log);
@@ -261,16 +261,16 @@ class HistoryController extends Controller
                             $descs = '';
                             $status = $overtime->status;
                             if($status=='N'){
-                                $descs = 'Activated';
+                                $descs = __('admin/history.activated');
                             }else if($status=='P'){
-                                $descs = 'Closed';
+                                $descs = __('admin/history.closed');
                             }
                             $list_log .= '<tr class="odd">';
                             $list_log .= '<td style="padding: 5px">' .$i. '</td>';
                             $list_log .= '<td style="padding: 5px">' .$overtime->lot_no. '</td>';
                             $list_log .= '<td style="padding: 5px">' .$overtime->debtor_acct. '</td>';
-                            $list_log .= '<td style="padding: 5px">' .date("d M Y H:i:s",strtotime($overtime->begin_date)). '</td>';
-                            $list_log .= '<td style="padding: 5px">' .date("d M Y H:i:s",strtotime($overtime->end_date)). '</td>';
+                            $list_log .= '<td style="padding: 5px">' .\Carbon\Carbon::parse($overtime->begin_date)->translatedFormat('d M Y H:i:s'). '</td>';
+                            $list_log .= '<td style="padding: 5px">' .\Carbon\Carbon::parse($overtime->end_date)->translatedFormat('d M Y H:i:s'). '</td>';
                             $list_log .= '<td style="padding: 5px">'. $descs. '</td>';
                             $list_log .= '<td style="padding: 5px">' .$overtime->remarks. '</td>';
                             $list_log .= '</tr>';
@@ -278,7 +278,7 @@ class HistoryController extends Controller
                         }
                     }else{
                         $list_log.='<tr class="odd">';
-                        $list_log.='<td colspan="7" style="text-align:center">No Data Available</td>';
+                        $list_log.='<td colspan="7" style="text-align:center">'.e(__('admin/history.pdf_no_data_row')).'</td>';
                         $list_log.='</tr>';
                     }
                     $content = array('listD'=>$list_log);

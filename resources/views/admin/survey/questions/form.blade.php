@@ -2,18 +2,18 @@
     <form role="form" enctype="multipart/form-data" id="form_nup" method="POST" >
   
               <div class="mb-3">
-                <label class="form-label">Subject</label>
+                <label class="form-label">{{ __('admin/survey.subject') }}</label>
                 <div class="col-12">
-                  <input type="text" class="form-control" name="txtsubject" id="txtsubject" placeholder="Input Subject">
+                  <input type="text" class="form-control" name="txtsubject" id="txtsubject" placeholder="{{ __('admin/survey.input_subject') }}">
                 </div>
               </div>
               <div class="mb-3">
-                <label class="form-label">Question</label>
+                <label class="form-label">{{ __('admin/survey.question') }}</label>
                 <div class="col-12">
-                  <input type="text" class="form-control" name="txtquestion" id="txtquestion" placeholder="Input Question">
+                  <input type="text" class="form-control" name="txtquestion" id="txtquestion" placeholder="{{ __('admin/survey.input_question') }}">
                 </div>
               </div>      
-              <h6 class="form-section"> Add Option(s) <button class="btn btn-outline-success round btn-sm" style="padding: 0px;margin-left:5px" id="btnAdd" type="button"><em class="cil-plus" style="padding-left: 5px;padding-right: 5px;"></em></button></h6>
+              <h6 class="form-section"> {{ __('admin/survey.add_options') }} <button class="btn btn-outline-success round btn-sm" style="padding: 0px;margin-left:5px" id="btnAdd" type="button"><em class="cil-plus" style="padding-left: 5px;padding-right: 5px;"></em></button></h6>
             
               <div  style="overflow-y: auto; overflow-x: hidden; height: 150px; ">
                 <div id="options" >
@@ -71,7 +71,7 @@
 
                       </button>
 
-                      Option Value(s)
+                      {{ __('admin/survey.option_values') }}
                       <span style="color:red">*</span>
 
                   </label>
@@ -84,7 +84,7 @@
                             class="form-control"
                             name="txtopt_value[]"
                             id="txtopt_value${i}"
-                            placeholder="Input Option"
+                            placeholder="{{ __('admin/survey.input_option') }}"
                             required>
 
                       <div class="form-check mt-2">
@@ -93,7 +93,7 @@
                                 id="remark${i}"
                                 value="1"
                                 onclick="checkremark(${i})">
-                          <label class="form-check-label" for="remark${i}">Need Remark</label>
+                          <label class="form-check-label" for="remark${i}">{{ __('admin/survey.need_remark') }}</label>
                       </div>
 
                   </div>
@@ -162,11 +162,11 @@
                   success:function(data, status){
                   if(data.status =='OK'){
                         Swal.fire({
-                          title: "Information",
+                          title: @json(__('common.information')),
                           animation: true,
                           icon:"success",
                           text: data.pesan,
-                          confirmButtonText: "OK"
+                          confirmButtonText: @json(__('common.ok'))
                         }).then(function(){
                           $('#modalxl').modal('hide');
                           tblgroupp.ajax.reload(null,true);  
@@ -175,11 +175,11 @@
                       
                   } else {
                       Swal.fire({
-                          title: "Information",
+                          title: @json(__('common.information')),
                           animation: true,
                           icon: "error",
                           text: data.pesan,
-                          confirmButtonText: "OK"
+                          confirmButtonText: @json(__('common.ok'))
                       });
                       block(false,'#form_nup');
                   }
@@ -188,10 +188,10 @@
     block(false,'#form_nup');
 
     Swal.fire({
-        title: "Information",
-        text: textStatus + ' Save : ' + errorThrown,
+        title: @json(__('common.information')),
+        text: @json(__('admin/survey.status_save_error')).replace(':status', textStatus).replace(':error', errorThrown),
         icon: "error",
-        confirmButtonText: "OK"
+        confirmButtonText: @json(__('common.ok'))
     });
 }
               });
@@ -239,7 +239,7 @@
 
                 '</button>' +
 
-                ' Option Value(s) ' +
+                ' {{ __('admin/survey.option_values') }} ' +
                 '<span style="color:red">*</span>' +
 
             '</label>' +
@@ -252,7 +252,7 @@
                        'class="form-control" ' +
                        'name="txtopt_value[]" ' +
                        'id="txtopt_value'+urut+'" ' +
-                       'placeholder="Input Option" ' +
+                       'placeholder="{{ __('admin/survey.input_option') }}" ' +
                        'value="'+data[i].options+'" required>>' +
 
                 '<label class="checkbox-inline">' +
@@ -263,7 +263,7 @@
                            'onclick="checkremark('+urut+')" ' +
                            flagvalue + '>' +
 
-                    ' Need Remark' +
+                    ' {{ __('admin/survey.need_remark') }}' +
 
                 '</label>' +
 

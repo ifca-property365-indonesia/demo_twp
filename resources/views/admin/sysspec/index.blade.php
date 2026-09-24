@@ -6,7 +6,7 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">System Specification</h3>
+                        <h3 class="page-title">{{ __('admin/sysspec.system_specification') }}</h3>
                     </div>
                 </div>
             </div>
@@ -15,11 +15,11 @@
                     <ul class="nav nav-tabs" id="myTab5" role="tablist">
                         <li class="nav-item">
                         <a class="nav-link active" id="base-tab1" data-coreui-toggle="tab" aria-controls="tab1" href="#adminimage" aria-expanded="true">
-                            <i class="cil-building"></i> &nbsp; Admin Login Image</a>
+                            <i class="cil-building"></i> &nbsp; {{ __('admin/sysspec.admin_login_image') }}</a>
                         </li>
                         <li class="nav-item">
                         <a class="nav-link" id="base-tab2" data-coreui-toggle="tab" aria-controls="tab2" href="#tenantimage" aria-expanded="false">
-                            <i class="cil-puzzle"></i> &nbsp; Tenant Login Image</a>
+                            <i class="cil-puzzle"></i> &nbsp; {{ __('admin/sysspec.tenant_login_image') }}</a>
                         </li>
                   
                     </ul>
@@ -28,23 +28,23 @@
                             <div class="container">
                                 <div class="row g-4">
                                     <div class="col-6 col-sm-4">
-                                        <img id="picturebox1" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image1; ?>" itemprop="thumbnail" alt="Image description">
+                                        <img id="picturebox1" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image1; ?>" itemprop="thumbnail" alt="{{ __('admin/sysspec.image_description') }}">
                                         <input type="file" class="form-control form-control-sm" id="imglogin1" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(1,this,'admin')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>{{ __('admin/sysspec.only_jpg_png') }}</p>
                                         <input type="hidden" name="namagambar" id="pathgambar1" value="<?php echo $image1; ?>">
                                         <input type="hidden" name="picname" id="picname1">
                                     </div>
                                     <div class="col-6 col-sm-4">
-                                        <img id="picturebox2" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image2; ?>" itemprop="thumbnail" alt="Image description">
+                                        <img id="picturebox2" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image2; ?>" itemprop="thumbnail" alt="{{ __('admin/sysspec.image_description') }}">
                                         <input type="file" class="form-control form-control-sm" id="imglogin2" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(2,this,'admin')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>{{ __('admin/sysspec.only_jpg_png') }}</p>
                                         <input type="hidden" name="namagambar" id="pathgambar2" value="<?php echo $image2; ?>">
                                         <input type="hidden" name="picname" id="picname2">
                                     </div>
                                     <div class="col-6 col-sm-4">
-                                        <img id="picturebox3" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image3; ?>" itemprop="thumbnail" alt="Image description">
+                                        <img id="picturebox3" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image3; ?>" itemprop="thumbnail" alt="{{ __('admin/sysspec.image_description') }}">
                                         <input type="file" class="form-control form-control-sm" id="imglogin3" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(3,this,'admin')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>{{ __('admin/sysspec.only_jpg_png') }}</p>
                                         <input type="hidden" name="namagambar" id="pathgambar3" value="<?php echo $image3; ?>">
                                         <input type="hidden" name="picname" id="picname3">
                                     </div>
@@ -55,23 +55,23 @@
                             <div class="container">
                                 <div class="row g-4">
                                     <div class="col-6 col-sm-4">
-                                        <img id="picturebox4" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image4; ?>" itemprop="thumbnail" alt="Image description">
+                                        <img id="picturebox4" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image4; ?>" itemprop="thumbnail" alt="{{ __('admin/sysspec.image_description') }}">
                                         <input type="file" class="form-control form-control-sm" id="imglogin4" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(4,this,'tenant')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>{{ __('admin/sysspec.only_jpg_png') }}</p>
                                         <input type="hidden" name="namagambar" id="pathgambar4" value="<?php echo $image1; ?>">
                                         <input type="hidden" name="picname" id="picname4">
                                     </div>
                                     <div class="col-6 col-sm-4">
-                                        <img id="picturebox5" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image5; ?>" itemprop="thumbnail" alt="Image description">
+                                        <img id="picturebox5" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image5; ?>" itemprop="thumbnail" alt="{{ __('admin/sysspec.image_description') }}">
                                         <input type="file" class="form-control form-control-sm" id="imglogin5" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(5,this,'tenant')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>{{ __('admin/sysspec.only_jpg_png') }}</p>
                                         <input type="hidden" name="namagambar" id="pathgambar5" value="<?php echo $image5; ?>">
                                         <input type="hidden" name="picname" id="picname5">
                                     </div>
                                     <div class="col-6 col-sm-4">
-                                        <img id="picturebox6" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image6; ?>" itemprop="thumbnail" alt="Image description">
+                                        <img id="picturebox6" class="img-thumbnail img-fluid w-100 pictured mb-2" src="<?php echo $image6; ?>" itemprop="thumbnail" alt="{{ __('admin/sysspec.image_description') }}">
                                         <input type="file" class="form-control form-control-sm" id="imglogin6" name="imglogin" accept="image/x-png,image/gif,image/jpeg" onChange="saveImage(6,this,'tenant')"/>
-                                        <p>(* Only Jpg, Png allowed)</p>
+                                        <p>{{ __('admin/sysspec.only_jpg_png') }}</p>
                                         <input type="hidden" name="namagambar" id="pathgambar6" value="<?php echo $image6; ?>">
                                         <input type="hidden" name="picname" id="picname6">
                                     </div>
@@ -100,7 +100,7 @@ function saveImage(seq, el, web) {
                 max = max.toFixed(2);
                 max = max + ' kb';
             }
-            Swal.fire('Please upload less than ' + max);
+            Swal.fire(@json(__('admin/sysspec.upload_less_than')).replace(':size', max));
             return false;
         }
  
@@ -121,10 +121,10 @@ function saveImage(seq, el, web) {
             success:function(data, status){
             if(data.status == "OK"){
                     Swal.fire({
-                    title: "Information",
+                    title: @json(__('common.information')),
                     text: data.pesan,
                     icon: "success",
-                    confirmButtonText: "OK"
+                    confirmButtonText: @json(__('common.ok'))
                     });
                     console.log(data.url);
                     $('#picturebox'+seq).attr('src', data.url);
@@ -132,15 +132,15 @@ function saveImage(seq, el, web) {
                     $('#picname'+seq).val(data.url);
                 } else {
                     Swal.fire({
-                    title: "Error",
+                    title: @json(__('common.error')),
                     text: data.pesan,
                     icon: "error",
-                    confirmButtonText: "OK"
+                    confirmButtonText: @json(__('common.ok'))
                     });
                 }
             },
             error: function(jqXHR, textStatus, errorThrown){
-                Swal.fire(textStatus+' Save : '+errorThrown);
+                Swal.fire(@json(__('admin/sysspec.request_error')).replace(':status', textStatus).replace(':error', errorThrown));
             }
         });
     }

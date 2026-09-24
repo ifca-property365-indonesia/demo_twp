@@ -22,9 +22,9 @@ class SetLocale
     {
         $locale = $request->session()->get('locale') ?: $request->cookie('locale');
 
-        if (isset(self::LOCALES[$locale])) {
-            app()->setLocale($locale);
-        }
+        // Selalu di-set (juga ke default) supaya bahasa request sebelumnya tidak terbawa
+        // kalau proses PHP dipakai ulang untuk beberapa request.
+        app()->setLocale(isset(self::LOCALES[$locale]) ? $locale : config('app.locale'));
 
         return $next($request);
     }

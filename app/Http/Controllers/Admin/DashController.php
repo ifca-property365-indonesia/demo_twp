@@ -14,20 +14,7 @@ class DashController extends Controller
 {
     public function index(Request $request, $pdf = null)
     {
-        $m = array(
-            1  => "Jan",
-            2  => "Feb",
-            3  => "Mar",
-            4  => "Apr",
-            5  => "May",
-            6  => "Jun",
-            7  => "Jul",
-            8  => "Aug",
-            9  => "Sep",
-            10 => "Oct",
-            11 => "Nov",
-            12 => "Dec"
-        );
+        $m = __('admin/dashboard.months_short');
 
         $selected_year = date('Y');
         $selected_month = date('n');
@@ -181,20 +168,7 @@ class DashController extends Controller
     }
     public function usageData(Request $request)
     {
-        $m = array(
-            1  => "Jan",
-            2  => "Feb",
-            3  => "Mar",
-            4  => "Apr",
-            5  => "May",
-            6  => "Jun",
-            7  => "Jul",
-            8  => "Aug",
-            9  => "Sep",
-            10 => "Oct",
-            11 => "Nov",
-            12 => "Dec"
-        );
+        $m = __('admin/dashboard.months_short');
 
         $selected_year = $request->get('year', date('Y'));
         $selected_month = $request->get('month', date('n'));
@@ -303,7 +277,7 @@ class DashController extends Controller
         {
             $le = '';
             foreach ($dt_Gra as $Eusage) {
-                $mn = date('M',mktime(0,0,0,$Eusage->Monthly,10)) .' '.$Eusage->Yearly;
+                $mn = __('admin/dashboard.months_short.' . (int) $Eusage->Monthly) .' '.$Eusage->Yearly;
                 $le.='<tr class="odd">';
                 $le.='<td>'.$mn.'</td>';
                 $le.='<td>'.number_format($Eusage->usages,2).'</td>';

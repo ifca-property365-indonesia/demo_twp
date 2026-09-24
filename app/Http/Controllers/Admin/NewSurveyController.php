@@ -60,11 +60,11 @@ class NewSurveyController extends Controller
             }
 
             DB::commit();
-            return response()->json(['status' => 'OK', 'message' => 'Survey created successfully!']);
+            return response()->json(['status' => 'OK', 'message' => __('admin/survey.survey_created')]);
 
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'Failed', 'message' => 'Save failed: ' . $e->getMessage()]);
+            return response()->json(['status' => 'Failed', 'message' => __('common.save_failed', ['message' => $e->getMessage()])]);
         }
     }
 
@@ -116,12 +116,12 @@ public function getDraftTable(Request $request)
 
             return response()->json([
                 'status' => 'OK',
-                'message' => 'Data has been deleted successfully'
+                'message' => __('common.deleted')
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'Fail',
-                'message' => 'Delete failed: ' . $e->getMessage()
+                'message' => __('common.delete_failed', ['message' => $e->getMessage()])
             ]);
         }
     }
@@ -149,12 +149,12 @@ public function getDraftTable(Request $request)
 
             return response()->json([
                 'status' => 'OK',
-                'message' => 'Survey published successfully!'
+                'message' => __('admin/survey.survey_published')
             ]);
         } catch (Exception $e) {
             return response()->json([
                 'status' => 'Fail',
-                'message' => 'Publish failed: ' . $e->getMessage()
+                'message' => __('admin/survey.publish_failed', ['message' => $e->getMessage()])
             ]);
         }
     }
@@ -167,7 +167,7 @@ public function getDraftTable(Request $request)
         
         // Pastikan data survey ditemukan
         if (!$survey) {
-            return "Survey data not found.";
+            return __('admin/survey.survey_not_found');
         }
 
         $questions = DB::connection('ifcaadm')->table('survey_questions')
@@ -236,11 +236,11 @@ public function getDraftTable(Request $request)
             }
 
             DB::commit();
-            return response()->json(['status' => 'OK', 'message' => 'Survey updated successfully!']);
+            return response()->json(['status' => 'OK', 'message' => __('admin/survey.survey_updated')]);
 
         } catch (Exception $e) {
             DB::rollBack();
-            return response()->json(['status' => 'Failed', 'message' => 'Update failed: ' . $e->getMessage()]);
+            return response()->json(['status' => 'Failed', 'message' => __('common.update_failed', ['message' => $e->getMessage()])]);
         }
     }
 
@@ -326,7 +326,7 @@ public function getDraftTable(Request $request)
             // 3. LEMPAR STATUS 500 AGAR JAVASCRIPT BISA MENANGKAP ERRORNYA
             return response()->json([
                 'status'  => 'ERROR',
-                'message' => 'DB Error: ' . $e->getMessage() . ' (Line: ' . $e->getLine() . ')'
+                'message' => __('admin/survey.db_error', ['message' => $e->getMessage(), 'line' => $e->getLine()])
             ], 500); 
         }
     }

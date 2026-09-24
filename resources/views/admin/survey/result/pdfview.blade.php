@@ -11,7 +11,7 @@
   </head>
   <body style="font-family: Arial, Helvetica, sans-serif!important">
     <section class="invoice">
-      <p style="font-size:18px;font-weight:bold">Survey Result</p><hr/>
+      <p style="font-size:18px;font-weight:bold">{{ __('admin/survey.survey_result') }}</p><hr/>
       <div class="row">
       <div class="col-sm-12">
         <div class="box" style="border-top: none;"> 
@@ -31,7 +31,7 @@
                 $e=$key->title;
                 $o1= '';
                 if ($e!= $r) {
-                    echo '<p style=" margin-top: 10px;font-size:18px;font-weight:bold">'. $o1 = $key->title.'</p>Total Respondents : '.$res;
+                    echo '<p style=" margin-top: 10px;font-size:18px;font-weight:bold">'. $o1 = $key->title.'</p>'.e(__('admin/survey.total_respondents_count', ['count' => $res]));
                 }
                 $r=$e;
                 
@@ -70,7 +70,7 @@
     </div>
       </div>
     <div class="footer">
-        <p style="font-size:8px">WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal</p>
+        <p style="font-size:8px">{{ __('admin/survey.pdf_disclaimer') }}</p>
     </div>
     </section>
   </body>

@@ -6,7 +6,7 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">News and Promo</h3>
+                        <h3 class="page-title">{{ __('admin/news.news_and_promo') }}</h3>
                     </div>
                 </div>
             </div>
@@ -16,12 +16,12 @@
                         <table class="table table-hover table-bordered w-100" id="tblgroup">
                             <thead>
                             <tr>
-                                <th style="padding-right: 20px;padding-left: 10px;">No</th>
-                                <th>Content Type</th>
-                                <th width="45%">Title</th>
-                                <th>Start Date</th>
-                                <th>End Date</th>
-                                <th>Status</th>
+                                <th style="padding-right: 20px;padding-left: 10px;">{{ __('admin/news.col_no') }}</th>
+                                <th>{{ __('admin/news.content_type') }}</th>
+                                <th width="45%">{{ __('common.title') }}</th>
+                                <th>{{ __('common.start_date') }}</th>
+                                <th>{{ __('common.end_date') }}</th>
+                                <th>{{ __('common.status') }}</th>
                             </tr>
                             </thead>
                         </table>
@@ -95,19 +95,19 @@
                     const today = new Date();
 
                     if (today > endDate) {
-                        return '<span class="badge text-bg-danger">Expired</span>';
+                        return '<span class="badge text-bg-danger">' + @json(__('admin/news.expired')) + '</span>';
                     }
 
-                    return '<span class="badge text-bg-success">Active</span>';
+                    return '<span class="badge text-bg-success">' + @json(__('admin/news.active')) + '</span>';
                 }
             }
           ],
           dom: '<"toolbar group">frtip'
       });
       $("div.group").html(
-        '<button id="addgroup" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
-        '<button id="editgroup" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
-        '<button id="deletegroup" class="btn btn-sm btn-danger">Delete</button>&nbsp;'
+        '<button id="addgroup" class="btn btn-sm btn-primary">' + @json(__('common.add')) + '</button>&nbsp;'+
+        '<button id="editgroup" class="btn btn-sm btn-info">' + @json(__('common.edit')) + '</button>&nbsp;'+
+        '<button id="deletegroup" class="btn btn-sm btn-danger">' + @json(__('common.delete')) + '</button>&nbsp;'
 
       );
       tblgroupp.on('click', 'tr', function() {
@@ -128,7 +128,7 @@
       $('#editgroup').click(function(){
         var rows = tblgroupp.rows('.selected').indexes();
         if (rows.length < 1) {
-            Swal.fire("Information",'Please select a row',"warning");
+            Swal.fire(@json(__('common.information')),@json(__('admin/news.select_row')),"warning");
             return;
         }
         var data = tblgroupp.rows(rows).data();
@@ -142,20 +142,20 @@
         $('#deletegroup').click(function(){
             var rows = tblgroupp.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information",'Please select a row',"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/news.select_row')),"warning");
                 return;
             }
             var data = tblgroupp.rows(rows).data();
             var id = data[0].id;
 
             Swal.fire({
-                title: 'Are you sure?',
-                text: 'You won\'t be able to revert this!',
+                title: @json(__('common.are_you_sure')),
+                text: @json(__('admin/news.cannot_revert')),
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, delete it!'
+                confirmButtonText: @json(__('admin/news.yes_delete'))
             })
             .then(function(a){
                 if (a.value==true) {
@@ -173,11 +173,11 @@
             data: { id: id,"_token": "{{ csrf_token() }}" },
             dataType:"json",
             success:function(event, data){
-                Swal.fire("Information",event.pesan,"success");
+                Swal.fire(@json(__('common.information')),event.pesan,"success");
                 tblgroupp.ajax.reload(null,true);
             },
             error: function(jqXHR, textStatus, errorThrown){
-                Swal.fire("Information",textStatus+' Save : '+errorThrown,"warning");
+                Swal.fire(@json(__('common.information')),@json(__('admin/news.request_error')).replace(':status', textStatus).replace(':error', errorThrown),"warning");
             }
         });
     }

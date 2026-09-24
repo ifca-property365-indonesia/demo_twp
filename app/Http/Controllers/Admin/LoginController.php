@@ -48,6 +48,6 @@ class LoginController extends Controller
     public function logout()
     {
         Session::flush();
-        return redirect('/')->with('alert', 'Already logout!');
+        return redirect('/')->with('alert', __('admin/login.already_logout'));
     }
 }

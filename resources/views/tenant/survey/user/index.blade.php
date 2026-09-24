@@ -1,14 +1,14 @@
 @extends('tenant.template.base')
 
-@section('title', 'Online Survey')
+@section('title', __('tenant/survey.title'))
 
 @section('content')
 <div class="page-body">
     <div class="page-head">
         <div class="page-head-row">
             <div class="page-head-content">
-                <h3 class="page-title">Take Survey</h3>
-                <div class="page-desc">Your feedback helps us improve our service.</div>
+                <h3 class="page-title">{{ __('tenant/survey.heading') }}</h3>
+                <div class="page-desc">{{ __('tenant/survey.page_desc') }}</div>
             </div>
         </div>
     </div>
@@ -42,10 +42,10 @@
                                                 </div>
                                             @endforeach
                                             <div class="remarks-box mt-2" id="remarks_box_{{ $q->id }}" style="display: none;">
-                                                <input type="text" class="form-control form-control-sm" name="remarks[{{ $q->id }}]" placeholder="Remarks (optional)">
+                                                <input type="text" class="form-control form-control-sm" name="remarks[{{ $q->id }}]" placeholder="{{ __('tenant/survey.remarks_optional') }}">
                                             </div>
                                         @else
-                                            <textarea class="form-control" name="answers[{{ $q->id }}]" rows="3" placeholder="Type your answer here..." required></textarea>
+                                            <textarea class="form-control" name="answers[{{ $q->id }}]" rows="3" placeholder="{{ __('tenant/survey.answer_placeholder') }}" required></textarea>
                                         @endif
                                     </div>
                                 @endforeach
@@ -53,7 +53,7 @@
 
                             <div class="text-end">
                                 <button type="button" id="btnSave{{ $survey->id }}" data-p="{{ $survey->id }}" class="btn btn-primary btn-save-survey">
-                                    <i class="cil-send"></i><span>Submit</span>
+                                    <i class="cil-send"></i><span>{{ __('common.submit') }}</span>
                                 </button>
                             </div>
                         </form>
@@ -68,7 +68,7 @@
             <div class="card">
                 <div class="card-body text-center py-5 text-body-secondary">
                     <i class="cil-task fs-1 d-block mb-2"></i>
-                    No survey available.
+                    {{ __('tenant/survey.no_survey') }}
                 </div>
             </div>
         @endif
@@ -96,7 +96,7 @@
                 return;
             }
 
-            button.prop('disabled', true).find('span').text('Submitting...');
+            button.prop('disabled', true).find('span').text(@json(__('tenant/survey.submitting')));
 
             $.ajax({
                 url: "{{ url('/tenant/usersurvey/submit') }}",
@@ -105,15 +105,15 @@
                 dataType: 'json'
             }).done(function (res) {
                 if (res.status == 'OK') {
-                    Swal.fire({ title: 'Thank you', icon: 'success', text: res.message || res.pesan })
+                    Swal.fire({ title: @json(__('common.thank_you')), icon: 'success', text: res.message || res.pesan })
                         .then(function () { window.location.reload(); });
                 } else {
-                    Swal.fire({ title: 'Information', icon: 'error', text: res.message || res.pesan });
-                    button.prop('disabled', false).find('span').text('Submit');
+                    Swal.fire({ title: @json(__('common.information')), icon: 'error', text: res.message || res.pesan });
+                    button.prop('disabled', false).find('span').text(@json(__('common.submit')));
                 }
             }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: 'Error', icon: 'error', text: (xhr.responseJSON && xhr.responseJSON.message) || (textStatus + ' : ' + errorThrown) });
-                button.prop('disabled', false).find('span').text('Submit');
+                Swal.fire({ title: @json(__('common.error')), icon: 'error', text: (xhr.responseJSON && xhr.responseJSON.message) || (textStatus + ' : ' + errorThrown) });
+                button.prop('disabled', false).find('span').text(@json(__('common.submit')));
             });
         });
     });

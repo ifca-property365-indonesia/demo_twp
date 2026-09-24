@@ -124,7 +124,7 @@ class UserSurveyController extends Controller
 
             return response()->json([
                 'status' => 'OK', 
-                'pesan' => 'Thank you, your survey answer has been saved successfully!'
+                'pesan' => __('tenant/survey.saved')
             ]);
 
         } catch (Exception $e) {
@@ -133,7 +133,7 @@ class UserSurveyController extends Controller
             
             return response()->json([
                 'status' => 'Failed', 
-                'pesan' => 'System error occurred: ' . $e->getMessage()
+                'pesan' => __('tenant/survey.system_error', ['message' => $e->getMessage()])
             ]);
         }
     }

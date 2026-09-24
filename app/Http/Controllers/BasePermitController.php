@@ -79,6 +79,59 @@ abstract class BasePermitController extends Controller
     protected const AUDIT_USER = 'TWP';
 
     // ------------------------------------------------------------------
+    // Label tampilan (terjemahan); kode di konstanta di atas tetap dipakai untuk logika
+    // ------------------------------------------------------------------
+
+    /** TYPES dengan label sesuai bahasa aktif. */
+    public static function typeLabels()
+    {
+        $labels = [];
+        foreach (array_keys(self::TYPES) as $code) {
+            $labels[$code] = __('shared/permit.types.' . $code);
+        }
+
+        return $labels;
+    }
+
+    /** STATUSES dengan label sesuai bahasa aktif. */
+    public static function statusLabels()
+    {
+        $labels = [];
+        foreach (array_keys(self::STATUSES) as $code) {
+            $labels[$code] = __('common.statuses.' . $code);
+        }
+
+        return $labels;
+    }
+
+    /** ADMIN_STATUSES dengan label sesuai bahasa aktif. */
+    public static function adminStatusLabels()
+    {
+        $labels = [];
+        foreach (array_keys(self::ADMIN_STATUSES) as $code) {
+            $labels[$code] = __('shared/permit.admin_statuses.' . $code);
+        }
+
+        return $labels;
+    }
+
+    /** Label satu jenis permit (kode asli kalau tidak dikenal). */
+    public static function typeLabel($code)
+    {
+        return isset(self::TYPES[$code]) ? __('shared/permit.types.' . $code) : $code;
+    }
+
+    /** Label satu status (kode asli, atau '-' kalau kosong, kalau tidak dikenal). */
+    public static function statusLabel($code)
+    {
+        if (isset(self::STATUSES[$code])) {
+            return __('common.statuses.' . $code);
+        }
+
+        return $code !== '' ? $code : '-';
+    }
+
+    // ------------------------------------------------------------------
     // Bagian yang berbeda per portal
     // ------------------------------------------------------------------
 
@@ -140,14 +193,14 @@ abstract class BasePermitController extends Controller
         $permit = $this->findPermit($doc_no);
 
         if (!$permit) {
-            abort(404, 'Permit not found.');
+            abort(404, __('shared/permit.not_found'));
         }
 
         $status = trim((string) $permit['header']->status);
         if (!in_array($status, self::EDITABLE_STATUSES, true)) {
             return redirect($this->base('history'))->with(
                 'alert',
-                'Permit ' . $doc_no . ' can no longer be changed (status: ' . (self::STATUSES[$status] ?? $status) . ').'
+                __('shared/permit.cannot_change', ['no' => $doc_no, 'status' => self::statusLabel($status)])
             );
         }
 
@@ -170,8 +223,8 @@ abstract class BasePermitController extends Controller
             'layout'    => $this->layout(),
             'portal'    => $this->portal(),
             'is_admin'  => $this->isAdmin(),
-            'types'     => self::TYPES,
-            'statuses'  => self::STATUSES,
+            'types'     => self::typeLabels(),
+            'statuses'  => self::statusLabels(),
             'editable'  => self::EDITABLE_STATUSES,
             'tenants'   => $this->isAdmin() ? $this->tenancies() : collect(),
         ]);
@@ -184,8 +237,8 @@ abstract class BasePermitController extends Controller
             'layout'       => $this->layout(),
             'portal'       => $this->portal(),
             'is_admin'     => $this->isAdmin(),
-            'types'        => self::TYPES,
-            'statuses'     => self::ADMIN_STATUSES,
+            'types'        => self::typeLabels(),
+            'statuses'     => self::adminStatusLabels(),
             'office_hours' => self::OFFICE_HOURS,
             'work_shifts'  => self::WORK_SHIFTS,
             'tools'        => [],
@@ -246,7 +299,7 @@ abstract class BasePermitController extends Controller
             ->get();
 
         if ($lots->isEmpty()) {
-            return response('<option value="">No unit available</option>');
+            return response('<option value="">' . e(__('shared/permit.no_unit')) . '</option>');
         }
 
         $html = '<option value=""></option>';
@@ -305,11 +358,11 @@ abstract class BasePermitController extends Controller
 
             return response()->json([
                 'status'    => 'OK',
-                'pesan'     => self::TYPES[$type] . ' ' . $doc_no . ' submitted successfully.',
+                'pesan'     => __('shared/permit.submitted', ['type' => self::typeLabel($type), 'no' => $doc_no]),
                 'permit_no' => $doc_no,
             ]);
         } catch (\Throwable $e) {
-            return $this->serverError('save', $e, 'Failed to save permit, please try again.');
+            return $this->serverError('save', $e, __('shared/permit.save_failed'));
         }
     }
 
@@ -327,14 +380,14 @@ abstract class BasePermitController extends Controller
         $permit = $this->findPermit($request->input('doc_no'));
 
         if (!$permit) {
-            return $this->fail('Permit not found.', 404);
+            return $this->fail(__('shared/permit.not_found'), 404);
         }
 
         $header = $permit['header'];
         $status = trim((string) $header->status);
 
         if (!in_array($status, self::EDITABLE_STATUSES, true)) {
-            return $this->fail('Permit ' . $header->complain_no . ' can no longer be changed (status: ' . (self::STATUSES[$status] ?? $status) . ').', 422);
+            return $this->fail(__('shared/permit.cannot_change', ['no' => $header->complain_no, 'status' => self::statusLabel($status)]), 422);
         }
 
         // Jenis permit mengikuti data tersimpan, bukan kiriman form.
@@ -410,11 +463,11 @@ abstract class BasePermitController extends Controller
 
             return response()->json([
                 'status'    => 'OK',
-                'pesan'     => self::TYPES[$type] . ' ' . $ctx['doc_no'] . ' ' . strtolower(self::STATUSES[$newStatus]) . ' successfully.',
+                'pesan'     => __('shared/permit.updated.' . $newStatus, ['type' => self::typeLabel($type), 'no' => $ctx['doc_no']]),
                 'permit_no' => $ctx['doc_no'],
             ]);
         } catch (\Throwable $e) {
-            return $this->serverError('update', $e, 'Failed to update permit, please try again.');
+            return $this->serverError('update', $e, __('shared/permit.update_failed'));
         }
     }
 
@@ -427,14 +480,14 @@ abstract class BasePermitController extends Controller
         $permit = $this->findPermit($request->input('doc_no'));
 
         if (!$permit) {
-            return $this->fail('Permit not found.', 404);
+            return $this->fail(__('shared/permit.not_found'), 404);
         }
 
         $header = $permit['header'];
         $status = trim((string) $header->status);
 
         if (!in_array($status, self::EDITABLE_STATUSES, true)) {
-            return $this->fail('Permit ' . $header->complain_no . ' can no longer be cancelled (status: ' . (self::STATUSES[$status] ?? $status) . ').', 422);
+            return $this->fail(__('shared/permit.cannot_cancel', ['no' => $header->complain_no, 'status' => self::statusLabel($status)]), 422);
         }
 
         try {
@@ -458,11 +511,11 @@ abstract class BasePermitController extends Controller
 
             return response()->json([
                 'status'    => 'OK',
-                'pesan'     => 'Permit ' . $ctx['doc_no'] . ' has been cancelled.',
+                'pesan'     => __('shared/permit.cancelled', ['no' => $ctx['doc_no']]),
                 'permit_no' => $ctx['doc_no'],
             ]);
         } catch (\Throwable $e) {
-            return $this->serverError('cancel', $e, 'Failed to cancel permit, please try again.');
+            return $this->serverError('cancel', $e, __('shared/permit.cancel_failed'));
         }
     }
 
@@ -594,32 +647,44 @@ abstract class BasePermitController extends Controller
 
         $rules = array_diff_key($rules, array_flip($locked));
 
+        $attr = function ($key) {
+            return __('shared/permit.attributes.' . $key);
+        };
+
         return Validator::make($request->all(), $rules, [], [
-            'tenant_no'     => 'tenant',
-            'lot_no'        => 'unit',
-            'incharge'      => 'person in charge',
-            'pic_hp'        => 'office phone / HP',
-            'contractor'    => 'contractor name',
-            'work_shift'    => 'working hours',
-            'tool_activity'   => 'activity',
-            'tool_activity.*' => 'activity',
-            'tool_name'       => 'tools / PPE',
-            'tool_name.*'     => 'tools / PPE',
-            'tool_remarks.*'  => 'remarks',
-            'worker_name'   => 'worker',
-            'worker_name.*' => 'worker name',
-            'owner'          => 'owner / tenant name',
-            'sender_name'    => 'sender / pickup name',
-            'sender_id_no'   => 'ID card / driving license no.',
-            'sender_address' => 'address',
-            'sender_hp'      => 'phone number',
-            'vehicle_type'   => 'vehicle type',
-            'vehicle_no'     => 'vehicle number',
-            'item_name'      => 'item',
-            'item_name.*'    => 'item name',
-            'item_qty'       => 'quantity',
-            'item_qty.*'     => 'quantity',
-            'item_remarks.*' => 'remarks',
+            'permit_type'   => $attr('permit_type'),
+            'note'          => $attr('note'),
+            'start_date'    => $attr('start_date'),
+            'end_date'      => $attr('end_date'),
+            'start_time'    => $attr('start_time'),
+            'end_time'      => $attr('end_time'),
+            'tenant_no'     => $attr('tenant_no'),
+            'lot_no'        => $attr('lot_no'),
+            'floor'         => $attr('floor'),
+            'incharge'      => $attr('incharge'),
+            'pic_hp'        => $attr('pic_hp'),
+            'contractor'    => $attr('contractor'),
+            'job_type'      => $attr('job_type'),
+            'work_shift'    => $attr('work_shift'),
+            'tool_activity'   => $attr('activity'),
+            'tool_activity.*' => $attr('activity'),
+            'tool_name'       => $attr('tools_ppe'),
+            'tool_name.*'     => $attr('tools_ppe'),
+            'tool_remarks.*'  => $attr('remarks'),
+            'worker_name'   => $attr('worker'),
+            'worker_name.*' => $attr('worker_name'),
+            'owner'          => $attr('owner'),
+            'sender_name'    => $attr('sender_name'),
+            'sender_id_no'   => $attr('sender_id_no'),
+            'sender_address' => $attr('sender_address'),
+            'sender_hp'      => $attr('sender_hp'),
+            'vehicle_type'   => $attr('vehicle_type'),
+            'vehicle_no'     => $attr('vehicle_no'),
+            'item_name'      => $attr('item'),
+            'item_name.*'    => $attr('item_name'),
+            'item_qty'       => $attr('quantity'),
+            'item_qty.*'     => $attr('quantity'),
+            'item_remarks.*' => $attr('remarks'),
         ]);
     }
 
@@ -812,12 +877,12 @@ abstract class BasePermitController extends Controller
     {
         $applicant = $this->applicant();
         if (!$applicant) {
-            return 'Applicant data not found.';
+            return __('shared/permit.applicant_not_found');
         }
 
         $tenancy = $this->tenancyInScope($id_tenancy);
         if (!$tenancy) {
-            return 'The selected tenant is not valid.';
+            return __('shared/permit.tenant_invalid');
         }
 
         // Tower (block_no) dari unit yang dipilih
@@ -829,7 +894,7 @@ abstract class BasePermitController extends Controller
             ->first();
 
         if (!$lot) {
-            return 'Sorry, the tower with this lot number is not found.';
+            return __('shared/permit.tower_not_found');
         }
 
         return [
@@ -1041,7 +1106,7 @@ abstract class BasePermitController extends Controller
             'line' => $e->getLine(),
         ]);
 
-        return $this->fail(config('app.debug') ? 'An error occurred: ' . $e->getMessage() : $message, 500);
+        return $this->fail(config('app.debug') ? __('common.error_occurred', ['message' => $e->getMessage()]) : $message, 500);
     }
 
     // ------------------------------------------------------------------
@@ -1181,15 +1246,14 @@ abstract class BasePermitController extends Controller
         $permit = $this->findPermit($doc_no);
 
         if (!$permit) {
-            abort(404, 'Permit not found.');
+            abort(404, __('shared/permit.not_found'));
         }
 
         $header = $permit['header'];
         $status = trim((string) $header->status);
 
         if ($status !== self::PRINTABLE_STATUS) {
-            abort(403, 'Permit ' . trim($header->complain_no) . ' cannot be printed (status: '
-                . (self::STATUSES[$status] ?? ($status !== '' ? $status : '-')) . '). Only approved permits can be printed.');
+            abort(403, __('shared/permit.cannot_print', ['no' => trim($header->complain_no), 'status' => self::statusLabel($status)]));
         }
 
         return $permit;

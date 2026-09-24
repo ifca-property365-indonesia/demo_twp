@@ -1,6 +1,6 @@
 @extends('tenant.template.base')
 
-@section('title', 'Ticket')
+@section('title', __('tenant/ticket.title'))
 
 @section('content')
     <div class="page-body">
@@ -8,10 +8,10 @@
             <div class="page-head-row">
                 <div class="page-head-content">
                     <h3 class="page-title">{{ $jdl }}</h3>
-                    <div class="page-desc">Submit a request or complaint to building management.</div>
+                    <div class="page-desc">{{ __('tenant/ticket.page_desc') }}</div>
                 </div>
                 <div class="page-head-content">
-                    <a href="{{ url('/tenant/history/ticket') }}" class="btn btn-outline-secondary"><i class="cil-history"></i><span>Ticket History</span></a>
+                    <a href="{{ url('/tenant/history/ticket') }}" class="btn btn-outline-secondary"><i class="cil-history"></i><span>{{ __('tenant/ticket.ticket_history') }}</span></a>
                 </div>
             </div>
         </div>
@@ -22,69 +22,69 @@
                     @csrf
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label" for="ticket_type">Ticket Type <span class="text-danger">*</span></label>
-                            <select name="ticket_type" id="ticket_type" class="form-control select2" data-placeholder="Choose a Ticket Type">
+                            <label class="form-label" for="ticket_type">{{ __('tenant/ticket.ticket_type') }} <span class="text-danger">*</span></label>
+                            <select name="ticket_type" id="ticket_type" class="form-control select2" data-placeholder="{{ __('tenant/ticket.choose_ticket_type') }}">
                                 <option value=""></option>
-                                <option value="R">Request</option>
-                                <option value="C">Complain</option>
+                                <option value="R">{{ __('tenant/ticket.type_request') }}</option>
+                                <option value="C">{{ __('tenant/ticket.type_complain') }}</option>
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="tenant_no">Tenant <span class="text-danger">*</span></label>
-                            <select name="tenant_no" id="tenant_no" class="form-control select2" data-placeholder="Choose a Tenant">
+                            <label class="form-label" for="tenant_no">{{ __('common.tenant') }} <span class="text-danger">*</span></label>
+                            <select name="tenant_no" id="tenant_no" class="form-control select2" data-placeholder="{{ __('tenant/ticket.choose_tenant') }}">
                                 {!! $combo_tenant !!}
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="lot_no">Unit <span class="text-danger">*</span></label>
-                            <select name="lot_no" id="lot_no" class="form-control select2" data-placeholder="Choose a Unit">
+                            <label class="form-label" for="lot_no">{{ __('common.unit') }} <span class="text-danger">*</span></label>
+                            <select name="lot_no" id="lot_no" class="form-control select2" data-placeholder="{{ __('tenant/ticket.choose_unit') }}">
                                 <option value=""></option>
                             </select>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="floor">Floor <span class="text-danger">*</span></label>
+                            <label class="form-label" for="floor">{{ __('common.floor') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" name="floor" id="floor" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="angka">Ticket Number</label>
+                            <label class="form-label" for="angka">{{ __('tenant/ticket.ticket_number') }}</label>
                             <input type="text" class="form-control" name="angka" id="angka" readonly>
                             <input type="hidden" name="pre" id="pre">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="location">Location <span class="text-danger">*</span></label>
+                            <label class="form-label" for="location">{{ __('tenant/ticket.location') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" maxlength="20" id="location" name="location">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="req_by">Requested By <span class="text-danger">*</span></label>
+                            <label class="form-label" for="req_by">{{ __('tenant/ticket.requested_by') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="req_by" name="req_by">
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="contact_no">Contact No <span class="text-danger">*</span></label>
+                            <label class="form-label" for="contact_no">{{ __('tenant/ticket.contact_no') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" maxlength="20" id="contact_no" name="contact_no">
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="category">Category <span class="text-danger">*</span></label>
-                            <select name="category" id="category" class="form-control select2" data-placeholder="Choose a Category" disabled>
+                            <label class="form-label" for="category">{{ __('common.category') }} <span class="text-danger">*</span></label>
+                            <select name="category" id="category" class="form-control select2" data-placeholder="{{ __('tenant/ticket.choose_category') }}" disabled>
                                 <option value=""></option>
                             </select>
                         </div>
                         <div class="col-12">
-                            <label class="form-label" for="description">Description <span class="text-danger">*</span></label>
-                            <textarea class="form-control" rows="3" maxlength="255" placeholder="Describe the request / complaint" id="description" name="description"></textarea>
+                            <label class="form-label" for="description">{{ __('common.description') }} <span class="text-danger">*</span></label>
+                            <textarea class="form-control" rows="3" maxlength="255" placeholder="{{ __('tenant/ticket.description_placeholder') }}" id="description" name="description"></textarea>
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label" for="ticket_image">Picture</label>
+                            <label class="form-label" for="ticket_image">{{ __('common.picture') }}</label>
                             <input type="file" id="ticket_image" name="ticket_image" class="form-control" accept="image/*">
-                            <div class="form-note">Max 2 MB. JPG, JPEG, PNG or GIF.</div>
+                            <div class="form-note">{{ __('tenant/ticket.picture_note') }}</div>
                         </div>
                         <div class="col-md-6">
                             <div id="pictureWrap" class="d-none">
                                 <img src="" id="picturebox" class="img-fluid rounded border" style="max-height: 180px;" alt="">
                                 <div class="mt-2 d-flex align-items-center gap-2">
                                     <span class="form-note mt-0" id="pictureInfo"></span>
-                                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnRemovePicture"><i class="cil-trash"></i><span>Remove</span></button>
+                                    <button type="button" class="btn btn-sm btn-outline-danger" id="btnRemovePicture"><i class="cil-trash"></i><span>{{ __('common.remove') }}</span></button>
                                 </div>
-                                <div class="form-note text-primary" id="pictureHint">Picture is uploaded only when you click Submit.</div>
+                                <div class="form-note text-primary" id="pictureHint">{{ __('tenant/ticket.picture_hint') }}</div>
                             </div>
                             <input type="hidden" name="picturepath" id="picturepath" value="">
                             <input type="hidden" name="picturename" id="picturename">
@@ -93,8 +93,8 @@
                     </div>
 
                     <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-                        <button type="button" id="btnReset" class="btn btn-outline-secondary"><i class="cil-reload"></i><span>Reset</span></button>
-                        <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-send"></i><span>Submit</span></button>
+                        <button type="button" id="btnReset" class="btn btn-outline-secondary"><i class="cil-reload"></i><span>{{ __('common.reset') }}</span></button>
+                        <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-send"></i><span>{{ __('common.submit') }}</span></button>
                     </div>
                     <input type="hidden" name="entity" id="entity">
                     <input type="hidden" name="project" id="project">
@@ -111,7 +111,7 @@
 
 			function loadHargaItem()
 			{
-				$('#resultHargaItem').html('Loading...');
+				$('#resultHargaItem').text(@json(__('common.loading')));
 
 				$.ajax({
 					url: "<?= url('tenant/ticketharga/getHargaItem') ?>",
@@ -129,9 +129,9 @@
 							buttons: [
 								{
 									extend: 'pdf',
-									title: 'Item Price List',
+									title: @json(__('tenant/ticket.item_price_list')),
 									className: 'btn btn-primary mb-2',
-									text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
+									text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
 
 									init: function(api, node, config) {
 										$(node).removeClass('dt-button');
@@ -156,7 +156,7 @@
 
 			function loadHargaJasa()
 			{
-				$('#resultHargaJasa').html('Loading...');
+				$('#resultHargaJasa').text(@json(__('common.loading')));
 
 				$.ajax({
 					url: "<?= url('tenant/ticketharga/getHargaJasa') ?>",
@@ -174,9 +174,9 @@
 							buttons: [
 								{
 									extend: 'pdf',
-									title: 'Service Price List',
+									title: @json(__('tenant/ticket.service_price_list')),
 									className: 'btn btn-primary mb-2',
-									text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
+									text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
 
 									init: function(api, node, config) {
 										$(node).removeClass('dt-button');
@@ -270,12 +270,12 @@
 				var file = this.files[0];
 				if (!file) { clearPicture(); return; }
 				if (!/^image\/(png|jpe?g|gif)$/i.test(file.type)) {
-					Swal.fire({ title: 'Information', text: 'Only JPG, JPEG, PNG or GIF files are allowed.', icon: 'warning' });
+					Swal.fire({ title: @json(__('common.information')), text: @json(__('tenant/ticket.only_image')), icon: 'warning' });
 					clearPicture();
 					return;
 				}
 				if (file.size > 2000000) {
-					Swal.fire({ title: 'Information', text: 'Maximum file size is 2 MB.', icon: 'warning' });
+					Swal.fire({ title: @json(__('common.information')), text: @json(__('tenant/ticket.max_size')), icon: 'warning' });
 					clearPicture();
 					return;
 				}
@@ -315,10 +315,10 @@
 						$('#pictureattach').val(res.pic_attached);
 						d.resolve();
 					} else {
-						d.reject(res.pesan || 'Picture upload failed.');
+						d.reject(res.pesan || @json(__('tenant/ticket.picture_upload_failed')));
 					}
 				}).fail(function (xhr, textStatus, errorThrown) {
-					d.reject('Picture upload failed: ' + textStatus + ' ' + errorThrown);
+					d.reject(@json(__('tenant/ticket.picture_upload_failed_detail')).replace(':status', textStatus).replace(':error', errorThrown));
 				});
 				return d.promise();
 			}
@@ -328,12 +328,12 @@
 			// ------------------------------------------------------------------
 			$('#btnReset').on('click', function () {
 				Swal.fire({
-					title: 'Reset the form?',
-					text: 'All entered data and the selected picture will be cleared.',
+					title: @json(__('tenant/ticket.reset_title')),
+					text: @json(__('tenant/ticket.reset_text')),
 					icon: 'warning',
 					showCancelButton: true,
-					confirmButtonText: 'Yes, reset',
-					cancelButtonText: 'Cancel',
+					confirmButtonText: @json(__('tenant/ticket.reset_confirm')),
+					cancelButtonText: @json(__('common.cancel')),
 					reverseButtons: true
 				}).then(function (r) {
 					if (!r.value) { return; }
@@ -361,14 +361,14 @@
 			        description: { required: true }
 			    },
 			    messages: {
-			        ticket_type: "Please select a type",
-			        tenant_no: "Please select a tenant",
-					lot_no: "Please select a lot",
-			        location: "Please select a location",
-					req_by: "Please select a req_by",
-			        contact_no: "Please select a contact_no",
-					category: "Please select a category",
-			        description: "Please select a description",
+			        ticket_type: @json(__('tenant/ticket.validation.ticket_type')),
+			        tenant_no: @json(__('tenant/ticket.validation.tenant_no')),
+					lot_no: @json(__('tenant/ticket.validation.lot_no')),
+			        location: @json(__('tenant/ticket.validation.location')),
+					req_by: @json(__('tenant/ticket.validation.req_by')),
+			        contact_no: @json(__('tenant/ticket.validation.contact_no')),
+					category: @json(__('tenant/ticket.validation.category')),
+			        description: @json(__('tenant/ticket.validation.description')),
 			    },
 			    errorElement: "div",
 			    errorClass: "invalid-feedback",
@@ -415,7 +415,7 @@
 					uploadPicture().fail(function (msg) {
 						$('#overlaySpinner').hide();
 						$('#btnSave').prop('disabled', false);
-						Swal.fire({ title: 'Error', icon: 'error', text: msg });
+						Swal.fire({ title: @json(__('common.error')), icon: 'error', text: msg });
 					}).done(function () {
 					// isi field foto hasil unggah ke data form
 					datafrm = datafrm.filter(function (f) { return ['picturepath', 'picturename', 'pictureattach'].indexOf(f.name) < 0; });
@@ -446,10 +446,10 @@
 								if (event.status == 'OK') {
 
 									Swal.fire({
-										title: "Information",
+										title: @json(__('common.information')),
 										icon: "success",
 										text: event.pesan,
-										confirmButtonText: "OK"
+										confirmButtonText: @json(__('common.ok'))
 									}).then(function () {
 										window.location.href = "{{ url('/tenant/dash') }}";
 									});
@@ -459,10 +459,10 @@
 									$('#btnSave').prop('disabled', false);
 
 									Swal.fire({
-										title: "Information",
+										title: @json(__('common.information')),
 										icon: "error",
 										text: event.pesan,
-										confirmButtonText: "OK"
+										confirmButtonText: @json(__('common.ok'))
 									});
 								}
 
@@ -480,10 +480,10 @@
 								$('#btnSave').prop('disabled', false);
 
 								Swal.fire({
-									title: "Error",
+									title: @json(__('common.error')),
 									icon: "error",
-									text: textStatus + ' Save : ' + errorThrown,
-									confirmButtonText: "OK"
+									text: @json(__('tenant/ticket.save_error')).replace(':status', textStatus).replace(':error', errorThrown),
+									confirmButtonText: @json(__('common.ok'))
 								});
 
 							}, remaining);
@@ -521,7 +521,7 @@
 						$('#description').val(data[0].work_requested);
 
 						if (data[0].picture != "") {
-							$('#picturebox').attr("src", data[0].picture); $('#pictureInfo').text('Current picture'); $('#pictureHint').addClass('d-none'); $('#pictureWrap').removeClass('d-none');
+							$('#picturebox').attr("src", data[0].picture); $('#pictureInfo').text(@json(__('tenant/ticket.current_picture'))); $('#pictureHint').addClass('d-none'); $('#pictureWrap').removeClass('d-none');
 							$('#picturepath').val(data[0].picture);
 						}
 

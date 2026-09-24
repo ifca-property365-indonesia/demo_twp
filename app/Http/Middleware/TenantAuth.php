@@ -15,7 +15,7 @@ class TenantAuth
     public function handle(Request $request, Closure $next)
     {
         if (!Session::get('is_Tenant_logged')) {
-            return redirect('/')->with('alert', 'Please login first!');
+            return redirect('/')->with('alert', __('shared/login.login_first'));
         }
 
         return $next($request);

@@ -1,13 +1,13 @@
 @extends('tenant.template.base')
 
-@section('title', 'Online Survey')
+@section('title', __('tenant/survey.title'))
 
 @section('content')
     <div class="page-body">
         <div class="page-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Take Survey</h3>
+                    <h3 class="page-title">{{ __('tenant/survey.heading') }}</h3>
                 </div>
             </div>
         </div>
@@ -19,7 +19,7 @@
                     @else
                         <div class="text-center py-5 text-body-secondary">
                             <i class="cil-task fs-1 d-block mb-2"></i>
-                            No survey available.
+                            {{ __('tenant/survey.no_survey') }}
                         </div>
                     @endif
                 </div>
@@ -66,14 +66,14 @@
                 dataType: 'json'
             }).done(function (res) {
                 if (res.status == 'OK') {
-                    Swal.fire({ title: 'Information', icon: 'success', text: res.pesan })
+                    Swal.fire({ title: @json(__('common.information')), icon: 'success', text: res.pesan })
                         .then(function () { window.location.href = "{{ url('/tenant/online_survey') }}"; });
                 } else {
-                    Swal.fire({ title: 'Information', icon: 'error', text: res.pesan });
+                    Swal.fire({ title: @json(__('common.information')), icon: 'error', text: res.pesan });
                     button.prop('disabled', false);
                 }
             }).fail(function (xhr, textStatus, errorThrown) {
-                Swal.fire({ title: 'Error', icon: 'error', text: textStatus + ' : ' + errorThrown });
+                Swal.fire({ title: @json(__('common.error')), icon: 'error', text: textStatus + ' : ' + errorThrown });
                 button.prop('disabled', false);
             });
         });

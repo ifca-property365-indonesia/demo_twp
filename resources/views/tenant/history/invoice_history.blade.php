@@ -4,7 +4,7 @@
         <div class="page-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Invoice History</h3>
+                    <h3 class="page-title">{{ __('tenant/history.invoice_title') }}</h3>
                 </div><!-- .page-head-content -->
             </div><!-- .page-head-row -->
         </div><!-- .page-head -->
@@ -14,21 +14,21 @@
                     <form id="form_search" method="POST" action="" novalidate>
                         <div class="row g-3 align-items-end">
                             <div class="col-sm-6 col-lg-3">
-                                <label for="start_date" class="form-label">Start Date (Doc Date)</label>
+                                <label for="start_date" class="form-label">{{ __('tenant/history.start_date_doc') }}</label>
                                 <div class="form-control-wrap">
                                     <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                     <input type="text" id="start_date" name="start_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y', strtotime('-3 months', strtotime(date('Y-m-01')))) }}" required autocomplete="off">
                                 </div>
                             </div>
                             <div class="col-sm-6 col-lg-3">
-                                <label for="end_date" class="form-label">End Date (Doc Date)</label>
+                                <label for="end_date" class="form-label">{{ __('tenant/history.end_date_doc') }}</label>
                                 <div class="form-control-wrap">
                                     <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                     <input type="text" id="end_date" name="end_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
                                 </div>
                             </div>
                             <div class="col-sm-4 col-lg-2">
-                                <button type="submit" id="btnSearch" class="btn btn-primary w-100"><i class="cil-search"></i><span>Search</span></button>
+                                <button type="submit" id="btnSearch" class="btn btn-primary w-100"><i class="cil-search"></i><span>{{ __('common.search') }}</span></button>
                             </div>
                         </div>
                     </form>
@@ -40,13 +40,13 @@
                         <table id="tblBilling" class="table table-bordered table-striped" role="grid" aria-describedby="tblBilling_info">
                             <thead class="table-dark">
                                 <tr role='row'>
-                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
-                                    <th class="sorting text-center" style="width: 24px;">Document Number</th>
-                                    <th class="sorting text-center" style="width: 100px;">Doc Date</th>
-                                    <th class="sorting text-center" style="width: 100px;">Due Date</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Period</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">Outstanding</th>
+                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">{{ __('tenant/history.col_no') }}</th>
+                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.document_number') }}</th>
+                                    <th class="sorting text-center" style="width: 100px;">{{ __('tenant/history.doc_date') }}</th>
+                                    <th class="sorting text-center" style="width: 100px;">{{ __('tenant/history.due_date') }}</th>
+                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/history.description') }}</th>
+                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">{{ __('tenant/history.period') }}</th>
+                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/history.outstanding') }}</th>
                                 </tr>
                             </thead>
                             <tbody>

@@ -13,19 +13,19 @@
   </head>
   <body>
     <section class="invoice" style="margin:0px!important;">
-      <h4>History Ticket</h4><hr/>
+      <h4>{{ __('admin/history.pdf_ticket_title') }}</h4><hr/>
       <table id="tbLog" class="table table-bordered table-striped" style="width:100%!important">
         <thead  style="background:#ffa500;">
           <tr class="odd">
             <th class="sorting_asc" style="width: 6px;padding: 4px"> #</th>
-            <th  style="width: 10px;padding: 4px">Ticket Number</th>
-            <th style="width: 10px;padding: 4px">Category</th>
-            <th  style="width: 70px!important;padding: 4px">Tenant Name</th>
-            <th class="sorting" style="width: 20px;padding: 4px">Description</th>
-            <th class="sorting" style="width: 50px;padding: 4px">Reported Date</th>
-            <th class="sorting" style="width: 15px;padding: 4px">Request By</th>
-            <th class="sorting" style="width: 5px;padding: 4px">Lot No</th>
-            <th class="sorting" style="width: 15px;padding: 4px">Ticket Status</th>
+            <th  style="width: 10px;padding: 4px">{{ __('admin/history.ticket_number') }}</th>
+            <th style="width: 10px;padding: 4px">{{ __('common.category') }}</th>
+            <th  style="width: 70px!important;padding: 4px">{{ __('admin/history.tenant_name') }}</th>
+            <th class="sorting" style="width: 20px;padding: 4px">{{ __('common.description') }}</th>
+            <th class="sorting" style="width: 50px;padding: 4px">{{ __('admin/history.reported_date') }}</th>
+            <th class="sorting" style="width: 15px;padding: 4px">{{ __('admin/history.request_by') }}</th>
+            <th class="sorting" style="width: 5px;padding: 4px">{{ __('common.lot_no') }}</th>
+            <th class="sorting" style="width: 15px;padding: 4px">{{ __('admin/history.ticket_status') }}</th>
           </tr>
         </thead>
         <tbody>
@@ -33,13 +33,13 @@
           if(!empty($listD)) {
             echo $listD;
           } else {
-            echo "Data Not Available";
+            echo e(__('admin/history.pdf_no_data'));
           }
           ?>
         </tbody>
       </table>
       <div class="footer">
-        <p style="font-size:8px">WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal</p>
+        <p style="font-size:8px">{{ __('admin/history.pdf_disclaimer') }}</p>
       </div> 
     </section>
   </body>

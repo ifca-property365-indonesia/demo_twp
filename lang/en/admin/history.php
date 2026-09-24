@@ -1,0 +1,53 @@
+<?php
+
+// Admin: History (ticket, overtime, log user) & ekspor PDF-nya.
+return [
+    'ticket_history'     => 'Ticket History',
+    'overtime_history'   => 'Overtime History',
+    'log_user_history'   => 'Log User History',
+    'request_date_from'  => 'Request Date From',
+    'reported_date_from' => 'Reported Date From',
+    'login_date_from'    => 'Login Date From',
+    'to'                 => 'To',
+    'choose_tenant'      => 'Choose Tenant',
+    'col_no'             => 'No.',
+    'lot_number'         => 'Lot Number',
+    'start_overtime'     => 'Start Overtime',
+    'end_overtime'       => 'End Overtime',
+    'ticket_number'      => 'Ticket Number',
+    'tenant_name'        => 'Tenant Name',
+    'reported_date'      => 'Reported Date',
+    'request_by'         => 'Request By',
+    'ticket_status'      => 'Ticket Status',
+    'login_date'         => 'Login Date',
+    'user_name'          => 'User Name',
+    'login_from'         => 'Login From',
+    'activated'          => 'Activated',
+    'closed'             => 'Closed',
+    'choose_end_date'    => 'Please choose end date',
+    'pdf_failed'         => 'Failed generating pdf file.',
+
+    // label status ticket di tabel Ticket History (kunci = kode status)
+    'ticket_statuses' => [
+        'R' => 'Open',
+        'A' => 'Accepted',
+        'S' => 'Survey',
+        'P' => 'Process',
+        'M' => 'Modify',
+        'Z' => 'Charged Approved',
+        'Y' => 'Approve',
+        'C' => 'Close',
+        'F' => 'Confirm',
+        'X' => 'Cancel',
+    ],
+
+    // PDF
+    'pdf_overtime_title' => 'History Overtime',
+    'pdf_log_title'      => 'History User Login',
+    'pdf_ticket_title'   => 'History Ticket',
+    'pdf_no_data'        => 'Data Not Available',
+    'pdf_no_data_row'    => 'No Data Available',
+    'pdf_open'           => 'Open',
+    'pdf_process'        => 'Process',
+    'pdf_disclaimer'     => 'WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal',
+];

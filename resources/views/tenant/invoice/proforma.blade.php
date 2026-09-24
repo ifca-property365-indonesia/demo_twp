@@ -4,7 +4,7 @@
         <div class="page-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Proforma Invoice</h3>
+                    <h3 class="page-title">{{ __('tenant/invoice.proforma_title') }}</h3>
                 </div><!-- .page-head-content -->
             </div><!-- .page-head-row -->
         </div><!-- .page-head -->
@@ -15,7 +15,7 @@
                     {{-- Mode semua tenant (akun admin di portal tenant): daftar berisi banyak tenant,
                          jadi label satu tenant tidak relevan. --}}
                     @unless (App\Support\TenantScope::all())
-                        <div class="mb-3"><span class="badge badge-soft-primary fs-6">Tenant No: {{ $tenant_no }}</span></div>
+                        <div class="mb-3"><span class="badge badge-soft-primary fs-6">{{ __('tenant/invoice.tenant_no', ['no' => $tenant_no]) }}</span></div>
                     @endunless
                     <div class="table-responsive">
                         <?php
@@ -24,14 +24,14 @@
                         <table id="tblBilling" class="table table-bordered table-striped" role="grid" aria-describedby="tblBilling_info">
                             <thead class="table-dark">
                                 <tr role='row'>
-                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
-                                    <th class="sorting text-center" style="width: 24px;">Document Number</th>
-                                    <th class="sorting text-center" style="width: 100px;">Doc Date</th>
-                                    <th class="sorting text-center" style="width: 100px;">Due Date</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Period</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">Outstanding</th>
-                                    <th class="sorting text-center" style="vertical-align: middle;">CHECK</th>
+                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">{{ __('tenant/invoice.col_no') }}</th>
+                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/invoice.document_number') }}</th>
+                                    <th class="sorting text-center" style="width: 100px;">{{ __('tenant/invoice.doc_date') }}</th>
+                                    <th class="sorting text-center" style="width: 100px;">{{ __('tenant/invoice.due_date') }}</th>
+                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/invoice.description') }}</th>
+                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">{{ __('tenant/invoice.period') }}</th>
+                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/invoice.outstanding') }}</th>
+                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/invoice.check') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -45,7 +45,7 @@
                         </table>
                         <?php  
                             } else {
-                                echo "<div class='text-center py-5 text-body-secondary'><i class='cil-wallet fs-1 d-block mb-2'></i>Data not available.</div>";
+                                echo "<div class='text-center py-5 text-body-secondary'><i class='cil-wallet fs-1 d-block mb-2'></i>" . e(__('common.no_data')) . "</div>";
                             }
                         ?>
                     </div>
@@ -62,11 +62,11 @@
                 buttons: [
                     {
                         extend: 'pdf',
-                        title: 'Proforma Invoice',
+                        title: @json(__('tenant/invoice.proforma_title')),
                         orientation: 'landscape',
                         pageSize: 'A4',
                         className: 'btn btn-primary mb-2',
-                        text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
+                        text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
 
                         customize: function (doc) {
 

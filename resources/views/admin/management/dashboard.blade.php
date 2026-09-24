@@ -1,6 +1,6 @@
 @extends('admin.template.layout2.base')
 
-@section('title', 'Graph Management')
+@section('title', __('admin/management.title'))
 
 @push('head-scripts')
     <script src="{{ url('assets/vendor/highcharts/highcharts.js') }}"></script>
@@ -11,21 +11,21 @@
     <div class="page-head">
         <div class="page-head-row">
             <div class="page-head-content">
-                <h3 class="page-title">Graph Management</h3>
-                <div class="page-desc"><p>Aging AP / AR, revenue and expense overview.</p></div>
+                <h3 class="page-title">{{ __('admin/management.title') }}</h3>
+                <div class="page-desc"><p>{{ __('admin/management.desc') }}</p></div>
             </div>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header fw-bold">Aging AP Graphic</div>
+        <div class="card-header fw-bold">{{ __('admin/management.aging_ap_graphic') }}</div>
         <div class="card-body">
             <div id="apChart" style="height: 460px;"></div>
         </div>
     </div>
 
     <div class="card mb-4">
-        <div class="card-header fw-bold">Aging AR Graphic</div>
+        <div class="card-header fw-bold">{{ __('admin/management.aging_ar_graphic') }}</div>
         <div class="card-body">
             <div id="arChart" style="height: 460px;"></div>
         </div>
@@ -33,7 +33,7 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="fw-bold">Revenue</span>
+            <span class="fw-bold">{{ __('admin/management.revenue') }}</span>
             <select id="yearFilterRevenue" class="form-select form-select-sm" style="width: 140px;"></select>
         </div>
         <div class="card-body">
@@ -44,7 +44,7 @@
 
     <div class="card mb-4">
         <div class="card-header d-flex justify-content-between align-items-center">
-            <span class="fw-bold">Expense</span>
+            <span class="fw-bold">{{ __('admin/management.expense') }}</span>
             <select id="yearFilterExpense" class="form-select form-select-sm" style="width: 140px;"></select>
         </div>
         <div class="card-body">
@@ -57,6 +57,8 @@
 
 @push('scripts')
 <script>
+
+var MGMT_LANG = @json(__('admin/management.chart'));
 
 $(document).ready(function () {
 
@@ -201,7 +203,7 @@ function loadArChart()
                 },
 
                 title: {
-                    text: 'AR Aging Profile (IDRbn)'
+                    text: MGMT_LANG.ar_profile
                 },
 
                 xAxis: {
@@ -333,7 +335,7 @@ function loadApChart()
                 },
 
                 title: {
-                    text: 'AP Aging Profile (IDRbn)'
+                    text: MGMT_LANG.ap_profile
                 },
 
                 xAxis: {
@@ -397,10 +399,7 @@ function loadRevenueChart(year) {
         data: { year: year }, //baru tambah
         dataType: "json",
         success: function(response) {
-            var categories = [
-                'JAN','FEB','MAR','APR','MAY','JUN',
-                'JUL','AUG','SEP','OCT','NOV','DEC'
-            ];
+            var categories = MGMT_LANG.months.slice();
 
             var actuals = [];
             var budgets = [];
@@ -422,7 +421,7 @@ function loadRevenueChart(year) {
                     marginBottom: 20 // Kurangi margin bawah agar menempel ke tabel
                 },
                 title: {
-                    text: 'REVENUE ' + year // <--- Akan berubah otomatis jadi REVENUE 2025, dsb.
+                    text: MGMT_LANG.revenue_year.replace(':year', year) // <--- Akan berubah otomatis jadi REVENUE 2025, dsb.
                 },
                 xAxis: {
                     categories: categories,
@@ -465,12 +464,12 @@ function loadRevenueChart(year) {
                 },
                 series: [
                     {
-                        name: 'TOTAL REVENUE ACTUAL',
+                        name: MGMT_LANG.revenue_actual,
                         data: actuals,
                         color: '#4F81BD',
                     },
                     {
-                        name: 'TOTAL REVENUE BUDGET',
+                        name: MGMT_LANG.revenue_budget,
                         data: budgets,
                         color: '#C0504D',
                     }
@@ -490,7 +489,7 @@ function loadRevenueChart(year) {
             // Baris 2: Data Actual
             tableHTML += `<tr>
                 <td style="border: 1px solid #ccc; text-align: left; padding: 5px 10px;">
-                    <span style="color:#4F81BD; margin-right:5px;">■</span> TOTAL REVENUE ACTUAL
+                    <span style="color:#4F81BD; margin-right:5px;">■</span> ${MGMT_LANG.revenue_actual}
                 </td>`;
             $.each(actuals, function(i, val) {
                 // Menampilkan kosong jika 0, atau format angka "21,428.8"
@@ -502,7 +501,7 @@ function loadRevenueChart(year) {
             // Baris 3: Data Budget
             tableHTML += `<tr>
                 <td style="border: 1px solid #ccc; text-align: left; padding: 5px 10px;">
-                    <span style="color:#C0504D; margin-right:5px;">■</span> TOTAL REVENUE BUDGET
+                    <span style="color:#C0504D; margin-right:5px;">■</span> ${MGMT_LANG.revenue_budget}
                 </td>`;
             $.each(budgets, function(i, val) {
                 let txt = val > 0 ? Highcharts.numberFormat(val, 1, '.', ',') : '';
@@ -523,10 +522,7 @@ function loadExpenseChart(year) {
         data: { year: year }, //baru tambah
         dataType: "json",
         success: function(response) {
-            var categories = [
-                'JAN','FEB','MAR','APR','MAY','JUN',
-                'JUL','AUG','SEP','OCT','NOV','DEC'
-            ];
+            var categories = MGMT_LANG.months.slice();
 
             var actuals = [];
             var budgets = [];
@@ -548,7 +544,7 @@ function loadExpenseChart(year) {
                     marginBottom: 20 // Kurangi margin bawah agar menempel ke tabel
                 },
                 title: {
-                    text: 'EXPENSE ' + year // <--- Akan berubah otomatis jadi REVENUE 2025, dsb.
+                    text: MGMT_LANG.expense_year.replace(':year', year) // <--- Akan berubah otomatis jadi REVENUE 2025, dsb.
                 },
                 xAxis: {
                     categories: categories,
@@ -591,12 +587,12 @@ function loadExpenseChart(year) {
                 },
                 series: [
                     {
-                        name: 'TOTAL EXPENSE ACTUAL',
+                        name: MGMT_LANG.expense_actual,
                         data: actuals,
                         color: '#4F81BD',
                     },
                     {
-                        name: 'TOTAL EXPENSE BUDGET',
+                        name: MGMT_LANG.expense_budget,
                         data: budgets,
                         color: '#C0504D',
                     }
@@ -616,7 +612,7 @@ function loadExpenseChart(year) {
             // Baris 2: Data Actual
             tableHTML += `<tr>
                 <td style="border: 1px solid #ccc; text-align: left; padding: 5px 10px;">
-                    <span style="color:#4F81BD; margin-right:5px;">■</span> TOTAL EXPENSE ACTUAL
+                    <span style="color:#4F81BD; margin-right:5px;">■</span> ${MGMT_LANG.expense_actual}
                 </td>`;
             $.each(actuals, function(i, val) {
                 // Menampilkan kosong jika 0, atau format angka "21,428.8"
@@ -628,7 +624,7 @@ function loadExpenseChart(year) {
             // Baris 3: Data Budget
             tableHTML += `<tr>
                 <td style="border: 1px solid #ccc; text-align: left; padding: 5px 10px;">
-                    <span style="color:#C0504D; margin-right:5px;">■</span> TOTAL EXPENSE BUDGET
+                    <span style="color:#C0504D; margin-right:5px;">■</span> ${MGMT_LANG.expense_budget}
                 </td>`;
             $.each(budgets, function(i, val) {
                 let txt = val > 0 ? Highcharts.numberFormat(val, 1, '.', ',') : '';

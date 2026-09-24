@@ -124,7 +124,7 @@ class SurveyPublishController extends Controller
                 
                     $i++;
                 }//END OF FOREACH SUBJECT
-                $msg = "Data has been saved successfully";
+                $msg = __('common.saved');
                 $st = 'OK';
            } else { //--proses update
                 $where=array('id'=>$publish_id);
@@ -195,13 +195,13 @@ class SurveyPublishController extends Controller
                     
                         $i++;
                 }//END OF FOREACH SUBJECT
-                $msg = "Data has been updated successfully";
+                $msg = __('common.updated');
                 $st = 'OK';
             
             }//end else update
 
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Save failed: " . $ex->getMessage();
+            $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
         return response()->json([
@@ -235,10 +235,10 @@ class SurveyPublishController extends Controller
                     ->table('pm_survey_publish')
                     ->where($where)
                     ->update($dataPub);
-            $msg = "Data has been saved successfully";
+            $msg = __('common.saved');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Publish failed: " . $ex->getMessage();
+            $msg = __('admin/survey.publish_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }
         return response()->json([
@@ -265,10 +265,10 @@ class SurveyPublishController extends Controller
             ->table('pm_survey_dt')
             ->where($criteriasur)
             ->delete();
-            $msg = "Data has been deleted successfully";
+            $msg = __('common.deleted');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
-            $msg = "Delete failed: " . $ex->getMessage();
+            $msg = __('common.delete_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }
         return response()->json([

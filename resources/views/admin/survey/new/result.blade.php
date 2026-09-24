@@ -4,7 +4,7 @@
     <div class="page-head">
         <div class="page-head-row">
             <div class="page-head-content">
-                <h3 class="page-title">Survey Results</h3>
+                <h3 class="page-title">{{ __('admin/survey.survey_results') }}</h3>
             </div>
         </div>
     </div>
@@ -16,8 +16,8 @@
                     <div class="card-body">
                         <h4 class="survey-title text-primary mb-1">{{ $survey->title }}</h4>
                         <div class="sub-text mb-3">
-                            Total Respondents: <strong class="text-dark">{{ $survey->totalRespondents }}</strong> People &nbsp;|&nbsp; 
-                            Publish Date: <strong>{{ date('d-m-Y', strtotime($survey->publish_date)) }}</strong>
+                            {{ __('admin/survey.total_respondents') }}: <strong class="text-dark">{{ $survey->totalRespondents }}</strong> {{ __('admin/survey.people') }} &nbsp;|&nbsp; 
+                            {{ __('admin/survey.publish_date') }}: <strong>{{ date('d-m-Y', strtotime($survey->publish_date)) }}</strong>
                         </div>
 
                         @if(count($survey->questions) > 0)
@@ -61,8 +61,8 @@
                                                             data-optid="{{ $opt->id }}" 
                                                             data-opttext="{{ $opt->option_text }}" 
                                                             data-surveytitle="{{ $survey->title }}" 
-                                                            title="Click to view voter list">
-                                                            <i class="cil-people"></i> {{ $opt->count }} Votes
+                                                            title="{{ __('admin/survey.click_view_voters') }}">
+                                                            <i class="cil-people"></i> {{ __('admin/survey.votes', ['count' => $opt->count]) }}
                                                         </span>
                                                     </div>
                                                 </div>
@@ -74,9 +74,9 @@
                                             <table class="table table-striped table-bordered table-sm mb-0 tbl-essay-answers" width="100%">
                                                 <thead class="table-light">
                                                     <tr>
-                                                        <th width="25%">Respondent</th>
-                                                        <th>Questionnaire Answer</th>
-                                                        <th width="20%">Time</th>
+                                                        <th width="25%">{{ __('admin/survey.respondent') }}</th>
+                                                        <th>{{ __('admin/survey.questionnaire_answer') }}</th>
+                                                        <th width="20%">{{ __('admin/survey.time') }}</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -88,7 +88,7 @@
                                                         </tr>
                                                     @empty
                                                         <tr>
-                                                            <td colspan="3" class="text-center text-muted py-3">No responses from respondents yet.</td>
+                                                            <td colspan="3" class="text-center text-muted py-3">{{ __('admin/survey.no_responses_yet') }}</td>
                                                         </tr>
                                                     @endforelse
                                                 </tbody>
@@ -98,7 +98,7 @@
                                 </div>
                             @endforeach
                         @else
-                            <p class="text-muted text-center py-2 mb-0">No questions in this survey yet.</p>
+                            <p class="text-muted text-center py-2 mb-0">{{ __('admin/survey.no_questions_yet') }}</p>
                         @endif
                     </div>
                 </div>
@@ -112,7 +112,7 @@
         @else
             <div class="card">
                 <div class="card-body">
-                    <p class="card-text badge badge-soft-secondary mb-0">No Survey Available</p>
+                    <p class="card-text badge badge-soft-secondary mb-0">{{ __('admin/survey.no_survey_available') }}</p>
                 </div>
             </div>
         @endif
@@ -140,9 +140,9 @@
                             "previous": "<i class='cil-chevron-left'></i>",
                             "next": "<i class='cil-chevron-right'></i>"
                         },
-                        "zeroRecords": "No answers found",
-                        "info": "Showing _START_ - _END_ of _TOTAL_ answers",
-                        "infoEmpty": "Showing 0 answers"
+                        "zeroRecords": @json(__('admin/survey.dt_no_answers')),
+                        "info": @json(__('admin/survey.dt_answers_info')),
+                        "infoEmpty": @json(__('admin/survey.dt_answers_empty'))
                     }
                 });
             }
@@ -154,10 +154,10 @@
             var optionText = $(this).data('opttext');
             var surveyTitle = $(this).data('surveytitle');
 
-            $('#modaltitlexl').html('Voter List for Option: <span class="text-primary">' + optionText + '</span> in survey <span class="text-primary">' + surveyTitle + '</span>');
+            $('#modaltitlexl').html(@json(__('admin/survey.voter_list_title')).replace(/:option|:survey/g, function(m){ return '<span class="text-primary">' + (m === ':option' ? optionText : surveyTitle) + '</span>'; }));
             
-            $('#modalbodyxl').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">Loading respondent list...</p></div>');
-            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
+            $('#modalbodyxl').html('<div class="text-center py-4"><div class="spinner-border text-primary" role="status"></div><p class="mt-2">{{ __('admin/survey.loading_respondents') }}</p></div>');
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
             
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
             $('#modalxl').modal('show');
@@ -172,7 +172,7 @@
                     
                     if (response && response.status === 'OK') {
                         var html = '<div class="table-responsive"><table class="table table-bordered table-striped table-sm" id="tblModalVoters" width="100%">';
-                        html += '<thead class="table-light"><tr><th width="8%">No.</th><th width="25%">Respondent Email</th><th>Remarks</th><th width="22%">Voting Time</th></tr></thead><tbody>';
+                        html += '<thead class="table-light"><tr><th width="8%">{{ __('admin/survey.no') }}</th><th width="25%">{{ __('admin/survey.respondent_email') }}</th><th>{{ __('common.remarks') }}</th><th width="22%">{{ __('admin/survey.voting_time') }}</th></tr></thead><tbody>';
 
                         // Cek dengan aman apakah data ada
                         var hasData = response.data && response.data.length > 0;
@@ -190,7 +190,7 @@
                                 html += '</tr>';
                             });
                         } else {
-                            html += '<tr><td colspan="4" class="text-center text-muted py-3">No voters found.</td></tr>';
+                            html += '<tr><td colspan="4" class="text-center text-muted py-3">{{ __('admin/survey.no_voters_found') }}</td></tr>';
                         }
 
                         html += '</tbody></table></div>';
@@ -209,21 +209,21 @@
                                         "previous": "<i class='cil-chevron-left'></i>",
                                         "next": "<i class='cil-chevron-right'></i>"
                                     },
-                                    "zeroRecords": "No voters found",
-                                    "info": "Showing _START_ - _END_ of _TOTAL_ respondents",
-                                    "infoEmpty": "Showing 0 respondents"
+                                    "zeroRecords": @json(__('admin/survey.dt_no_voters')),
+                                    "info": @json(__('admin/survey.dt_respondents_info')),
+                                    "infoEmpty": @json(__('admin/survey.dt_respondents_empty'))
                                 }
                             });
                         }
                     } else {
                         // Tampilkan pesan error dari backend ke dalam Modal
-                        var errMsg = (response && response.message) ? response.message : 'Unknown error from server.';
-                        $('#modalbodyxl').html('<div class="alert alert-danger mb-0"><strong>Server Error:</strong><br>' + errMsg + '</div>');
+                        var errMsg = (response && response.message) ? response.message : @json(__('admin/survey.unknown_server_error'));
+                        $('#modalbodyxl').html('<div class="alert alert-danger mb-0"><strong>{{ __('common.server_error') }}</strong><br>' + errMsg + '</div>');
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("AJAX Error:", textStatus, errorThrown, jqXHR.responseText); // <-- Bantuan Debugging
-                    $('#modalbodyxl').html('<div class="alert alert-danger mb-0"><strong>System Error:</strong> ' + errorThrown + '<br><small>Check console (F12) for details.</small></div>');
+                    $('#modalbodyxl').html('<div class="alert alert-danger mb-0"><strong>{{ __('common.system_error') }}</strong> ' + errorThrown + '<br><small>{{ __('admin/survey.check_console') }}</small></div>');
                 }
             });
         });

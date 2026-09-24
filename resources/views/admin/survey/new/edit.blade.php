@@ -8,7 +8,7 @@
     <input type="hidden" name="survey_id" value="{{ $survey->id }}">
 
     <div class="mb-3">
-      <label class="form-label">Survey Title <span class="text-danger">*</span></label>
+      <label class="form-label">{{ __('admin/survey.survey_title') }} <span class="text-danger">*</span></label>
       <div class="col-12">
         <input type="text" class="form-control" name="title" id="title" value="{{ $survey->title }}" required>
       </div>
@@ -19,20 +19,20 @@
       @foreach($questions as $index => $q)
       <div class="question-block" id="qb-{{ $index }}">
         <div class="mb-3">
-          <label class="form-label">Question <span class="text-danger">*</span></label>
+          <label class="form-label">{{ __('admin/survey.question') }} <span class="text-danger">*</span></label>
           <input type="text" class="form-control" name="questions[{{ $index }}][text]" value="{{ $q->question_text }}" required>
         </div>
         
         <div class="mb-3">
-          <label class="form-label">Question Type</label>
+          <label class="form-label">{{ __('admin/survey.question_type') }}</label>
           <select class="form-select" name="questions[{{ $index }}][type]" onchange="toggleOptions(this, {{ $index }})">
-            <option value="multiple_choice" {{ $q->question_type == 'multiple_choice' ? 'selected' : '' }}>Multiple Choice</option>
-            <option value="essay" {{ $q->question_type == 'essay' ? 'selected' : '' }}>Questionnaire</option>
+            <option value="multiple_choice" {{ $q->question_type == 'multiple_choice' ? 'selected' : '' }}>{{ __('admin/survey.multiple_choice') }}</option>
+            <option value="essay" {{ $q->question_type == 'essay' ? 'selected' : '' }}>{{ __('admin/survey.questionnaire') }}</option>
           </select>
         </div>
 
         <div id="options-area-{{ $index }}" style="{{ $q->question_type == 'essay' ? 'display:none;' : '' }}">
-          <label class="form-label">Answer Options <span class="text-danger">*</span></label>
+          <label class="form-label">{{ __('admin/survey.answer_options') }} <span class="text-danger">*</span></label>
           <div class="more-options-{{ $index }}">
             
             @if($q->question_type == 'multiple_choice' && count($q->options) > 0)
@@ -48,7 +48,7 @@
               @endforeach
             @else
               <div class="input-group mb-2">
-                <input type="text" class="form-control" name="questions[{{ $index }}][options][]" placeholder="Option 1" {{ $q->question_type == 'essay' ? 'disabled' : 'required' }}>
+                <input type="text" class="form-control" name="questions[{{ $index }}][options][]" placeholder="{{ __('admin/survey.option_n', ['number' => 1]) }}" {{ $q->question_type == 'essay' ? 'disabled' : 'required' }}>
                 <button type="button" class="btn btn-sm btn-success" onclick="addOption({{ $index }})"><i class="cil-plus"></i></button>
               </div>
             @endif
@@ -58,7 +58,7 @@
 
         <div class="text-end mt-2">
             <button type="button" class="btn btn-danger btn-sm" onclick="$('#qb-{{ $index }}').remove()">
-                <i class="cil-trash"></i> Delete Question
+                <i class="cil-trash"></i> {{ __('admin/survey.delete_question') }}
             </button>
         </div>
       </div>
@@ -68,7 +68,7 @@
     <div class="mb-3">
       <div class="col-12">
         <button type="button" class="btn btn-info btn-sm" onclick="addQuestion()">
-          <i class="cil-plus"></i> Add Question
+          <i class="cil-plus"></i> {{ __('admin/survey.add_question') }}
         </button>
       </div>
     </div>
@@ -110,17 +110,17 @@
           dataType:"json",
           success:function(data, status){
             if(data.status == 'OK'){
-              Swal.fire({ title: "Information", animation: false, icon: "success", text: data.message, confirmButtonText: "OK" });
+              Swal.fire({ title: @json(__('common.information')), animation: false, icon: "success", text: data.message, confirmButtonText: @json(__('common.ok')) });
               $('#modalxl').modal('hide');
               if (typeof tbldraft !== 'undefined') tbldraft.ajax.reload(null, false);  
             } else {
-              Swal.fire({ title: "Information", animation: false, icon: "error", text: data.message, confirmButtonText: "OK" });
+              Swal.fire({ title: @json(__('common.information')), animation: false, icon: "error", text: data.message, confirmButtonText: @json(__('common.ok')) });
             }
             if (typeof block === "function") block(false, '#formSurveyEdit');
             $('#modalxl #savefrmxl').attr("disabled", false); 
           },                    
           error: function(jqXHR, textStatus, errorThrown){
-            Swal.fire("Save Error: " + textStatus + " - " + errorThrown, "", "error");
+            Swal.fire(@json(__('admin/survey.save_error')).replace(':status', textStatus).replace(':error', errorThrown), "", "error");
             if (typeof block === "function") block(false, '#formSurveyEdit');
             $('#modalxl #savefrmxl').attr("disabled", false); 
           }
@@ -136,28 +136,28 @@
     let html = `
       <div class="question-block" id="qb-${qIndex}">
         <div class="mb-3">
-          <label class="form-label">Question <span class="text-danger">*</span></label>
-          <input type="text" class="form-control" name="questions[${qIndex}][text]" placeholder="Enter question..." required>
+          <label class="form-label">{{ __('admin/survey.question') }} <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" name="questions[${qIndex}][text]" placeholder="{{ __('admin/survey.enter_question') }}" required>
         </div>
         <div class="mb-3">
-          <label class="form-label">Question Type</label>
+          <label class="form-label">{{ __('admin/survey.question_type') }}</label>
           <select class="form-select" name="questions[${qIndex}][type]" onchange="toggleOptions(this, ${qIndex})">
-            <option value="multiple_choice">Multiple Choice</option>
-            <option value="essay">Questionnaire</option>
+            <option value="multiple_choice">{{ __('admin/survey.multiple_choice') }}</option>
+            <option value="essay">{{ __('admin/survey.questionnaire') }}</option>
           </select>
         </div>
         <div id="options-area-${qIndex}">
-          <label class="form-label">Answer Options <span class="text-danger">*</span></label>
+          <label class="form-label">{{ __('admin/survey.answer_options') }} <span class="text-danger">*</span></label>
           <div class="more-options-${qIndex}">
             <div class="input-group mb-2">
-              <input type="text" class="form-control" name="questions[${qIndex}][options][]" placeholder="Option 1" required>
+              <input type="text" class="form-control" name="questions[${qIndex}][options][]" placeholder="{{ __('admin/survey.option_n', ['number' => 1]) }}" required>
               <button type="button" class="btn btn-sm btn-success" onclick="addOption(${qIndex})"><i class="cil-plus"></i></button>
             </div>
           </div>
         </div>
         <div class="text-end mt-2">
             <button type="button" class="btn btn-danger btn-sm" onclick="$('#qb-${qIndex}').remove()">
-                <i class="cil-trash"></i> Delete Question
+                <i class="cil-trash"></i> {{ __('admin/survey.delete_question') }}
             </button>
         </div>
       </div>`;
@@ -168,7 +168,7 @@
   function addOption(index) {
     let optHtml = `
       <div class="input-group mb-2">
-        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Next option..." required>
+        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="{{ __('admin/survey.next_option') }}" required>
         <button type="button" class="btn btn-sm btn-danger" onclick="$(this).closest('.input-group').remove()"><i class="cil-minus"></i></button>
       </div>`;
     $(`.more-options-${index}`).append(optHtml);

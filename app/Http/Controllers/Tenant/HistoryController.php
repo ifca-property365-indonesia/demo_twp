@@ -117,13 +117,13 @@ class HistoryController extends Controller
         $query = DB::connection('mysql')->select($sql);
         if (count($query) > 0)
         {
-            $callback['Pesan'] = "Data has been found";   
+            $callback['Pesan'] = __('common.data_found');   
             $callback['Error'] = false;
         }
         else
         {
             $callback['Error'] = true;
-            $callback['Pesan'] = 'Data not found!';
+            $callback['Pesan'] = __('common.data_not_found');
         }
         echo json_encode($callback);
     }
@@ -188,13 +188,13 @@ class HistoryController extends Controller
 
         if (count($query) > 0)
         {
-            $callback['Pesan'] = "Data has been found";   
+            $callback['Pesan'] = __('common.data_found');   
             $callback['Error'] = false;
         }
         else
         {
             $callback['Error'] = true;
-            $callback['Pesan'] = 'Data not found!';
+            $callback['Pesan'] = __('common.data_not_found');
         }
         echo json_encode($callback);
     }
@@ -326,13 +326,13 @@ class HistoryController extends Controller
 
         if (count($query) > 0)
         {
-            $callback['Pesan'] = "Data has been found";   
+            $callback['Pesan'] = __('common.data_found');   
             $callback['Error'] = false;
         }
         else
         {
             $callback['Error'] = true;
-            $callback['Pesan'] = 'Data not found!';
+            $callback['Pesan'] = __('common.data_not_found');
         }
         echo json_encode($callback);
     }

@@ -22,11 +22,11 @@
     $attr = function ($field, $label, $max = 50) use ($locked) {
         return in_array($field, $locked, true)
             ? 'readonly'
-            : 'name="' . $field . '" maxlength="' . $max . '" required data-label="' . $label . '"';
+            : 'name="' . $field . '" maxlength="' . $max . '" required data-label="' . e($label) . '"';
     };
 @endphp
 
-@section('title', $isEdit ? 'Update Permit' : 'Request Permit')
+@section('title', $isEdit ? __('shared/permit.update_permit') : __('shared/permit.request_permit'))
 
 @push('styles')
     <link rel="stylesheet" href="{{ url('assets/app/css/permit.css?ver=1.0.2') }}">
@@ -37,20 +37,20 @@
         <div class="page-head permit-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">{{ $isEdit ? 'Update Permit' : 'Request Permit' }}</h3>
+                    <h3 class="page-title">{{ $isEdit ? __('shared/permit.update_permit') : __('shared/permit.request_permit') }}</h3>
                     <div class="page-desc text-body-secondary">
                         <p>
                             @if ($isEdit)
-                                Permit type, number, tenant and unit cannot be changed.
+                                {{ __('shared/permit.form_desc_edit') }}
                             @else
-                                Work Permit, Entry Permit of Goods, or Exit Permit of Goods.
+                                {{ __('shared/permit.form_desc_new') }}
                             @endif
                         </p>
                     </div>
                 </div>
                 <div class="page-head-content">
                     <a href="{{ $base . '/history' }}" class="btn btn-outline-secondary d-none d-sm-inline-flex">
-                        <i class="cil-history"></i><span>Permit History</span>
+                        <i class="cil-history"></i><span>{{ __('shared/permit.permit_history') }}</span>
                     </a>
                     <a href="{{ $base . '/history' }}" class="btn btn-icon btn-outline-secondary d-inline-flex d-sm-none">
                         <i class="cil-history"></i>
@@ -70,8 +70,8 @@
                         <section class="permit-section">
                             <div class="permit-section__head">
                                 <span class="permit-section__num">1</span>
-                                <h6 class="permit-section__title" id="permitTitle">Permit Information</h6>
-                                <span class="permit-no" title="{{ $isEdit ? 'Permit number' : 'Next permit number' }}">
+                                <h6 class="permit-section__title" id="permitTitle">{{ __('shared/permit.section_info') }}</h6>
+                                <span class="permit-no" title="{{ $isEdit ? __('shared/permit.permit_number') : __('shared/permit.next_permit_number') }}">
                                     <i class="cil-clipboard"></i>
                                     <span id="permitNoBadge">{{ $letter_no !== '' ? $letter_no : '-' }}</span>
                                 </span>
@@ -79,13 +79,13 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="permit_type">Permit Type <span class="req">*</span></label>
+                                        <label class="form-label" for="permit_type">{{ __('shared/permit.permit_type') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
                                             @if ($isEdit)
                                                 <input type="hidden" name="permit_type" id="permit_type" value="{{ $type }}">
                                                 <input type="text" class="form-control" value="{{ $types[$type] ?? $type }}" readonly>
                                             @else
-                                                <select name="permit_type" id="permit_type" class="form-control js-select2" required data-label="Permit Type" data-placeholder="Choose a permit type">
+                                                <select name="permit_type" id="permit_type" class="form-control js-select2" required data-label="{{ __('shared/permit.permit_type') }}" data-placeholder="{{ __('shared/permit.ph_choose_type') }}">
                                                     <option value=""></option>
                                                     @foreach ($types as $code => $label)
                                                         <option value="{{ $code }}">{{ $label }}</option>
@@ -98,16 +98,16 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="permit_no">Permit Number</label>
+                                        <label class="form-label" for="permit_no">{{ __('shared/permit.permit_number') }}</label>
                                         <div class="form-control-wrap">
                                             <input type="text" class="form-control" id="permit_no" name="permit_no" value="{{ $letter_no }}" readonly>
                                         </div>
-                                        @unless ($isEdit)<div class="form-note">Generated automatically when the permit is submitted.</div>@endunless
+                                        @unless ($isEdit)<div class="form-note">{{ __('shared/permit.permit_no_auto') }}</div>@endunless
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="pemohon">Applicant</label>
+                                        <label class="form-label" for="pemohon">{{ __('shared/permit.applicant') }}</label>
                                         <div class="form-control-wrap">
                                             <input type="text" class="form-control" id="pemohon" name="pemohon" value="{{ $isEdit ? ($detail->member_name ?? $permit->serv_req_by) : ($applicant['name'] ?? '') }}" readonly>
                                         </div>
@@ -115,7 +115,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="handphone">Phone Number</label>
+                                        <label class="form-label" for="handphone">{{ __('shared/permit.phone_number') }}</label>
                                         <div class="form-control-wrap">
                                             <input type="text" class="form-control" id="handphone" name="handphone" value="{{ $isEdit ? ($detail->member_hp ?? $permit->contact_no) : ($applicant['hp'] ?? '') }}" readonly>
                                         </div>
@@ -128,7 +128,7 @@
                         @unless ($isEdit)
                         <div class="alert alert-info d-flex align-items-center gap-2" id="permitEmpty">
                             <i class="cil-info fs-5"></i><div>
-                            Select a <strong>Permit Type</strong> above to fill in the permit details.</div>
+                            {!! __('shared/permit.select_type_first') !!}</div>
                         </div>
                         @endunless
 
@@ -136,13 +136,13 @@
                         <section class="permit-section" id="sectionLocation" @unless($isEdit) hidden @endunless>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">2</span>
-                                <h6 class="permit-section__title">Location</h6>
-                                <span class="permit-section__hint">Tenant &rarr; Unit &rarr; Floor is filled automatically</span>
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_location') }}</h6>
+                                <span class="permit-section__hint">{{ __('shared/permit.hint_location') }}</span>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-5">
                                     <div class="mb-3">
-                                        <label class="form-label" for="tenant_no">Tenant <span class="req">*</span></label>
+                                        <label class="form-label" for="tenant_no">{{ __('common.tenant') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
                                             @if ($isEdit)
                                                 @php
@@ -151,7 +151,7 @@
                                                 @endphp
                                                 <input type="text" id="tenant_no" class="form-control" value="{{ $tenantLabel }}" readonly>
                                             @else
-                                                <select name="tenant_no" id="tenant_no" class="form-control js-select2" required data-label="Tenant" data-placeholder="Choose a tenant">
+                                                <select name="tenant_no" id="tenant_no" class="form-control js-select2" required data-label="{{ __('common.tenant') }}" data-placeholder="{{ __('shared/permit.ph_choose_tenant') }}">
                                                     <option value=""></option>
                                                     @foreach ($tenancies as $t)
                                                         <option value="{{ $t->id }}">{{ $t->tenant_no }}{{ $t->entity_desc ? ' - ' . $t->entity_desc : '' }}</option>
@@ -164,12 +164,12 @@
                                 </div>
                                 <div class="col-md-4">
                                     <div class="mb-3">
-                                        <label class="form-label" for="lot_no">Unit <span class="req">*</span></label>
+                                        <label class="form-label" for="lot_no">{{ __('common.unit') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
                                             @if ($isEdit)
                                                 <input type="text" id="lot_no" class="form-control" value="{{ $detail->unit ?? $permit->lot_no }}" readonly>
                                             @else
-                                                <select name="lot_no" id="lot_no" class="form-control js-select2" required data-label="Unit" data-placeholder="Choose a unit">
+                                                <select name="lot_no" id="lot_no" class="form-control js-select2" required data-label="{{ __('common.unit') }}" data-placeholder="{{ __('shared/permit.ph_choose_unit') }}">
                                                     <option value=""></option>
                                                 </select>
                                             @endif
@@ -179,9 +179,9 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label" for="floor">Floor <span class="req">*</span></label>
+                                        <label class="form-label" for="floor">{{ __('common.floor') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="floor" {{ $isEdit ? '' : 'name=floor required' }} data-label="Floor" readonly placeholder="-" value="{{ $isEdit ? ($detail->floor ?? $permit->floor) : '' }}">
+                                            <input type="text" class="form-control" id="floor" {{ $isEdit ? '' : 'name=floor required' }} data-label="{{ __('common.floor') }}" readonly placeholder="-" value="{{ $isEdit ? ($detail->floor ?? $permit->floor) : '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -193,42 +193,42 @@
                         <section class="permit-section" id="sectionWork" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">3</span>
-                                <h6 class="permit-section__title">Work Detail</h6>
-                                @if ($locked)<span class="permit-section__hint">This section cannot be changed</span>@endif
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_work') }}</h6>
+                                @if ($locked)<span class="permit-section__hint">{{ __('shared/permit.hint_locked') }}</span>@endif
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="contractor">Contractor Name <span class="req">*</span></label>
+                                        <label class="form-label" for="contractor">{{ __('shared/permit.contractor_name') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="contractor" {!! $attr('contractor', 'Contractor Name') !!} value="{{ $detail->kontraktor_name ?? '' }}">
+                                            <input type="text" class="form-control" id="contractor" {!! $attr('contractor', __('shared/permit.contractor_name')) !!} value="{{ $detail->kontraktor_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="job_type">Job Type <span class="req">*</span></label>
+                                        <label class="form-label" for="job_type">{{ __('shared/permit.job_type') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="job_type" {!! $attr('job_type', 'Job Type') !!} placeholder="e.g. Interior renovation" value="{{ $detail->work_type ?? '' }}">
+                                            <input type="text" class="form-control" id="job_type" {!! $attr('job_type', __('shared/permit.job_type')) !!} placeholder="{{ __('shared/permit.ph_job_type_work') }}" value="{{ $detail->work_type ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="incharge">Person in Charge <span class="req">*</span></label>
+                                        <label class="form-label" for="incharge">{{ __('shared/permit.person_in_charge') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="incharge" {!! $attr('incharge', 'Person in Charge') !!} value="{{ $detail->pic_name ?? '' }}">
+                                            <input type="text" class="form-control" id="incharge" {!! $attr('incharge', __('shared/permit.person_in_charge')) !!} value="{{ $detail->pic_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="pic_hp">Office Phone / HP <span class="req">*</span></label>
+                                        <label class="form-label" for="pic_hp">{{ __('shared/permit.office_phone') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="pic_hp" inputmode="tel" {!! $attr('pic_hp', 'Office Phone / HP', 20) !!} placeholder="Person in charge phone" value="{{ $detail->pic_hp ?? '' }}">
+                                            <input type="text" class="form-control" id="pic_hp" inputmode="tel" {!! $attr('pic_hp', __('shared/permit.office_phone'), 20) !!} placeholder="{{ __('shared/permit.ph_pic_phone') }}" value="{{ $detail->pic_hp ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -240,24 +240,24 @@
                         <section class="permit-section" id="sectionGoods" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">3</span>
-                                <h6 class="permit-section__title">Goods Detail</h6>
-                                @if ($locked)<span class="permit-section__hint">This section cannot be changed</span>@endif
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_goods') }}</h6>
+                                @if ($locked)<span class="permit-section__hint">{{ __('shared/permit.hint_locked') }}</span>@endif
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="owner">Owner / Tenant Name <span class="req">*</span></label>
+                                        <label class="form-label" for="owner">{{ __('shared/permit.owner_name') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="owner" {!! $attr('owner', 'Owner / Tenant Name') !!} value="{{ $detail->owner_name ?? '' }}">
+                                            <input type="text" class="form-control" id="owner" {!! $attr('owner', __('shared/permit.owner_name')) !!} value="{{ $detail->owner_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="goods_job_type">Job Type <span class="req">*</span></label>
+                                        <label class="form-label" for="goods_job_type">{{ __('shared/permit.job_type') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="goods_job_type" {!! $attr('job_type', 'Job Type') !!} placeholder="e.g. Moving in furniture" value="{{ $detail->work_type ?? '' }}">
+                                            <input type="text" class="form-control" id="goods_job_type" {!! $attr('job_type', __('shared/permit.job_type')) !!} placeholder="{{ __('shared/permit.ph_job_type_goods') }}" value="{{ $detail->work_type ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -269,30 +269,30 @@
                         <section class="permit-section" id="sectionSchedule" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">4</span>
-                                <h6 class="permit-section__title">Schedule &amp; Notes</h6>
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_schedule') }}</h6>
                             </div>
                             <div class="row g-3">
                                 <div class="col-6 col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label" for="start_date">Start Date <span class="req">*</span></label>
+                                        <label class="form-label" for="start_date">{{ __('common.start_date') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="date" class="form-control" id="start_date" name="start_date" required data-label="Start Date" value="{{ $fmtDate($permit->start_date ?? null) }}">
+                                            <input type="date" class="form-control" id="start_date" name="start_date" required data-label="{{ __('common.start_date') }}" value="{{ $fmtDate($permit->start_date ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label" for="end_date">End Date <span class="req">*</span></label>
+                                        <label class="form-label" for="end_date">{{ __('common.end_date') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="date" class="form-control" id="end_date" name="end_date" required data-label="End Date" value="{{ $fmtDate($permit->end_date ?? null) }}">
+                                            <input type="date" class="form-control" id="end_date" name="end_date" required data-label="{{ __('common.end_date') }}" value="{{ $fmtDate($permit->end_date ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12 shift-field" hidden>
                                     <div class="mb-2">
-                                        <label class="form-label d-block">Working Hours <span class="req">*</span></label>
+                                        <label class="form-label d-block">{{ __('shared/permit.working_hours') }} <span class="req">*</span></label>
                                         <div class="d-flex flex-wrap gap-3">
                                             @foreach ($work_shifts as $code => $range)
                                                 <div class="form-check">
@@ -303,25 +303,25 @@
                                             @endforeach
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="work_shift" id="work_shift_O" value="O" @checked($shift === 'O')>
-                                                <label class="form-check-label" for="work_shift_O">Other</label>
+                                                <label class="form-check-label" for="work_shift_O">{{ __('shared/permit.other') }}</label>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-3 time-field" hidden>
                                     <div class="mb-3">
-                                        <label class="form-label" for="start_time">Start Time <span class="req">*</span></label>
+                                        <label class="form-label" for="start_time">{{ __('common.start_time') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="time" class="form-control" id="start_time" name="start_time" required data-label="Start Time" value="{{ $fmtTime($permit->start_time ?? null) }}">
+                                            <input type="time" class="form-control" id="start_time" name="start_time" required data-label="{{ __('common.start_time') }}" value="{{ $fmtTime($permit->start_time ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-6 col-md-3 time-field" hidden>
                                     <div class="mb-3">
-                                        <label class="form-label" for="end_time">End Time <span class="req">*</span></label>
+                                        <label class="form-label" for="end_time">{{ __('common.end_time') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="time" class="form-control" id="end_time" name="end_time" required data-label="End Time" value="{{ $fmtTime($permit->end_time ?? null) }}">
+                                            <input type="time" class="form-control" id="end_time" name="end_time" required data-label="{{ __('common.end_time') }}" value="{{ $fmtTime($permit->end_time ?? null) }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -329,23 +329,20 @@
                                 <div class="col-12 shift-field" hidden>
                                     <div class="form-note text-danger mt-0 mb-3">
                                         <i class="cil-info"></i>
-                                        Start Time and End Time are the <strong>daily working hours</strong> for this permit,
-                                        applied to every day between the start and end date &mdash; not the total duration of the work.
-                                        End Time may be past midnight (e.g. 22:00 - 10:00).
+                                        {!! __('shared/permit.note_daily_hours') !!}
                                     </div>
                                 </div>
                                 <div class="col-12 goods-field" hidden>
                                     <div class="form-note text-danger mt-0 mb-3">
                                         <i class="cil-info"></i>
-                                        Goods may only be moved in / out between <strong>22:00 - 10:00</strong> unless special permission is given.
-                                        Report to security before and after moving the goods.
+                                        {!! __('shared/permit.note_goods_hours') !!}
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label class="form-label" for="note">Note <span class="req">*</span></label>
+                                        <label class="form-label" for="note">{{ __('common.note') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <textarea class="form-control" id="note" name="note" rows="3" maxlength="500" required data-label="Note" placeholder="Describe the work / goods in detail">{{ $permit->note ?? '' }}</textarea>
+                                            <textarea class="form-control" id="note" name="note" rows="3" maxlength="500" required data-label="{{ __('common.note') }}" placeholder="{{ __('shared/permit.ph_note') }}">{{ $permit->note ?? '' }}</textarea>
                                             <div class="invalid-feedback"></div>
                                         </div>
                                         <div class="form-note"><span id="noteCount">0</span>/500</div>
@@ -358,16 +355,16 @@
                         <section class="permit-section" id="sectionLines" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">5</span>
-                                <h6 class="permit-section__title">Workers <span class="req">*</span></h6>
-                                <span class="permit-section__hint">Total <strong><span id="lineCount">0</span></strong> worker(s) &middot; press Enter to add a new row</span>
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_workers') }} <span class="req">*</span></h6>
+                                <span class="permit-section__hint">{!! __('shared/permit.hint_workers', ['count' => '<span id="lineCount">0</span>']) !!}</span>
                             </div>
                             <div class="permit-lines">
                                 <div class="table-responsive">
                                     <table class="table" id="tblLines">
                                         <thead>
                                             <tr>
-                                                <th class="line-no">No.</th>
-                                                <th>Worker Name</th>
+                                                <th class="line-no">{{ __('common.col_no') }}</th>
+                                                <th>{{ __('shared/permit.worker_name') }}</th>
                                                 <th class="line-act"></th>
                                             </tr>
                                         </thead>
@@ -376,7 +373,7 @@
                                 </div>
                                 <div class="permit-lines__foot">
                                     <button type="button" class="btn btn-sm btn-primary" id="btnAddLine">
-                                        <i class="cil-plus"></i><span>Add Worker</span>
+                                        <i class="cil-plus"></i><span>{{ __('shared/permit.add_worker') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -386,18 +383,18 @@
                         <section class="permit-section" id="sectionTools" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">6</span>
-                                <h6 class="permit-section__title">Work Activities &amp; Tools <span class="req">*</span></h6>
-                                <span class="permit-section__hint"><span id="toolCount">0</span> row(s)</span>
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_tools') }} <span class="req">*</span></h6>
+                                <span class="permit-section__hint">{!! __('shared/permit.hint_rows', ['count' => '<span id="toolCount">0</span>']) !!}</span>
                             </div>
                             <div class="permit-lines">
                                 <div class="table-responsive">
                                     <table class="table" id="tblTools">
                                         <thead>
                                             <tr>
-                                                <th class="line-no">No.</th>
-                                                <th style="min-width: 14rem;">Job Type / Activity</th>
-                                                <th style="min-width: 12rem;">Tools / PPE</th>
-                                                <th style="min-width: 10rem;">Remarks</th>
+                                                <th class="line-no">{{ __('common.col_no') }}</th>
+                                                <th style="min-width: 14rem;">{{ __('shared/permit.activity_col') }}</th>
+                                                <th style="min-width: 12rem;">{{ __('shared/permit.tools_ppe') }}</th>
+                                                <th style="min-width: 10rem;">{{ __('common.remarks') }}</th>
                                                 <th class="line-act"></th>
                                             </tr>
                                         </thead>
@@ -406,7 +403,7 @@
                                 </div>
                                 <div class="permit-lines__foot">
                                     <button type="button" class="btn btn-sm btn-primary" id="btnAddTool">
-                                        <i class="cil-plus"></i><span>Add Activity</span>
+                                        <i class="cil-plus"></i><span>{{ __('shared/permit.add_activity') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -416,18 +413,18 @@
                         <section class="permit-section" id="sectionItems" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">5</span>
-                                <h6 class="permit-section__title">Goods <span class="req">*</span></h6>
-                                <span class="permit-section__hint"><span id="itemCount">0</span> row(s) &middot; press Enter to move to the next field</span>
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_items') }} <span class="req">*</span></h6>
+                                <span class="permit-section__hint">{!! __('shared/permit.hint_items', ['count' => '<span id="itemCount">0</span>']) !!}</span>
                             </div>
                             <div class="permit-lines">
                                 <div class="table-responsive">
                                     <table class="table" id="tblItems">
                                         <thead>
                                             <tr>
-                                                <th class="line-no">No.</th>
-                                                <th style="min-width: 14rem;">Type of Goods</th>
-                                                <th style="min-width: 7rem; width: 9rem;">Quantity</th>
-                                                <th style="min-width: 10rem;">Remarks</th>
+                                                <th class="line-no">{{ __('common.col_no') }}</th>
+                                                <th style="min-width: 14rem;">{{ __('shared/permit.type_of_goods') }}</th>
+                                                <th style="min-width: 7rem; width: 9rem;">{{ __('shared/permit.quantity') }}</th>
+                                                <th style="min-width: 10rem;">{{ __('common.remarks') }}</th>
                                                 <th class="line-act"></th>
                                             </tr>
                                         </thead>
@@ -436,7 +433,7 @@
                                 </div>
                                 <div class="permit-lines__foot">
                                     <button type="button" class="btn btn-sm btn-primary" id="btnAddItem">
-                                        <i class="cil-plus"></i><span>Add Item</span>
+                                        <i class="cil-plus"></i><span>{{ __('shared/permit.add_item') }}</span>
                                     </button>
                                 </div>
                             </div>
@@ -446,59 +443,59 @@
                         <section class="permit-section" id="sectionSender" hidden>
                             <div class="permit-section__head">
                                 <span class="permit-section__num">6</span>
-                                <h6 class="permit-section__title">Sender / Pickup &amp; Vehicle</h6>
+                                <h6 class="permit-section__title">{{ __('shared/permit.section_sender') }}</h6>
                             </div>
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="sender_name">Sender / Pickup Name <span class="req">*</span></label>
+                                        <label class="form-label" for="sender_name">{{ __('shared/permit.sender_name') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="sender_name" {!! $attr('sender_name', 'Sender / Pickup Name') !!} value="{{ $detail->sender_name ?? '' }}">
+                                            <input type="text" class="form-control" id="sender_name" {!! $attr('sender_name', __('shared/permit.sender_name')) !!} value="{{ $detail->sender_name ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label" for="sender_id_no">ID Card / Driving License No. <span class="req">*</span></label>
+                                        <label class="form-label" for="sender_id_no">{{ __('shared/permit.sender_id_no') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="sender_id_no" {!! $attr('sender_id_no', 'ID Card / Driving License No.', 30) !!} value="{{ $detail->sender_id_no ?? '' }}">
+                                            <input type="text" class="form-control" id="sender_id_no" {!! $attr('sender_id_no', __('shared/permit.sender_id_no'), 30) !!} value="{{ $detail->sender_id_no ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="mb-3">
-                                        <label class="form-label" for="sender_hp">Phone Number <span class="req">*</span></label>
+                                        <label class="form-label" for="sender_hp">{{ __('shared/permit.phone_number') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="sender_hp" inputmode="tel" {!! $attr('sender_hp', 'Phone Number', 20) !!} value="{{ $detail->sender_hp ?? '' }}">
+                                            <input type="text" class="form-control" id="sender_hp" inputmode="tel" {!! $attr('sender_hp', __('shared/permit.phone_number'), 20) !!} value="{{ $detail->sender_hp ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-12">
                                     <div class="mb-3">
-                                        <label class="form-label" for="sender_address">Address <span class="req">*</span></label>
+                                        <label class="form-label" for="sender_address">{{ __('shared/permit.address') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="sender_address" {!! $attr('sender_address', 'Address', 255) !!} value="{{ $detail->sender_address ?? '' }}">
+                                            <input type="text" class="form-control" id="sender_address" {!! $attr('sender_address', __('shared/permit.address'), 255) !!} value="{{ $detail->sender_address ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="vehicle_type">Vehicle Type <span class="req">*</span></label>
+                                        <label class="form-label" for="vehicle_type">{{ __('shared/permit.vehicle_type') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control" id="vehicle_type" {!! $attr('vehicle_type', 'Vehicle Type', 30) !!} placeholder="e.g. Pickup, box truck" value="{{ $detail->vehicle_type ?? '' }}">
+                                            <input type="text" class="form-control" id="vehicle_type" {!! $attr('vehicle_type', __('shared/permit.vehicle_type'), 30) !!} placeholder="{{ __('shared/permit.ph_vehicle_type') }}" value="{{ $detail->vehicle_type ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="mb-3">
-                                        <label class="form-label" for="vehicle_no">Vehicle Number <span class="req">*</span></label>
+                                        <label class="form-label" for="vehicle_no">{{ __('shared/permit.vehicle_number') }} <span class="req">*</span></label>
                                         <div class="form-control-wrap">
-                                            <input type="text" class="form-control text-uppercase" id="vehicle_no" {!! $attr('vehicle_no', 'Vehicle Number', 10) !!} placeholder="B 1234 XYZ" value="{{ $detail->vehicle_no ?? '' }}">
+                                            <input type="text" class="form-control text-uppercase" id="vehicle_no" {!! $attr('vehicle_no', __('shared/permit.vehicle_number'), 10) !!} placeholder="B 1234 XYZ" value="{{ $detail->vehicle_no ?? '' }}">
                                             <div class="invalid-feedback"></div>
                                         </div>
                                     </div>
@@ -509,9 +506,9 @@
                         <div class="permit-actions">
                             @if ($is_admin && $isEdit)
                                 <div class="permit-status">
-                                    <label class="form-label mb-1" for="set_status">Status after saving</label>
+                                    <label class="form-label mb-1" for="set_status">{{ __('shared/permit.status_after_save') }}</label>
                                     <select name="set_status" id="set_status" class="form-select">
-                                        <option value="">Modify</option>
+                                        <option value="">{{ __('shared/permit.modify') }}</option>
                                         @foreach ($statuses as $code => $label)
                                             <option value="{{ $code }}">{{ $label }}</option>
                                         @endforeach
@@ -519,19 +516,18 @@
                                 </div>
                             @endif
                             <span class="hint">
-                                <span class="d-block"><span class="req">*</span> Required fields</span>
+                                <span class="d-block"><span class="req">*</span> {{ __('common.required_fields') }}</span>
                                 <div class="form-note text-danger mt-0 mb-3">
                                         <span class="d-block mt-1"><i class="cil-info"></i>
-                                        Operating hours are <strong>{{ $office_hours }}</strong> on working days.
-                                        Requests submitted outside these hours will be processed on the next working day.
+                                        {!! __('shared/permit.office_hours_note', ['hours' => '<strong>' . e($office_hours) . '</strong>']) !!}
                                         </span>
                                     </div>
                             </span>
                             <button type="button" class="btn btn-outline-secondary" id="btnReset">
-                                <i class="cil-reload"></i><span>Reset</span>
+                                <i class="cil-reload"></i><span>{{ __('common.reset') }}</span>
                             </button>
                             <button type="submit" class="btn btn-primary" id="btnSave" @unless($isEdit) disabled @endunless>
-                                <i class="cil-send"></i><span>{{ $isEdit ? 'Save Changes' : 'Submit' }}</span>
+                                <i class="cil-send"></i><span>{{ $isEdit ? __('shared/permit.save_changes') : __('common.submit') }}</span>
                             </button>
                         </div>
                     </form>
@@ -554,6 +550,61 @@
     };
     var TYPES    = @json($types);
     var IS_EDIT  = {{ $isEdit ? 'true' : 'false' }};
+    // Teks UI sesuai bahasa aktif; placeholder :field / :type / :no diganti lewat t()
+    @php
+        $jsLang = [
+            'permit_information'   => __('shared/permit.section_info'),
+            'save_changes'         => __('shared/permit.save_changes'),
+            'submit'               => __('common.submit'),
+            'submit_type'          => __('shared/permit.submit_type'),
+            'failed_load_units'    => __('shared/permit.failed_load_units'),
+            'remove_row'           => __('shared/permit.remove_row'),
+            'this_field'           => __('shared/permit.this_field'),
+            'field_required'       => __('shared/permit.field_required'),
+            'field_empty'          => __('shared/permit.field_empty'),
+            'end_date_before'      => __('shared/permit.end_date_before'),
+            'end_time_same'        => __('shared/permit.end_time_same'),
+            'complete_fields'      => __('shared/permit.complete_fields'),
+            'permit_type'          => __('shared/permit.permit_type'),
+            'confirm_submit_title' => __('shared/permit.confirm_submit_title'),
+            'confirm_save_title'   => __('shared/permit.confirm_save_title'),
+            'confirm_submit_html'  => __('shared/permit.confirm_submit_html'),
+            'confirm_update_html'  => __('shared/permit.confirm_update_html'),
+            'yes_submit'           => __('shared/permit.yes_submit'),
+            'yes_save'             => __('shared/permit.yes_save'),
+            'cancel'               => __('common.cancel'),
+            'submitting'           => __('shared/permit.submitting'),
+            'submitted_title'      => __('shared/permit.submitted_title'),
+            'updated_title'        => __('shared/permit.updated_title'),
+            'redirect_history'     => __('shared/permit.redirect_history'),
+            'ok'                   => __('common.ok'),
+            'failed'               => __('common.failed'),
+            'error'                => __('common.error'),
+            'check_form'           => __('shared/permit.check_form'),
+            'reset_title'          => __('shared/permit.reset_title'),
+            'reset_text'           => __('shared/permit.reset_text'),
+            'yes_reset'            => __('shared/permit.yes_reset'),
+            'ph_worker_name'       => __('shared/permit.ph_worker_name'),
+            'worker_name'          => __('shared/permit.worker_name'),
+            'ph_activity'          => __('shared/permit.ph_activity'),
+            'activity'             => __('shared/permit.activity'),
+            'ph_tools'             => __('shared/permit.ph_tools'),
+            'tools_ppe'            => __('shared/permit.tools_ppe'),
+            'ph_goods'             => __('shared/permit.ph_goods'),
+            'type_of_goods'        => __('shared/permit.type_of_goods'),
+            'ph_qty'               => __('shared/permit.ph_qty'),
+            'quantity'             => __('shared/permit.quantity'),
+            'optional'             => __('common.optional'),
+        ];
+    @endphp
+    var LANG = @json($jsLang);
+
+    function t(text, params) {
+        $.each(params || {}, function (key, value) {
+            text = text.split(':' + key).join(value);
+        });
+        return text;
+    }
     // Baris tersimpan (ubah permit): nama pekerja (W) atau barang (I/O), dan kegiatan (W)
     var EDIT_LINES = @json(array_values((array) $lines));
     var EDIT_TOOLS = @json(array_values((array) $tools));
@@ -601,7 +652,7 @@
         var isWork  = type === 'W';
         var isGoods = chosen && !isWork;
 
-        $('#permitTitle').text(chosen ? TYPES[type] : 'Permit Information');
+        $('#permitTitle').text(chosen ? TYPES[type] : LANG.permit_information);
         $('#permitEmpty').prop('hidden', chosen);
 
         setVisible(sections.location, chosen);
@@ -629,10 +680,10 @@
         applyShift();
 
         if (IS_EDIT) {
-            $btnSave.prop('disabled', false).find('span').text('Save Changes');
+            $btnSave.prop('disabled', false).find('span').text(LANG.save_changes);
         } else {
             $btnSave.prop('disabled', !chosen)
-                .find('span').text(chosen ? 'Submit ' + TYPES[type] : 'Submit');
+                .find('span').text(chosen ? t(LANG.submit_type, { type: TYPES[type] }) : LANG.submit);
         }
 
         clearErrors();
@@ -664,7 +715,7 @@
                 }
             })
             .fail(function () {
-                toast('error', 'Failed to load units, please try again.');
+                toast('error', LANG.failed_load_units);
             });
 
         $.getJSON(URLS.letterNo + '/' + id)
@@ -774,7 +825,7 @@
                 ).appendTo($tr);
             });
 
-            $tr.append('<td class="line-act"><button type="button" class="btn btn-del" title="Remove row"><i class="cil-trash"></i></button></td>');
+            $tr.append('<td class="line-act"><button type="button" class="btn btn-del" title="' + escapeHtml(LANG.remove_row) + '"><i class="cil-trash"></i></button></td>');
             $body.append($tr);
             renumber();
 
@@ -824,17 +875,17 @@
 
     var grids = {
         workers: makeGrid('#tblLines', '#lineCount', '#btnAddLine', [
-            { name: 'worker_name', max: 50, placeholder: 'Worker name', label: 'Worker name' }
+            { name: 'worker_name', max: 50, placeholder: LANG.ph_worker_name, label: LANG.worker_name }
         ]),
         tools: makeGrid('#tblTools', '#toolCount', '#btnAddTool', [
-            { name: 'tool_activity', key: 'activity',  max: 100, placeholder: 'e.g. Ceiling installation', label: 'Activity' },
-            { name: 'tool_name',     key: 'tool_name', max: 100, placeholder: 'e.g. Ladder, helmet, gloves', label: 'Tools / PPE' },
-            { name: 'tool_remarks',  key: 'remarks',   max: 255, placeholder: 'Optional' }
+            { name: 'tool_activity', key: 'activity',  max: 100, placeholder: LANG.ph_activity, label: LANG.activity },
+            { name: 'tool_name',     key: 'tool_name', max: 100, placeholder: LANG.ph_tools, label: LANG.tools_ppe },
+            { name: 'tool_remarks',  key: 'remarks',   max: 255, placeholder: LANG.optional }
         ]),
         items: makeGrid('#tblItems', '#itemCount', '#btnAddItem', [
-            { name: 'item_name',    key: 'item_name', max: 100, placeholder: 'e.g. Sofa, boxes', label: 'Type of goods' },
-            { name: 'item_qty',     key: 'item_qty',  max: 20,  placeholder: 'e.g. 2 pcs', label: 'Quantity' },
-            { name: 'item_remarks', key: 'remarks',   max: 255, placeholder: 'Optional' }
+            { name: 'item_name',    key: 'item_name', max: 100, placeholder: LANG.ph_goods, label: LANG.type_of_goods },
+            { name: 'item_qty',     key: 'item_qty',  max: 20,  placeholder: LANG.ph_qty, label: LANG.quantity },
+            { name: 'item_remarks', key: 'remarks',   max: 255, placeholder: LANG.optional }
         ])
     };
 
@@ -888,31 +939,31 @@
 
         $form.find(':input[required]:enabled').each(function () {
             if ($.trim($(this).val()) === '') {
-                fail($(this), ($(this).data('label') || 'This field') + ' is required.');
+                fail($(this), t(LANG.field_required, { field: $(this).data('label') || LANG.this_field }));
             }
         });
 
         var start = $('#start_date').val(), end = $('#end_date').val();
         if (start && end && end < start) {
-            fail($('#end_date'), 'End Date cannot be earlier than Start Date.');
+            fail($('#end_date'), LANG.end_date_before);
         }
 
         // boleh lewat tengah malam (22:00 - 10:00), asal tidak sama
         var st = $('#start_time').val(), et = $('#end_time').val();
         if (st && et && et === st) {
-            fail($('#end_time'), 'End Time must be different from Start Time.');
+            fail($('#end_time'), LANG.end_time_same);
         }
 
         // Kolom wajib di tabel baris (yang tampil saja)
         $form.find('.permit-lines input[data-req]:enabled').each(function () {
             if ($.trim($(this).val()) === '') {
-                fail($(this), $(this).data('req') + ' cannot be empty.');
+                fail($(this), t(LANG.field_empty, { field: $(this).data('req') }));
             }
         });
 
         if ($first) {
             scrollTo($first);
-            toast('error', 'Please complete the highlighted fields.');
+            toast('error', LANG.complete_fields);
             return false;
         }
 
@@ -967,7 +1018,7 @@
         e.preventDefault();
 
         if (!TYPES[$type.val()]) {
-            setError($type, 'Permit Type is required.');
+            setError($type, t(LANG.field_required, { field: LANG.permit_type }));
             return;
         }
 
@@ -976,12 +1027,12 @@
         }
 
         Swal.fire({
-            title: (IS_EDIT ? 'Save changes to ' : 'Submit ') + TYPES[$type.val()] + '?',
-            html: 'Permit number <strong>' + escapeHtml($permitNo.val() || '-') + '</strong> will be ' + (IS_EDIT ? 'updated.' : 'submitted for approval.'),
+            title: t(IS_EDIT ? LANG.confirm_save_title : LANG.confirm_submit_title, { type: TYPES[$type.val()] }),
+            html: t(escapeHtml(IS_EDIT ? LANG.confirm_update_html : LANG.confirm_submit_html), { no: '<strong>' + escapeHtml($permitNo.val() || '-') + '</strong>' }),
             icon: 'question',
             showCancelButton: true,
-            confirmButtonText: IS_EDIT ? 'Yes, save' : 'Yes, submit',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: IS_EDIT ? LANG.yes_save : LANG.yes_submit,
+            cancelButtonText: LANG.cancel,
             reverseButtons: true
         }).then(function (result) {
             if (result.value) {
@@ -994,7 +1045,7 @@
         var started = Date.now();
 
         $btnSave.prop('disabled', true);
-        $('#overlaySpinnerText').text('Submitting permit, please wait...');
+        $('#overlaySpinnerText').text(LANG.submitting);
         $spinner.css('display', 'flex');
 
         function finish(cb) {
@@ -1013,17 +1064,17 @@
             finish(function () {
                 if (res.status === 'OK') {
                     Swal.fire({
-                        title: IS_EDIT ? 'Permit Updated' : 'Permit Submitted',
-                        html: escapeHtml(res.pesan) + '<br><small class="text-body-secondary">You will be redirected to Permit History.</small>',
+                        title: IS_EDIT ? LANG.updated_title : LANG.submitted_title,
+                        html: escapeHtml(res.pesan) + '<br><small class="text-body-secondary">' + escapeHtml(LANG.redirect_history) + '</small>',
                         icon: 'success',
-                        confirmButtonText: 'OK',
+                        confirmButtonText: LANG.ok,
                         allowOutsideClick: false
                     }).then(function () {
                         window.location.href = URLS.history;
                     });
                 } else {
                     $btnSave.prop('disabled', false);
-                    Swal.fire({ title: 'Failed', text: res.pesan, icon: 'error' });
+                    Swal.fire({ title: LANG.failed, text: res.pesan, icon: 'error' });
                 }
             });
         }).fail(function (xhr, textStatus, errorThrown) {
@@ -1036,7 +1087,7 @@
                 }
 
                 Swal.fire({
-                    title: xhr.status === 422 ? 'Please check the form' : 'Error',
+                    title: xhr.status === 422 ? LANG.check_form : LANG.error,
                     text: res.pesan || (textStatus + ': ' + errorThrown),
                     icon: 'error'
                 });
@@ -1054,12 +1105,12 @@
             return;
         }
         Swal.fire({
-            title: 'Reset the form?',
-            text: 'All entered data will be cleared.',
+            title: LANG.reset_title,
+            text: LANG.reset_text,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, reset',
-            cancelButtonText: 'Cancel',
+            confirmButtonText: LANG.yes_reset,
+            cancelButtonText: LANG.cancel,
             reverseButtons: true
         }).then(function (result) {
             if (!result.value) {

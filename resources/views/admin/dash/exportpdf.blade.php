@@ -16,7 +16,7 @@ tbody:before, tbody:after { display: none; }.footer{position: fixed; bottom: 0px
   </head>
   <body>
     <section class="invoice">
-      <h4 style="font-family: Tahoma!important;">Electricity Summary Usage</h4><hr/>
+      <h4 style="font-family: Tahoma!important;">{{ __('admin/dashboard.pdf_heading') }}</h4><hr/>
       <div class="col-sm-12">
         <img id="chart" style="width: 600px;" src="{{ $im }}" />
         <div id="legendDiv"></div>
@@ -25,9 +25,9 @@ tbody:before, tbody:after { display: none; }.footer{position: fixed; bottom: 0px
       <table class="table table-bordered table-striped dataTable" role="grid">
         <thead style="background:#ffa500;">
           <tr>
-            <th>Period</th>
-            <th>LWBP usage (kwh)</th>
-            <th>WBP usage (kwh)</th>
+            <th>{{ __('common.period') }}</th>
+            <th>{{ __('admin/dashboard.pdf_lwbp') }}</th>
+            <th>{{ __('admin/dashboard.pdf_wbp') }}</th>
           </tr>            
         </thead>
         <tbody>
@@ -36,7 +36,7 @@ tbody:before, tbody:after { display: none; }.footer{position: fixed; bottom: 0px
       </table>
     </section>
     <div class="footer">
-        <p style="font-size:8px">WINDAS Tenant Web Portal may contain information that is created and managed by various sources, both internal and external. At no time shall WINDAS Building Management be responsible or liable, directly or indirectly, for any damage or loss resulting from or alleged to result from the use of or reliance on any such content in WINDAS Tenant Web Portal</p>
+        <p style="font-size:8px">{{ __('admin/dashboard.pdf_disclaimer') }}</p>
       </div> 
   </body>
 </html>

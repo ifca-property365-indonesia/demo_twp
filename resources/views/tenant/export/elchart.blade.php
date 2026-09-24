@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Electricity Usage</title>
+    <title>{{ __('tenant/dashboard.electricity_usage') }}</title>
     <style>
         @page { margin: 24px 28px; }
         body { font-family: "DejaVu Sans", Helvetica, Arial, sans-serif; font-size: 10px; color: #1f2937; margin: 0; }
@@ -19,8 +19,8 @@
     </style>
 </head>
 <body>
-    <h1>Electricity Usage</h1>
-    <div class="muted">Generated {{ date('d M Y H:i') }}</div>
+    <h1>{{ __('tenant/dashboard.electricity_usage') }}</h1>
+    <div class="muted">{{ __('tenant/dashboard.generated_at', ['date' => date('d M Y H:i')]) }}</div>
 
     <div class="chart">
         <img src="{{ url('./storage/file_generate/chart/') }}/{{ $image }}" alt="chart">
@@ -29,9 +29,9 @@
     <table>
         <thead>
             <tr>
-                <th class="text-center">Period</th>
-                <th class="text-center">LWBP Usage (kWh)</th>
-                <th class="text-center">WBP Usage (kWh)</th>
+                <th class="text-center">{{ __('common.period') }}</th>
+                <th class="text-center">{{ __('tenant/dashboard.col_lwbp_usage') }}</th>
+                <th class="text-center">{{ __('tenant/dashboard.col_wbp_usage') }}</th>
             </tr>
         </thead>
         <tbody>

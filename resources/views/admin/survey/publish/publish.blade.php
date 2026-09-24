@@ -1,28 +1,28 @@
 <div>
     <form role="form" enctype="multipart/form-data" id="form_publish" method="POST" >
       <div class="mb-3">
-        <label class="form-label">Survey Title</label>
+        <label class="form-label">{{ __('admin/survey.survey_title') }}</label>
         <div class="col-12">
-          <input type="text" class="form-control" name="txttitle" id="txttitle" placeholder="Input Subject" readonly>
+          <input type="text" class="form-control" name="txttitle" id="txttitle" placeholder="{{ __('admin/survey.input_subject') }}" readonly>
         </div>
       </div>
       <div class="mb-3" >
-        <label class="form-label">Publish Date</label>
+        <label class="form-label">{{ __('admin/survey.publish_date') }}</label>
         <div class="form-control-wrap">
             <div class="form-icon form-icon-left">
                 <i class="cil-calendar"></i>
             </div>
-            <input type="text" id="txtPublish" name="txtPublish" placeholder="Publish Date" class="form-control date-picker" data-date-format="dd/mm/yyyy" >
+            <input type="text" id="txtPublish" name="txtPublish" placeholder="{{ __('admin/survey.publish_date') }}" class="form-control date-picker" data-date-format="dd/mm/yyyy" >
         </div>
         
       </div>
       <div class="mb-3">
-        <label class="form-label">Expired Date</label>
+        <label class="form-label">{{ __('admin/survey.expired_date') }}</label>
         <div class="form-control-wrap">
             <div class="form-icon form-icon-left">
                 <i class="cil-calendar"></i>
             </div>
-            <input type="text" id="txtExpired" name="txtExpired" placeholder="Expired Date" class="form-control date-picker" data-date-format="dd/mm/yyyy" >
+            <input type="text" id="txtExpired" name="txtExpired" placeholder="{{ __('admin/survey.expired_date') }}" class="form-control date-picker" data-date-format="dd/mm/yyyy" >
         </div>
       </div>
     </form>
@@ -48,7 +48,7 @@ function loaddata(){
       },
       messages: {
         txtExpired:{
-                    cek_date:"Expired Date can't be smaller than Publish Date"
+                    cek_date:@json(__('admin/survey.expired_smaller_publish'))
                   }
               },
       errorElement: "div",
@@ -139,11 +139,11 @@ $('#modalxl #savefrm_publish').click(function(){
                 success:function(data, status){
                 if(data.status =='OK'){
                   Swal.fire({
-                          title: "Information",
+                          title: @json(__('common.information')),
                           animation: false,
                           icon: "success",
                           text: data.pesan,
-                          confirmButtonText: "OK"
+                          confirmButtonText: @json(__('common.ok'))
                       });
                       $('#modalxl').modal('hide');
                       tblsurvey.ajax.reload(null,true);  
@@ -152,11 +152,11 @@ $('#modalxl #savefrm_publish').click(function(){
                       $('#modalxl #savefrm_publish').attr("disabled", false); 
                 }else{
                   Swal.fire({
-                            title: "Information",
+                            title: @json(__('common.information')),
                             animation: false,
                             icon: "error",
                             text: data.pesan,
-                            confirmButtonText: "OK"
+                            confirmButtonText: @json(__('common.ok'))
                         });
                       block(false,'#form_publish');
                       $('#modalxl #savefrm_publish').attr("disabled", false); 
@@ -166,7 +166,7 @@ $('#modalxl #savefrm_publish').click(function(){
               
               },                    
                 error: function(jqXHR, textStatus, errorThrown){
-                  Swal.fire(textStatus+' Save : '+errorThrown);
+                  Swal.fire(@json(__('admin/survey.status_save_error')).replace(':status', textStatus).replace(':error', errorThrown));
                     block(false,'#form_publish');
                     $('#modalxl #savefrm_publish').attr("disabled", false); 
                 }

@@ -1,6 +1,6 @@
 @extends('tenant.template.base')
 
-@section('title', 'News Feed')
+@section('title', __('tenant/news.title'))
 
 @section('content')
     @php
@@ -20,8 +20,8 @@
         <div class="page-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">News Feed</h3>
-                    <div class="page-desc">Latest news and announcements from building management.</div>
+                    <h3 class="page-title">{{ __('tenant/news.title') }}</h3>
+                    <div class="page-desc">{{ __('tenant/news.page_desc') }}</div>
                 </div>
             </div>
         </div>
@@ -55,7 +55,7 @@
                 <div class="card">
                     <div class="card-body text-center py-5 text-body-secondary">
                         <i class="cil-newspaper fs-1 d-block mb-2"></i>
-                        No latest news.
+                        {{ __('tenant/news.no_news') }}
                     </div>
                 </div>
             @endif

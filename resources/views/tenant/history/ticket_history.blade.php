@@ -4,7 +4,7 @@
         <div class="page-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Ticket History</h3>
+                    <h3 class="page-title">{{ __('tenant/history.ticket_title') }}</h3>
                 </div><!-- .page-head-content -->
             </div><!-- .page-head-row -->
         </div><!-- .page-head -->
@@ -15,21 +15,21 @@
                 @csrf
                     <div class="row g-3 align-items-end">
                         <div class="col-sm-6 col-lg-3">
-                            <label for="start" class="form-label">Start Date</label>
+                            <label for="start" class="form-label">{{ __('common.start_date') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('01/m/Y') }}" required autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                            <label for="end" class="form-label">End Date</label>
+                            <label for="end" class="form-label">{{ __('common.end_date') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-4 col-lg-2">
-                            <button type="submit" id="search" class="btn btn-primary w-100"><i class="cil-search"></i><span>Search</span></button>
+                            <button type="submit" id="search" class="btn btn-primary w-100"><i class="cil-search"></i><span>{{ __('common.search') }}</span></button>
                         </div>
                     </div>
                 </form>
@@ -42,14 +42,14 @@
 	                			<table id="tblTicket" class="table table-bordered table-striped" role="grid" aria-describedby="tblTicket_info">
 		                            <thead class="table-dark">
 		                                <tr role="row">
-		                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
-		                                    <th class="sorting text-center" style="width: 24px;">Ticket Number</th>
-		                                    <th class="sorting text-center" style="width: 24px; vertical-align: middle;">Category</th>
-		                                    <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-		                                    <th class="sorting text-center" style="width: 100px; vertical-align: middle;">Reported Date</th>
-		                                    <th class="sorting text-center" style="width: 24px;">Request By</th>
-		                                    <th class="sorting text-center" style="width: 80px; vertical-align: middle;">Lot No</th>
-		                                    <th class="sorting text-center" style="width: 10px;">Ticket Status</th>
+		                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">{{ __('tenant/history.col_no') }}</th>
+		                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.ticket_number') }}</th>
+		                                    <th class="sorting text-center" style="width: 24px; vertical-align: middle;">{{ __('tenant/history.category') }}</th>
+		                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/history.description') }}</th>
+		                                    <th class="sorting text-center" style="width: 100px; vertical-align: middle;">{{ __('tenant/history.reported_date') }}</th>
+		                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.request_by') }}</th>
+		                                    <th class="sorting text-center" style="width: 80px; vertical-align: middle;">{{ __('tenant/history.lot_no') }}</th>
+		                                    <th class="sorting text-center" style="width: 10px;">{{ __('tenant/history.ticket_status') }}</th>
 		                                </tr>
 		                            </thead>
 		                            <tbody>
@@ -63,6 +63,7 @@
     </div>
 
     <script type="text/javascript">
+    	var STATUS_LABELS = @json(__('common.statuses'));
     	$(document).ready(function(){
 			$('.date-picker').datepicker('setEndDate', new Date());
 	    	$('#tblTicket').DataTable({
@@ -101,20 +102,21 @@
 		                    // Status yang tidak ada di daftar (mis. 'O' dari sistem lain) tampil
 		                    // sebagai kodenya. Dulu status seperti itu membuat render error
 		                    // (variabel color tidak terisi) dan tabel macet di "Loading".
-		                    var map = {
-		                        A: ['Accepted', 'badge-soft-primary'],
-		                        S: ['Survey', 'badge-soft-primary'],
-		                        P: ['Process', 'badge-soft-primary'],
-		                        F: ['Confirm', 'badge-soft-primary'],
-		                        M: ['Modify', 'badge-soft-primary'],
-		                        Z: ['Charged Approved', 'badge-soft-warning'],
-		                        Y: ['Approved', 'badge-soft-success'],
-		                        C: ['Closed', 'badge-soft-success'],
-		                        R: ['Open', 'badge-soft-info'],
-		                        X: ['Cancel', 'badge-soft-secondary']
+		                    var colors = {
+		                        A: 'badge-soft-primary',
+		                        S: 'badge-soft-primary',
+		                        P: 'badge-soft-primary',
+		                        F: 'badge-soft-primary',
+		                        M: 'badge-soft-primary',
+		                        Z: 'badge-soft-warning',
+		                        Y: 'badge-soft-success',
+		                        C: 'badge-soft-success',
+		                        R: 'badge-soft-info',
+		                        X: 'badge-soft-secondary'
 		                    };
 		                    var code = data == null ? '' : String(data).trim();
-		                    var item = map[code] || [code || '-', 'badge-soft-secondary'];
+		                    var known = Object.prototype.hasOwnProperty.call(colors, code) && Object.prototype.hasOwnProperty.call(STATUS_LABELS, code);
+		                    var item = known ? [STATUS_LABELS[code], colors[code]] : [code || '-', 'badge-soft-secondary'];
 		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>';
 		                }
 		            },
@@ -123,9 +125,9 @@
 		        buttons: [
 		            {
 		                extend: 'pdf',
-		                title: 'Ticket History',
+		                title: @json(__('tenant/history.ticket_title')),
 		                className: 'btn btn-primary mb-2',
-                        text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
+                        text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
                         init: function(api, node, config) {
                             $(node).removeClass('dt-button')
                         },
@@ -158,18 +160,18 @@
 		                                title: event.Pesan,
 		                                // text: event.Pesan,
 		                                icon:"warning",
-		                                confirmButtonText: "OK"
+		                                confirmButtonText: @json(__('common.ok'))
 		                            });
 		                            $('#tblTicket').DataTable().ajax.reload();
 		                        }
 		                    },
 		                    error: function(jqXHR, textStatus, errorThrown){
 		                        Swal.fire({
-		                            title: "Error",
+		                            title: @json(__('common.error')),
 		                            animation: false,
 		                            icon:"error",
-		                            text: textStatus+' Search : '+errorThrown,
-		                            confirmButtonText: "OK"
+		                            text: @json(__('tenant/history.search_error')).replace(':status', function () { return textStatus; }).replace(':error', function () { return errorThrown; }),
+		                            confirmButtonText: @json(__('common.ok'))
 		                        });
 		                    }
 		                });

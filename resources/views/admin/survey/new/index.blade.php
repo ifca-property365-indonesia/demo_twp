@@ -6,7 +6,7 @@
             <div class="page-head">
                 <div class="page-head-row">
                     <div class="page-head-content">
-                        <h3 class="page-title">Question Entry</h3>
+                        <h3 class="page-title">{{ __('admin/survey.question_entry') }}</h3>
                     </div>
                 </div>
             </div>
@@ -14,10 +14,10 @@
                 <div class="card-body">
                     <ul class="nav nav-underline-border mb-3">
                         <li class="nav-item">
-                            <a class="nav-link active" data-coreui-toggle="tab" href="#t_draft"><i class="cil-pencil"></i> &nbsp;Draft Survey</a>
+                            <a class="nav-link active" data-coreui-toggle="tab" href="#t_draft"><i class="cil-pencil"></i> &nbsp;{{ __('admin/survey.draft_survey') }}</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" data-coreui-toggle="tab" href="#t_published"><i class="cil-task"></i> &nbsp;Published Survey</a>
+                            <a class="nav-link" data-coreui-toggle="tab" href="#t_published"><i class="cil-task"></i> &nbsp;{{ __('admin/survey.published_survey') }}</a>
                         </li>
                     </ul>
                     <div class="tab-content">
@@ -27,9 +27,9 @@
                                 <table class="table table-hover table-bordered w-100" id="tbldraft">
                                     <thead>
                                     <tr>
-                                        <th>No.</th>          
-                                        <th>Survey Title</th>
-                                        <th>Description</th>
+                                        <th>{{ __('admin/survey.no') }}</th>          
+                                        <th>{{ __('admin/survey.survey_title') }}</th>
+                                        <th>{{ __('common.description') }}</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -42,11 +42,11 @@
                                 <table class="table table-hover table-bordered w-100" id="tblpublished">
                                     <thead>
                                     <tr>
-                                        <th>No.</th>          
-                                        <th>Survey Title</th>
-                                        <th>Publish Date</th>
-                                        <th>Expired Date</th>
-                                        <th width="20%">Action</th>
+                                        <th>{{ __('admin/survey.no') }}</th>          
+                                        <th>{{ __('admin/survey.survey_title') }}</th>
+                                        <th>{{ __('admin/survey.publish_date') }}</th>
+                                        <th>{{ __('admin/survey.expired_date') }}</th>
+                                        <th width="20%">{{ __('common.action') }}</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -84,8 +84,8 @@ var tbldraft;
                     render: function (data) { return FormatDateNew(data); }
                 },
                 {data: null, name: "action", searchable: false, orderable: false, render: function (data, type, row) { 
-                    var btnEdit = '<button type="button" class="btn btn-info btn-sm btn-edit-dates me-1" data-id="' + row.id + '" data-title="' + row.title + '" data-publish="' + row.publish_date + '" data-expired="' + row.expired_date + '"><i class="cil-pencil"></i> Edit</button>';
-                    var btnDelete = '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '"><i class="cil-trash"></i> Delete</button>';
+                    var btnEdit = '<button type="button" class="btn btn-info btn-sm btn-edit-dates me-1" data-id="' + row.id + '" data-title="' + row.title + '" data-publish="' + row.publish_date + '" data-expired="' + row.expired_date + '"><i class="cil-pencil"></i> {{ __('common.edit') }}</button>';
+                    var btnDelete = '<button type="button" class="btn btn-danger btn-sm btn-delete" data-id="' + row.id + '"><i class="cil-trash"></i> {{ __('common.delete') }}</button>';
                     return btnEdit + btnDelete; 
                 }}
             ]
@@ -112,10 +112,10 @@ var tbldraft;
 
         // TOOLBAR BUTTONS UNTUK DRAFT
         $("div.tbldraft").html(
-            '<button id="addparam" class="btn btn-sm btn-primary">Add</button>&nbsp;'+
-            '<button id="editparam" class="btn btn-sm btn-info">Edit</button>&nbsp;'+
-            '<button id="deleteparam" class="btn btn-sm btn-danger">Delete</button>&nbsp;'+
-            '<button id="publishparam" class="btn btn-sm btn-secondary">Publish</button>&nbsp;'
+            '<button id="addparam" class="btn btn-sm btn-primary">{{ __('common.add') }}</button>&nbsp;'+
+            '<button id="editparam" class="btn btn-sm btn-info">{{ __('common.edit') }}</button>&nbsp;'+
+            '<button id="deleteparam" class="btn btn-sm btn-danger">{{ __('common.delete') }}</button>&nbsp;'+
+            '<button id="publishparam" class="btn btn-sm btn-secondary">{{ __('common.publish') }}</button>&nbsp;'
         );
 
         // ROW SELECTION (DRAFT)
@@ -132,8 +132,8 @@ var tbldraft;
         $('#addparam').click(function(){
             block(true,'#modalbodyxl');
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
-            $('#modaltitlexl').addClass('white').html('Add New Survey');
-            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Save</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
+            $('#modaltitlexl').addClass('white').html(@json(__('admin/survey.add_new_survey')));
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">{{ __('common.save') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
             $('#modalbodyxl').html("");
             $('#modalbodyxl').load("{{ url('/admin/usersurvey/create') }}");
             $('#modalxl').data('id', 0);
@@ -145,7 +145,7 @@ var tbldraft;
         $('#editparam').click(function(){
             var rows = tbldraft.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information", 'Please select a row to edit', "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.select_row_to_edit')), "warning");
                 return;
             }
             
@@ -154,8 +154,8 @@ var tbldraft;
 
             block(true, '#modalbodyxl');
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
-            $('#modaltitlexl').addClass('white').html('Edit Survey');
-            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">Update</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
+            $('#modaltitlexl').addClass('white').html(@json(__('admin/survey.edit_survey')));
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="savefrmxl">{{ __('common.update') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
             $('#modalbodyxl').html("");
             $('#modalbodyxl').load("{{ url('/admin/usersurvey/edit') }}/" + survey_id);
             $('#modalxl').data('id', survey_id);
@@ -167,7 +167,7 @@ var tbldraft;
         $('#publishparam').click(function(){
             var rows = tbldraft.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information", 'Please select a row', "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.select_row')), "warning");
                 return;
             } 
             var data = tbldraft.rows(rows).data();
@@ -175,19 +175,19 @@ var tbldraft;
             var title = data[0].title;
 
             Swal.fire({
-                title: 'Publish "' + title + '"?',
-                text: 'Published surveys will be moved to the Published tab.',
+                title: @json(__('admin/survey.publish_title_confirm')).replace(':title', function(){ return title; }),
+                text: @json(__('admin/survey.publish_moved')),
                 icon: 'info',
                 showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
-                confirmButtonText: 'Yes, Publish'
+                confirmButtonText: @json(__('admin/survey.yes_publish'))
             }).then(function(a){
                 if (a.value == true) {
                     $('#modalbodyxl').html("");
                     $('#modalxl').modal({backdrop: 'static', keyboard: false});
-                    $('.modal-footer').html('<button type="button" class="btn btn-sm btn-success" id="savefrm_publish">Confirm Publish</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
-                    $('#modaltitlexl').addClass('white').html('Publish Survey');
+                    $('.modal-footer').html('<button type="button" class="btn btn-sm btn-success" id="savefrm_publish">{{ __('admin/survey.confirm_publish') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
+                    $('#modaltitlexl').addClass('white').html(@json(__('admin/survey.publish_survey')));
                     $('#modalbodyxl').load("{{ url('/admin/usersurvey/publish-form') }}/" + survey_id);
                     $('#modalxl').data('id', survey_id);
                     $('#modalxl').data('form', 'publish');
@@ -200,7 +200,7 @@ var tbldraft;
         $('#deleteparam').click(function(){
             var rows = tbldraft.rows('.selected').indexes();
             if (rows.length < 1) {
-                Swal.fire("Information", 'Please select a row', "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.select_row')), "warning");
                 return;
             } 
             var data = tbldraft.rows(rows).data();
@@ -228,28 +228,28 @@ var tbldraft;
                 <form id="frmUpdateDates">
                     <input type="hidden" name="id" value="${id}">
                     <div class="mb-3">
-                        <label class="form-label">Survey Title</label>
+                        <label class="form-label">{{ __('admin/survey.survey_title') }}</label>
                         <input type="text" class="form-control" value="${title}" readonly>
                     </div>
                     
                     <div class="mb-3">
-                        <label class="form-label">Publish Date</label>
+                        <label class="form-label">{{ __('admin/survey.publish_date') }}</label>
                         <input type="date" class="form-control" name="publish_date" id="edit_publish_date" value="${publish_date}" ${isPublishDisabled ? 'disabled style="background-color: #e9ecef; cursor: not-allowed;"' : ''} required>
                         
                         ${isPublishDisabled ? `
                             <div class="text-danger fw-bold mt-1" style="font-size: 12px;">
-                                <i class="cil-lock-locked"></i> The publish date is active/running today and can no longer be modified!
+                                <i class="cil-lock-locked"></i> {{ __('admin/survey.publish_date_locked') }}
                             </div>
                         ` : ''}
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Expired Date</label>
+                        <label class="form-label">{{ __('admin/survey.expired_date') }}</label>
                         <input type="date" class="form-control" name="expired_date" id="edit_expired_date" value="${expired_date}" min="${todayStr}" required>
                         
                         <!-- RED NOTIF REAL-TIME EXPIRED DATE -->
                         <div id="expired_date_error" class="text-danger fw-bold mt-1" style="display: none; font-size: 12px;">
-                            <i class="cil-warning"></i> Expired date cannot be earlier than today (${todayStr})!
+                            <i class="cil-warning"></i> {{ __('admin/survey.expired_before_today_on', ['date' => '${todayStr}']) }}
                         </div>
                     </div>
                 </form>
@@ -257,8 +257,8 @@ var tbldraft;
 
             $('#modalbodyxl').html(htmlForm);
             $('#modalxl').modal({backdrop: 'static', keyboard: false});
-            $('#modaltitlexl').addClass('white').html('Edit Published Survey Dates');
-            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="btnSaveUpdatedDates">Update Dates</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">Close</button>');
+            $('#modaltitlexl').addClass('white').html(@json(__('admin/survey.edit_published_dates')));
+            $('.modal-footer').html('<button type="button" class="btn btn-sm btn-primary" id="btnSaveUpdatedDates">{{ __('admin/survey.update_dates') }}</button><button type="button" class="btn btn-sm btn-secondary" data-coreui-dismiss="modal">{{ __('common.close') }}</button>');
             $('#modalxl').modal('show');
         });
 
@@ -295,17 +295,17 @@ var tbldraft;
 
             // Validasi Expired Date Minimal Hari Ini
             if (!expired_date) {
-                Swal.fire("Information", "Expired date is required!", "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.expired_required')), "warning");
                 return;
             }
 
             if (expDate < today) {
-                Swal.fire("Information", "Expired date cannot be earlier than today!", "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.expired_before_today')), "warning");
                 return;
             }
 
             if (new Date(publish_date) > expDate) {
-                Swal.fire("Information", "Publish date cannot be later than Expired date!", "warning");
+                Swal.fire(@json(__('common.information')), @json(__('admin/survey.publish_after_expired')), "warning");
                 return;
             }
 
@@ -323,16 +323,16 @@ var tbldraft;
                 success: function(event) {
                     block(false, '#modalbodyxl');
                     if (event.status == 'OK') {
-                        Swal.fire("Information", event.message || "Dates updated successfully!", "success");
+                        Swal.fire(@json(__('common.information')), event.message || @json(__('admin/survey.dates_updated')), "success");
                         $('#modalxl').modal('hide');
                         tblpublished.ajax.reload(null, false);
                     } else {
-                        Swal.fire("Information", event.message || "Failed to update dates", "error");
+                        Swal.fire(@json(__('common.information')), event.message || @json(__('admin/survey.dates_update_failed')), "error");
                     }
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     block(false, '#modalbodyxl');
-                    Swal.fire("Information", textStatus + ' : ' + errorThrown, "warning");
+                    Swal.fire(@json(__('common.information')), textStatus + ' : ' + errorThrown, "warning");
                 }
             });
         });
@@ -342,13 +342,13 @@ var tbldraft;
     // FUNCTION: DELETE AJAX
     function DeleteSurvey(id) {
         Swal.fire({
-            title: 'Are you sure?',
-            text: 'You won\'t be able to revert this!',
+            title: @json(__('common.are_you_sure')),
+            text: @json(__('admin/survey.revert_warning')),
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: @json(__('admin/survey.yes_delete'))
         }).then(function(result) {
             if (result.value == true) {
                 block(true, '.page-body');
@@ -360,16 +360,16 @@ var tbldraft;
                     success: function(event) {
                         block(false, '.page-body');
                         if (event.status == 'OK') {
-                            Swal.fire("Information", event.message, "success");
+                            Swal.fire(@json(__('common.information')), event.message, "success");
                             tbldraft.ajax.reload(null, false); 
                             tblpublished.ajax.reload(null, false); 
                         } else {
-                            Swal.fire("Information", event.message, "error");
+                            Swal.fire(@json(__('common.information')), event.message, "error");
                         }
                     },                    
                     error: function(jqXHR, textStatus, errorThrown){        
                         block(false, '.page-body');
-                        Swal.fire("Information", textStatus + ' : ' + errorThrown, "warning");
+                        Swal.fire(@json(__('common.information')), textStatus + ' : ' + errorThrown, "warning");
                     }
                 });
             }

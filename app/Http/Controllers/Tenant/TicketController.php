@@ -45,11 +45,11 @@ class TicketController extends Controller
         if(empty($id) || empty($form))
         {
             $id   = '0';
-            $jdl  = 'New Ticket';
+            $jdl  = __('tenant/ticket.new_ticket');
             $form = 'add';
         } else {
             $id   = $id;
-            $jdl  = 'Edit Ticket';
+            $jdl  = __('tenant/ticket.edit_ticket');
             $form = 'edit';
         }
 
@@ -202,7 +202,7 @@ class TicketController extends Controller
         $tenant_lot = $this->lotsOfTenancy($tenancy->entity_cd, $tenancy->project_no, $tenancy->tenant_no);
 
         if ($tenant_lot->isEmpty()) {
-            return response('<option value="">No lot available</option>');
+            return response('<option value="">' . e(__('tenant/ticket.no_lot')) . '</option>');
         }
 
         $list_lot = '<option></option>';
@@ -290,7 +290,7 @@ class TicketController extends Controller
             $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
 
             if ($_FILES["ticket_image"]["size"] > 2000000) {
-                $msg = "Maximum file size is 2MB";
+                $msg = __('common.upload_max_size', ['size' => '2MB']);
                 $uploadOk = 0;
                 $psn = 'failed';
                 $res = array("pesan" => $msg, "status" => $psn);
@@ -305,7 +305,7 @@ class TicketController extends Controller
                 $imageFileType != "jpg" && $imageFileType != "png" && $imageFileType != "jpeg"
                 && $imageFileType != "gif" && $imageFileType != "JPG"
             ) {
-                $msg = "Sorry, only JPG, JPEG, PNG & GIF files are allowed.";
+                $msg = __('common.upload_only_image');
                 $uploadOk = 0;
                 $psn = 'failed';
                 $res = array("pesan" => $msg, "status" => $psn);
@@ -315,22 +315,22 @@ class TicketController extends Controller
             }
             // Check if $uploadOk is set to 0 by an error
             if ($uploadOk == 0) {
-                $msg = "Sorry, your file was not uploaded.";
+                $msg = __('common.upload_not_saved');
                 $psn = "Failed";
                 // if everything is ok, try to upload file
             } else {
                 if (move_uploaded_file($_FILES["ticket_image"]["tmp_name"], $target_file)) {
-                    $msg = "The file " . basename($_FILES["ticket_image"]["name"]) . " has been uploaded.";
+                    $msg = __('common.upload_done', ['name' => basename($_FILES["ticket_image"]["name"])]);
                     $psn = "OK";
                     $descs = "/storage/file_ticket/" . $picname;
                     $url = url('/tenant') . $descs;
                 } else {
-                    $msg = "Sorry, there was an error uploading your file.";
+                    $msg = __('common.upload_error');
                     $psn = "Failed";
                 }
             }
         } else {
-            $msg = "Sorry, there was an error uploading your file.";
+            $msg = __('common.upload_error');
             $psn = "Failed";
         }
         $res = array(
@@ -378,7 +378,7 @@ class TicketController extends Controller
             $data_tenant = DB::table('pm_tenancy')->where('id', $tenant_no)->get();
 
             if ($data_tenant->isEmpty()) {
-                throw new \Exception("Tenant not found: $tenant_no");
+                throw new \Exception(__('tenant/ticket.tenant_not_found', ['tenant' => $tenant_no]));
             }
             
             $dataopen = DB::connection('dblive')
@@ -386,7 +386,7 @@ class TicketController extends Controller
                 ->where(['entity_cd' => $entity])
                 ->get();
             if ($dataopen->isEmpty()) {
-                throw new \Exception("Document control not found for $entity / $pre");
+                throw new \Exception(__('tenant/ticket.doc_control_not_found', ['entity' => $entity, 'prefix' => $pre]));
             }
             
 
@@ -399,7 +399,7 @@ class TicketController extends Controller
                 ->get();
             
             if ($dataopen2->isEmpty()) {
-                throw new \Exception("Document format not found (rowId=$next_doc_noSave, type_format=$Type_format1)");
+                throw new \Exception(__('tenant/ticket.doc_format_not_found', ['row' => $next_doc_noSave, 'format' => $Type_format1]));
             }
 
             $typeformat2 = $dataopen2[0]->format;
@@ -529,7 +529,7 @@ class TicketController extends Controller
                     $msg = $query;
                     $st = 'Fail';
                 } else {
-                    $msg = "Data has been saved successfully";
+                    $msg = __('common.saved');
                     $st = 'OK';
                 }
             } else {
@@ -541,7 +541,7 @@ class TicketController extends Controller
                     $msg = $query;
                     $st = 'Fail';
                 } else {
-                    $msg = "Data has been updated successfully";
+                    $msg = __('common.updated');
                     $st = 'OK';
                 }
             }
@@ -610,7 +610,7 @@ class TicketController extends Controller
             );
 
             return response()->json([
-                "pesan" => $msg ?: "Data has been saved successfully",
+                "pesan" => $msg ?: __('common.saved'),
                 "status" => $st ?? 'OK'
             ]);
         } catch (\Throwable $e) {
@@ -622,7 +622,7 @@ class TicketController extends Controller
 
             return response()->json([
                 'status' => 'Fail',
-                'pesan' => 'An error occurred: ' . $e->getMessage(),
+                'pesan' => __('common.error_occurred', ['message' => $e->getMessage()]),
                 'file' => $e->getFile(),
                 'line' => $e->getLine()
             ], 500);
@@ -639,10 +639,10 @@ class TicketController extends Controller
         <table class="table table-bordered table-striped" id="tblHargaItem">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Code</th>
-                    <th>Description</th>
-                    <th>Price</th>
+                    <th>'.e(__('tenant/ticket.col_no')).'</th>
+                    <th>'.e(__('tenant/ticket.col_code')).'</th>
+                    <th>'.e(__('common.description')).'</th>
+                    <th>'.e(__('tenant/ticket.col_price')).'</th>
                 </tr>
             </thead>
             <tbody>
@@ -680,10 +680,10 @@ class TicketController extends Controller
         <table class="table table-bordered table-striped" id="tblHargaJasa">
             <thead>
                 <tr>
-                    <th>No</th>
-                    <th>Code</th>
-                    <th>Description</th>
-                    <th>Price</th>
+                    <th>'.e(__('tenant/ticket.col_no')).'</th>
+                    <th>'.e(__('tenant/ticket.col_code')).'</th>
+                    <th>'.e(__('common.description')).'</th>
+                    <th>'.e(__('tenant/ticket.col_price')).'</th>
                 </tr>
             </thead>
             <tbody>

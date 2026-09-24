@@ -4,7 +4,7 @@
         <div class="page-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Billing History</h3>
+                    <h3 class="page-title">{{ __('tenant/history.billing_title') }}</h3>
                 </div><!-- .page-head-content -->
             </div><!-- .page-head-row -->
         </div><!-- .page-head -->
@@ -15,21 +15,21 @@
                 @csrf
                     <div class="row g-3 align-items-end">
                         <div class="col-sm-6 col-lg-3">
-                            <label for="start" class="form-label">Start Date</label>
+                            <label for="start" class="form-label">{{ __('common.start_date') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="start" name="start" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-6 col-lg-3">
-                            <label for="end" class="form-label">End Date</label>
+                            <label for="end" class="form-label">{{ __('common.end_date') }}</label>
                             <div class="form-control-wrap">
                                 <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
                                 <input type="text" id="end" name="end" class="form-control date-picker" data-date-format="dd/mm/yyyy" value="{{ date('d/m/Y') }}" required autocomplete="off">
                             </div>
                         </div>
                         <div class="col-sm-4 col-lg-2">
-                            <button type="submit" id="search" class="btn btn-primary w-100"><i class="cil-search"></i><span>Search</span></button>
+                            <button type="submit" id="search" class="btn btn-primary w-100"><i class="cil-search"></i><span>{{ __('common.search') }}</span></button>
                         </div>
                     </div>
                 </form>
@@ -42,17 +42,17 @@
 	                			<table id="tblBilling" class="table table-bordered table-striped" role="grid" aria-describedby="tblBilling_info">
 		                            <thead class="table-dark">
 		                                <tr role="row">
-		                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">No.</th>
-		                                    <th class="sorting text-center" style="width: 24px;">Document Number</th>
-		                                    <th class="sorting text-center" style="width: 100px;">Doc Date</th>
-		                                    <th class="sorting text-center" style="width: 100px;">Due Date</th>
-		                                    <th class="sorting text-center" style="vertical-align: middle;">Description</th>
-		                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">Period</th>
-		                                    <th class="sorting text-center" style="width: 1px; vertical-align: middle;">Currency</th>
-		                                    <th class="sorting" style="vertical-align: middle;">Amount</th>
-		                                    <th class="sorting" style="vertical-align: middle;">Paid</th>
-											<th class="sorting" style="vertical-align: middle;">Paid Date</th>
-		                                    <th class="sorting text-center" style="vertical-align: middle;">Outstanding</th>
+		                                    <th class="sorting text-center" style="width: 7px; vertical-align: middle;">{{ __('tenant/history.col_no') }}</th>
+		                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.document_number') }}</th>
+		                                    <th class="sorting text-center" style="width: 100px;">{{ __('tenant/history.doc_date') }}</th>
+		                                    <th class="sorting text-center" style="width: 100px;">{{ __('tenant/history.due_date') }}</th>
+		                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/history.description') }}</th>
+		                                    <th class="sorting text-center" style="width: 110px; vertical-align: middle;">{{ __('tenant/history.period') }}</th>
+		                                    <th class="sorting text-center" style="width: 1px; vertical-align: middle;">{{ __('tenant/history.currency') }}</th>
+		                                    <th class="sorting" style="vertical-align: middle;">{{ __('tenant/history.amount') }}</th>
+		                                    <th class="sorting" style="vertical-align: middle;">{{ __('tenant/history.paid') }}</th>
+											<th class="sorting" style="vertical-align: middle;">{{ __('tenant/history.paid_date') }}</th>
+		                                    <th class="sorting text-center" style="vertical-align: middle;">{{ __('tenant/history.outstanding') }}</th>
 		                                </tr>
 		                            </thead>
 		                            <tbody>
@@ -155,11 +155,11 @@ $(document).ready(function(){
 		        buttons: [
     {
         extend: 'pdf',
-        title: 'Billing History',
+        title: @json(__('tenant/history.billing_title')),
         orientation: 'landscape', // <- ini yang bikin landscape
         pageSize: 'A4',           // optional, biar jelas
         className: 'btn btn-primary mb-2',
-        text: '<i class="cil-cloud-download"></i>&nbsp;Generate PDF',
+        text: '<i class="cil-cloud-download"></i>&nbsp;' + @json(__('common.generate_pdf')),
         init: function(api, node, config) {
             $(node).removeClass('dt-button')
         },
@@ -191,18 +191,18 @@ $(document).ready(function(){
 		                                title: event.Pesan,
 		                                // text: event.Pesan,
 		                                icon:"warning",
-		                                confirmButtonText: "OK"
+		                                confirmButtonText: @json(__('common.ok'))
 		                            });
 		                            $('#tblBilling').DataTable().ajax.reload();
 		                        }
 		                    },
 		                    error: function(jqXHR, textStatus, errorThrown){
 		                        Swal.fire({
-		                            title: "Error",
+		                            title: @json(__('common.error')),
 		                            animation: false,
 		                            icon:"error",
-		                            text: textStatus+' Search : '+errorThrown,
-		                            confirmButtonText: "OK"
+		                            text: @json(__('tenant/history.search_error')).replace(':status', function () { return textStatus; }).replace(':error', function () { return errorThrown; }),
+		                            confirmButtonText: @json(__('common.ok'))
 		                        });
 		                    }
 		                });

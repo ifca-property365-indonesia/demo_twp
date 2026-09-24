@@ -2,7 +2,7 @@
 
 @php $base = url($portal . '/permit'); @endphp
 
-@section('title', 'Permit History')
+@section('title', __('shared/permit.permit_history'))
 
 @push('styles')
     <link rel="stylesheet" href="{{ url('assets/app/css/permit.css?ver=1.0.2') }}">
@@ -13,14 +13,14 @@
         <div class="page-head permit-head">
             <div class="page-head-row">
                 <div class="page-head-content">
-                    <h3 class="page-title">Permit History</h3>
+                    <h3 class="page-title">{{ __('shared/permit.permit_history') }}</h3>
                     <div class="page-desc text-body-secondary">
-                        <p>All Work Permit and Entry / Exit Permit of Goods requests.</p>
+                        <p>{{ __('shared/permit.history_desc') }}</p>
                     </div>
                 </div>
                 <div class="page-head-content">
                     <a href="{{ $base . '/add' }}" class="btn btn-primary d-none d-sm-inline-flex">
-                        <i class="cil-plus"></i><span>Request Permit</span>
+                        <i class="cil-plus"></i><span>{{ __('shared/permit.request_permit') }}</span>
                     </a>
                     <a href="{{ $base . '/add' }}" class="btn btn-icon btn-primary d-inline-flex d-sm-none">
                         <i class="cil-plus"></i>
@@ -41,20 +41,20 @@
                         <div class="row g-3 align-items-end">
                             <div class="col-sm-6 col-lg-3">
                                 <div class="mb-3">
-                                    <label class="form-label" for="permit_no">Permit No</label>
+                                    <label class="form-label" for="permit_no">{{ __('shared/permit.permit_no') }}</label>
                                     <div class="form-control-wrap">
                                         <div class="form-icon form-icon-left"><i class="cil-search"></i></div>
-                                        <input type="text" id="permit_no" name="permit_no" class="form-control" placeholder="All permit no">
+                                        <input type="text" id="permit_no" name="permit_no" class="form-control" placeholder="{{ __('shared/permit.ph_all_permit_no') }}">
                                     </div>
                                 </div>
                             </div>
                             @if ($is_admin)
                             <div class="col-sm-6 col-lg-3">
                                 <div class="mb-3">
-                                    <label class="form-label" for="tenant_no">Tenant</label>
+                                    <label class="form-label" for="tenant_no">{{ __('common.tenant') }}</label>
                                     <div class="form-control-wrap">
                                         <select id="tenant_no" name="tenant_no" class="form-select">
-                                            <option value="">All tenants</option>
+                                            <option value="">{{ __('shared/permit.all_tenants') }}</option>
                                             @foreach ($tenants as $t)
                                                 <option value="{{ $t->tenant_no }}">{{ $t->tenant_no }}{{ $t->entity_desc ? ' - ' . $t->entity_desc : '' }}</option>
                                             @endforeach
@@ -65,10 +65,10 @@
                             @endif
                             <div class="col-sm-6 col-lg-3">
                                 <div class="mb-3">
-                                    <label class="form-label" for="permit_type">Permit Type</label>
+                                    <label class="form-label" for="permit_type">{{ __('shared/permit.permit_type') }}</label>
                                     <div class="form-control-wrap">
                                         <select id="permit_type" name="permit_type" class="form-select">
-                                            <option value="">All types</option>
+                                            <option value="">{{ __('shared/permit.all_types') }}</option>
                                             @foreach ($types as $code => $label)
                                                 <option value="{{ $code }}">{{ $label }}</option>
                                             @endforeach
@@ -78,10 +78,10 @@
                             </div>
                             <div class="col-sm-6 col-lg-2">
                                 <div class="mb-3">
-                                    <label class="form-label" for="status">Status</label>
+                                    <label class="form-label" for="status">{{ __('common.status') }}</label>
                                     <div class="form-control-wrap">
                                         <select id="status" name="status" class="form-select">
-                                            <option value="">All status</option>
+                                            <option value="">{{ __('shared/permit.all_status') }}</option>
                                             @foreach ($statuses as $code => $label)
                                                 <option value="{{ $code }}">{{ $label }}</option>
                                             @endforeach
@@ -91,19 +91,19 @@
                             </div>
                             <div class="col-sm-6 col-lg-2">
                                 <div class="mb-3">
-                                    <label class="form-label" for="start_date">Start Date</label>
+                                    <label class="form-label" for="start_date">{{ __('common.start_date') }}</label>
                                     <div class="form-control-wrap">
                                         <div class="form-icon form-icon-left"><i class="cil-calendar"></i></div>
-                                        <input type="text" id="start_date" name="start_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" placeholder="All dates">
+                                        <input type="text" id="start_date" name="start_date" class="form-control date-picker" data-date-format="dd/mm/yyyy" placeholder="{{ __('shared/permit.all_dates') }}">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-lg-2">
                                 <div class="mb-3 d-flex">
                                     <button type="submit" class="btn btn-primary me-1 flex-grow-1" id="btnSearch">
-                                        <i class="cil-filter"></i><span>Filter</span>
+                                        <i class="cil-filter"></i><span>{{ __('common.filter') }}</span>
                                     </button>
-                                    <button type="button" class="btn btn-outline-secondary" id="btnReset" title="Reset filter">
+                                    <button type="button" class="btn btn-outline-secondary" id="btnReset" title="{{ __('shared/permit.reset_filter') }}">
                                         <i class="cil-reload"></i>
                                     </button>
                                 </div>
@@ -120,19 +120,19 @@
                         <table id="tblPermit" class="table table-bordered table-hover permit-table w-100">
                             <thead>
                                 <tr>
-                                    <th class="text-center" style="width: 48px;">No.</th>
-                                    <th>Permit No</th>
-                                    @if ($is_admin)<th>Tenant</th>@endif
-                                    <th>Type</th>
-                                    <th class="text-center">Tower</th>
-                                    <th class="text-center">Floor</th>
-                                    <th class="text-center">Unit</th>
-                                    <th>Description</th>
-                                    <th>Start</th>
-                                    <th>End</th>
-                                    <th class="text-center">Time</th>
-                                    <th class="text-center">Status</th>
-                                    <th class="text-center" style="width: 132px;">Action</th>
+                                    <th class="text-center" style="width: 48px;">{{ __('common.col_no') }}</th>
+                                    <th>{{ __('shared/permit.permit_no') }}</th>
+                                    @if ($is_admin)<th>{{ __('common.tenant') }}</th>@endif
+                                    <th>{{ __('common.type') }}</th>
+                                    <th class="text-center">{{ __('common.tower') }}</th>
+                                    <th class="text-center">{{ __('common.floor') }}</th>
+                                    <th class="text-center">{{ __('common.unit') }}</th>
+                                    <th>{{ __('common.description') }}</th>
+                                    <th>{{ __('shared/permit.col_start') }}</th>
+                                    <th>{{ __('shared/permit.col_end') }}</th>
+                                    <th class="text-center">{{ __('common.time') }}</th>
+                                    <th class="text-center">{{ __('common.status') }}</th>
+                                    <th class="text-center" style="width: 132px;">{{ __('common.action') }}</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -151,6 +151,23 @@
 
     var TYPES    = @json($types);
     var STATUSES = @json($statuses);
+    // Teks UI sesuai bahasa aktif; placeholder :no diganti lewat t()
+    @php
+        $jsLang = [
+            'update_no'     => __('shared/permit.update_no'),
+            'cancel_no'     => __('shared/permit.cancel_no'),
+            'print_no'      => __('shared/permit.print_no'),
+            'only_approved' => __('shared/permit.only_approved'),
+            'cancel_title'  => __('shared/permit.cancel_title'),
+            'cancel_text'   => __('shared/permit.cancel_text'),
+            'yes_cancel'    => __('shared/permit.yes_cancel'),
+            'no'            => __('common.no'),
+            'information'   => __('common.information'),
+            'error'         => __('common.error'),
+            'load_failed'   => __('shared/permit.load_failed'),
+        ];
+    @endphp
+    var LANG = @json($jsLang);
     var PRINT_URL  = "{{ $base }}/print";
     var EDIT_URL   = "{{ $base }}/edit";
     var CANCEL_URL = "{{ $base }}/cancel";
@@ -164,6 +181,13 @@
         Z: 'badge-soft-success',  Y: 'badge-soft-success', C: 'badge-soft-dark',
         X: 'badge-soft-danger'
     };
+
+    function t(text, params) {
+        $.each(params || {}, function (key, value) {
+            text = text.split(':' + key).join(value);
+        });
+        return text;
+    }
 
     function esc(s) {
         return $('<div>').text(s == null ? '' : String(s)).html();
@@ -195,14 +219,14 @@
         autoWidth: false,
         language: {
             search: '',
-            searchPlaceholder: 'Search in table...',
-            processing: 'Loading...',
-            emptyTable: 'No permit found.',
-            zeroRecords: 'No permit matches the filter.',
-            info: 'Showing _START_ to _END_ of _TOTAL_ permits',
-            infoEmpty: 'No permits',
-            infoFiltered: '(filtered from _MAX_ total)',
-            lengthMenu: 'Show _MENU_'
+            searchPlaceholder: @json(__('shared/permit.dt_search')),
+            processing: @json(__('common.loading')),
+            emptyTable: @json(__('shared/permit.dt_empty')),
+            zeroRecords: @json(__('shared/permit.dt_zero')),
+            info: @json(__('shared/permit.dt_info')),
+            infoEmpty: @json(__('shared/permit.dt_info_empty')),
+            infoFiltered: @json(__('shared/permit.dt_filtered')),
+            lengthMenu: @json(__('shared/permit.dt_length'))
         },
         ajax: {
             url: "{{ $base }}/historyTable",
@@ -218,7 +242,7 @@
                     window.location.reload();
                     return;
                 }
-                Swal.fire({ title: 'Error', text: 'Failed to load permit history.', icon: 'error' });
+                Swal.fire({ title: LANG.error, text: LANG.load_failed, icon: 'error' });
             }
         },
         columns: [
@@ -252,20 +276,20 @@
 
                     if (EDITABLE.indexOf(status) >= 0) {
                         html += '<a href="' + EDIT_URL + '/' + encodeURIComponent(d) + '" ' +
-                            'class="btn btn-sm btn-outline-secondary btn-print me-1" title="Update ' + esc(d) + '">' +
+                            'class="btn btn-sm btn-outline-secondary btn-print me-1" title="' + esc(t(LANG.update_no, { no: d })) + '">' +
                             '<i class="cil-pencil"></i></a>';
                         html += '<button type="button" class="btn btn-sm btn-outline-danger btn-print btn-cancel me-1" ' +
-                            'data-permit="' + esc(d) + '" title="Cancel ' + esc(d) + '">' +
+                            'data-permit="' + esc(d) + '" title="' + esc(t(LANG.cancel_no, { no: d })) + '">' +
                             '<i class="cil-ban"></i></button>';
                     }
                     // Hanya permit Approved yang bisa dicetak (dicek juga di server)
                     if (status !== PRINTABLE) {
                         html += '<span class="btn btn-sm btn-outline-primary btn-print disabled" ' +
-                            'title="Only approved permits can be printed" aria-disabled="true">' +
+                            'title="' + esc(LANG.only_approved) + '" aria-disabled="true">' +
                             '<i class="cil-print"></i></span>';
                     } else {
                         html += '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
-                            'class="btn btn-sm btn-outline-primary btn-print" title="Print ' + esc(d) + '">' +
+                            'class="btn btn-sm btn-outline-primary btn-print" title="' + esc(t(LANG.print_no, { no: d })) + '">' +
                             '<i class="cil-print"></i></a>';
                     }
                     return html;
@@ -287,12 +311,12 @@
         var permitNo = $(this).data('permit');
 
         Swal.fire({
-            title: 'Cancel permit ' + permitNo + '?',
-            text: 'A cancelled permit can no longer be changed.',
+            title: t(LANG.cancel_title, { no: permitNo }),
+            text: LANG.cancel_text,
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonText: 'Yes, cancel it',
-            cancelButtonText: 'No',
+            confirmButtonText: LANG.yes_cancel,
+            cancelButtonText: LANG.no,
             reverseButtons: true,
             confirmButtonColor: '#e55353'
         }).then(function (r) {
@@ -300,12 +324,12 @@
 
             $.ajax({ url: CANCEL_URL, type: 'POST', data: { doc_no: permitNo }, dataType: 'json' })
                 .done(function (res) {
-                    Swal.fire({ title: 'Information', icon: res.status === 'OK' ? 'success' : 'error', text: res.pesan });
+                    Swal.fire({ title: LANG.information, icon: res.status === 'OK' ? 'success' : 'error', text: res.pesan });
                     table.ajax.reload(null, false);
                 })
                 .fail(function (xhr, textStatus, errorThrown) {
                     var res = xhr.responseJSON || {};
-                    Swal.fire({ title: 'Error', icon: 'error', text: res.pesan || (textStatus + ' : ' + errorThrown) });
+                    Swal.fire({ title: LANG.error, icon: 'error', text: res.pesan || (textStatus + ' : ' + errorThrown) });
                     table.ajax.reload(null, false);
                 });
         });
