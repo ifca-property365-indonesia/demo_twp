@@ -33,7 +33,7 @@
                         $e=$key->title;
                         if ($e!= $r) {
                             echo '<h5 style="margin-top:10px;">'.$key->title.'</h5>
-                                Total Responden : '.$res;
+                                Total Respondents : '.$res;
                         }
                         $r=$e;
 
@@ -68,7 +68,7 @@
                                             </div>
 
                                             <strong>
-        Responden: '.$key->jumlah.' orang 
+        Respondents: '.$key->jumlah.' people 
         <span class="badge rounded-pill text-bg-info" style="margin-left:10px;">
             '.$percent.'%
         </span>

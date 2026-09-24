@@ -31,7 +31,7 @@
                 $e=$key->title;
                 $o1= '';
                 if ($e!= $r) {
-                    echo '<p style=" margin-top: 10px;font-size:18px;font-weight:bold">'. $o1 = $key->title.'</p>Total Responden : '.$res;
+                    echo '<p style=" margin-top: 10px;font-size:18px;font-weight:bold">'. $o1 = $key->title.'</p>Total Respondents : '.$res;
                 }
                 $r=$e;
                 
