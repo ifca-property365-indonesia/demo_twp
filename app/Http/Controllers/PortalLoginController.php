@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admin\LoginController as AdminLogin;
 use App\Http\Controllers\Tenant\LoginController as TenantLogin;
 use App\Support\Password;
+use App\Support\UserLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -105,6 +106,9 @@ class PortalLoginController extends Controller
                 ->withInput($request->only('email', 'bsn'))
                 ->with('alert', __('shared/login.incorrect'));
         }
+
+        // bahasa pilihan user ini (belum pernah memilih -> English)
+        UserLocale::load($email);
 
         // portal yang boleh dibuka tanpa login ulang (menu pindah portal di header)
         Session::put('portals', array(

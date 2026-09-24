@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
 use App\Support\Password;
+use App\Support\UserLocale;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -56,6 +57,7 @@ class LoginController extends Controller
             );
 
             $this->createSession($login->idforeign);
+            UserLocale::load($login->email);   // bahasa pilihan user ini (default English)
             return redirect('/tenant/dash');
         }
 
