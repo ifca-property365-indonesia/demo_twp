@@ -1,4 +1,5 @@
 @extends('admin.template.layout2.base')
+@section('title', __('admin/news.news_and_promo'))
 @section('content')
 <div class="page-body">
     <div>

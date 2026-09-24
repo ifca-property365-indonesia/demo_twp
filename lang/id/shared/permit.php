@@ -138,10 +138,21 @@ return [
     'update_no'        => 'Ubah :no',
     'cancel_no'        => 'Batalkan :no',
     'print_no'         => 'Cetak :no',
-    'only_approved'    => 'Hanya izin yang sudah disetujui yang dapat dicetak',
+    'only_approved'    => 'Dapat dicetak setelah admin mengunggah dokumen bertanda tangan',
     'cancel_title'     => 'Batalkan izin :no?',
     'cancel_text'      => 'Izin yang dibatalkan tidak dapat diubah lagi.',
     'yes_cancel'       => 'Ya, batalkan',
+    'print_form_no'    => 'Cetak formulir :no (untuk ditandatangani)',
+    'upload_no'        => 'Unggah dokumen bertanda tangan :no',
+    'view_signed_no'   => 'Lihat dokumen bertanda tangan :no',
+    'upload_title'     => 'Unggah dokumen bertanda tangan :no',
+    'upload_text'      => 'PDF, JPG atau PNG, maks. 5 MB. File disimpan sebagai :no dan izin menjadi Disetujui.',
+    'upload_replace'   => 'Izin ini sudah memiliki dokumen bertanda tangan; unggahan baru akan menggantikannya.',
+    'upload_button'    => 'Unggah & Setujui',
+    'upload_choose'    => 'Pilih file terlebih dahulu.',
+    'upload_too_big'   => 'Ukuran file maksimal 5 MB.',
+    'upload_type'      => 'Hanya file PDF, JPG atau PNG yang diperbolehkan.',
+    'uploading'        => 'Mengunggah...',
 
     // pesan controller
     'not_found'          => 'Izin tidak ditemukan.',
@@ -162,9 +173,14 @@ return [
     'applicant_not_found'=> 'Data pemohon tidak ditemukan.',
     'tenant_invalid'     => 'Tenant yang dipilih tidak valid.',
     'tower_not_found'    => 'Maaf, tower untuk nomor unit ini tidak ditemukan.',
+    'uploaded'           => 'Dokumen bertanda tangan untuk :no berhasil diunggah. Izin sekarang Disetujui.',
+    'upload_failed'      => 'Gagal mengunggah dokumen bertanda tangan, silakan coba lagi.',
+    'cannot_upload'      => 'Dokumen bertanda tangan tidak dapat diunggah untuk izin :no (status: :status).',
+    'signed_not_found'   => 'Dokumen bertanda tangan untuk izin :no tidak ditemukan.',
 
     // nama atribut untuk pesan validasi server
     'attributes' => [
+        'signed_file'    => 'dokumen bertanda tangan',
         'permit_type'    => 'jenis izin',
         'note'           => 'catatan',
         'start_date'     => 'tanggal mulai',

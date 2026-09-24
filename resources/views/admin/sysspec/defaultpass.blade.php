@@ -1,4 +1,5 @@
 @extends('admin.template.layout2.base')
+@section('title', __('admin/sysspec.default_password'))
 @section('content')
 
 <style type="text/css">

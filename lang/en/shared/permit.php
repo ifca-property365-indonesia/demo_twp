@@ -138,10 +138,21 @@ return [
     'update_no'        => 'Update :no',
     'cancel_no'        => 'Cancel :no',
     'print_no'         => 'Print :no',
-    'only_approved'    => 'Only approved permits can be printed',
+    'only_approved'    => 'Can be printed after the admin uploads the signed document',
     'cancel_title'     => 'Cancel permit :no?',
     'cancel_text'      => 'A cancelled permit can no longer be changed.',
     'yes_cancel'       => 'Yes, cancel it',
+    'print_form_no'    => 'Print form :no (for signing)',
+    'upload_no'        => 'Upload signed document :no',
+    'view_signed_no'   => 'View signed document :no',
+    'upload_title'     => 'Upload signed document :no',
+    'upload_text'      => 'PDF, JPG or PNG, max 5 MB. The file is saved as :no and the permit becomes Approved.',
+    'upload_replace'   => 'This permit already has a signed document; uploading replaces it.',
+    'upload_button'    => 'Upload & Approve',
+    'upload_choose'    => 'Please choose a file.',
+    'upload_too_big'   => 'Maximum file size is 5 MB.',
+    'upload_type'      => 'Only PDF, JPG or PNG files are allowed.',
+    'uploading'        => 'Uploading...',
 
     // pesan controller
     'not_found'          => 'Permit not found.',
@@ -162,9 +173,14 @@ return [
     'applicant_not_found'=> 'Applicant data not found.',
     'tenant_invalid'     => 'The selected tenant is not valid.',
     'tower_not_found'    => 'Sorry, the tower with this lot number is not found.',
+    'uploaded'           => 'Signed document for :no uploaded. The permit is now Approved.',
+    'upload_failed'      => 'Failed to upload the signed document, please try again.',
+    'cannot_upload'      => 'A signed document cannot be uploaded for permit :no (status: :status).',
+    'signed_not_found'   => 'The signed document for permit :no was not found.',
 
     // nama atribut untuk pesan validasi server
     'attributes' => [
+        'signed_file'    => 'signed document',
         'permit_type'    => 'permit type',
         'note'           => 'note',
         'start_date'     => 'start date',

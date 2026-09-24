@@ -165,14 +165,30 @@
             'information'   => __('common.information'),
             'error'         => __('common.error'),
             'load_failed'   => __('shared/permit.load_failed'),
+            'print_form_no' => __('shared/permit.print_form_no'),
+            'upload_no'     => __('shared/permit.upload_no'),
+            'view_signed_no'=> __('shared/permit.view_signed_no'),
+            'upload_title'  => __('shared/permit.upload_title'),
+            'upload_text'   => __('shared/permit.upload_text'),
+            'upload_replace'=> __('shared/permit.upload_replace'),
+            'upload_button' => __('shared/permit.upload_button'),
+            'upload_choose' => __('shared/permit.upload_choose'),
+            'upload_too_big'=> __('shared/permit.upload_too_big'),
+            'upload_type'   => __('shared/permit.upload_type'),
+            'uploading'     => __('shared/permit.uploading'),
+            'cancel'        => __('common.cancel'),
         ];
     @endphp
     var LANG = @json($jsLang);
+    var IS_ADMIN   = @json((bool) $is_admin);
     var PRINT_URL  = "{{ $base }}/print";
+    var SIGNED_URL = "{{ $base }}/signed";
+    var UPLOAD_URL = "{{ $base }}/upload";
     var EDIT_URL   = "{{ $base }}/edit";
     var CANCEL_URL = "{{ $base }}/cancel";
     var EDITABLE  = @json(array_values($editable));
-    var PRINTABLE = @json(\App\Http\Controllers\BasePermitController::PRINTABLE_STATUS);
+    var SIGNED_TYPES  = @json(\App\Http\Controllers\BasePermitController::SIGNED_TYPES);
+    var SIGNED_MAX_KB = @json(\App\Http\Controllers\BasePermitController::SIGNED_MAX_KB);
 
     var TYPE_BADGE   = { W: 'badge-soft-primary', I: 'badge-soft-success', O: 'badge-soft-warning' };
     var STATUS_BADGE = {
@@ -282,15 +298,33 @@
                             'data-permit="' + esc(d) + '" title="' + esc(t(LANG.cancel_no, { no: d })) + '">' +
                             '<i class="cil-ban"></i></button>';
                     }
-                    // Hanya permit Approved yang bisa dicetak (dicek juga di server)
-                    if (status !== PRINTABLE) {
-                        html += '<span class="btn btn-sm btn-outline-primary btn-print disabled" ' +
+                    // Cetak (aturan dari server, dicek lagi saat dibuka):
+                    // admin = formulir untuk ditandatangani (kecuali Cancel);
+                    // tenant = dokumen bertanda tangan, setelah Approved.
+                    if (status === 'X') {
+                        // permit batal: tidak ada aksi cetak / upload
+                    } else if (row.can_print) {
+                        html += '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
+                            'class="btn btn-sm btn-outline-primary btn-print me-1" title="' +
+                            esc(t(IS_ADMIN ? LANG.print_form_no : LANG.print_no, { no: d })) + '">' +
+                            '<i class="cil-print"></i></a>';
+                    } else {
+                        html += '<span class="btn btn-sm btn-outline-primary btn-print disabled me-1" ' +
                             'title="' + esc(LANG.only_approved) + '" aria-disabled="true">' +
                             '<i class="cil-print"></i></span>';
-                    } else {
-                        html += '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
-                            'class="btn btn-sm btn-outline-primary btn-print" title="' + esc(t(LANG.print_no, { no: d })) + '">' +
-                            '<i class="cil-print"></i></a>';
+                    }
+
+                    // Admin: unggah dokumen bertanda tangan (-> Approved) & lihat dokumennya
+                    if (row.can_upload) {
+                        html += '<button type="button" class="btn btn-sm btn-outline-success btn-print btn-upload me-1" ' +
+                            'data-permit="' + esc(d) + '" data-signed="' + (row.has_signed ? 1 : 0) + '" ' +
+                            'title="' + esc(t(LANG.upload_no, { no: d })) + '">' +
+                            '<i class="cil-cloud-upload"></i></button>';
+                    }
+                    if (IS_ADMIN && row.has_signed) {
+                        html += '<a href="' + SIGNED_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
+                            'class="btn btn-sm btn-outline-success btn-print me-1" title="' + esc(t(LANG.view_signed_no, { no: d })) + '">' +
+                            '<i class="cil-description"></i></a>';
                     }
                     return html;
                 } }
@@ -332,6 +366,63 @@
                     Swal.fire({ title: LANG.error, icon: 'error', text: res.pesan || (textStatus + ' : ' + errorThrown) });
                     table.ajax.reload(null, false);
                 });
+        });
+    });
+
+    // Admin: unggah dokumen bertanda tangan -> file disimpan sebagai nomor permit, status Approved
+    $('#tblPermit').on('click', '.btn-upload', function () {
+        var permitNo = $(this).data('permit');
+        var hasSigned = $(this).data('signed') == 1;
+
+        Swal.fire({
+            title: t(LANG.upload_title, { no: permitNo }),
+            html: esc(t(LANG.upload_text, { no: permitNo })) +
+                (hasSigned ? '<div class="text-warning small mt-2">' + esc(LANG.upload_replace) + '</div>' : ''),
+            input: 'file',
+            inputAttributes: {
+                accept: SIGNED_TYPES.map(function (x) { return '.' + x; }).join(','),
+                'aria-label': t(LANG.upload_title, { no: permitNo })
+            },
+            showCancelButton: true,
+            confirmButtonText: LANG.upload_button,
+            cancelButtonText: LANG.cancel,
+            reverseButtons: true,
+            showLoaderOnConfirm: true,
+            allowOutsideClick: function () { return !Swal.isLoading(); },
+            preConfirm: function (file) {
+                if (!file) {
+                    Swal.showValidationMessage(LANG.upload_choose);
+                    return false;
+                }
+                var ext = (file.name.split('.').pop() || '').toLowerCase();
+                if (SIGNED_TYPES.indexOf(ext) < 0) {
+                    Swal.showValidationMessage(LANG.upload_type);
+                    return false;
+                }
+                if (file.size > SIGNED_MAX_KB * 1024) {
+                    Swal.showValidationMessage(LANG.upload_too_big);
+                    return false;
+                }
+
+                var fd = new FormData();
+                fd.append('doc_no', permitNo);
+                fd.append('signed_file', file);
+
+                return $.ajax({
+                    url: UPLOAD_URL, type: 'POST', data: fd,
+                    processData: false, contentType: false, dataType: 'json'
+                }).then(function (res) {
+                    return res;
+                }, function (xhr, textStatus, errorThrown) {
+                    var res = xhr.responseJSON || {};
+                    Swal.showValidationMessage(res.pesan || (textStatus + ' : ' + errorThrown));
+                    return false;
+                });
+            }
+        }).then(function (r) {
+            if (!r.value) { return; }
+            Swal.fire({ title: LANG.information, icon: r.value.status === 'OK' ? 'success' : 'error', text: r.value.pesan });
+            table.ajax.reload(null, false);
         });
     });
 

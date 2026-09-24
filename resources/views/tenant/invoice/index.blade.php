@@ -1,4 +1,5 @@
 @extends('tenant.template.base')
+@section('title', __('tenant/invoice.outstanding_title'))
 @section('content')
 <div class="page-body">
         <div class="page-head">

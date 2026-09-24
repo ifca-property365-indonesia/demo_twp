@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use DataTables;
 use PDF;
@@ -26,7 +27,12 @@ use PDF;
  *   - tenant hanya melihat/mengubah permit miliknya (TenantScope), admin semua tenant;
  *   - saat ubah permit, tenant boleh mengubah bagian 3-6, admin hanya bagian 4-6
  *     (jadwal, pekerja, kegiatan & peralatan);
- *   - admin bisa menetapkan status Approved (Y) / Cancel (X); tanpa itu jadi Modify (M).
+ *   - menyimpan perubahan selalu -> Modify (M); Cancel (X) lewat tombol di History;
+ *   - Approved (Y) hanya lewat admin mengunggah dokumen bertanda tangan (uploadSigned),
+ *     disimpan sebagai {permit_no}.{ext} di storage/app/private/permit_signed/{entity}/{project}/
+ *     (disk 'local', tidak bisa diakses langsung lewat URL; dibuka lewat signed());
+ *   - cetak: admin mencetak formulir PDF (untuk ditandatangani) selama belum Cancel;
+ *     tenant hanya setelah Approved, dan yang dicetak adalah dokumen bertanda tangan.
  */
 abstract class BasePermitController extends Controller
 {
@@ -54,14 +60,16 @@ abstract class BasePermitController extends Controller
     /** Status yang isinya masih boleh diubah / dibatalkan (belum disetujui atau dibatalkan). */
     public const EDITABLE_STATUSES = ['R', 'M'];
 
-    /** Satu-satunya status yang boleh dicetak ke PDF (Approved). */
+    /** Status setelah admin mengunggah dokumen bertanda tangan; hanya status ini yang bisa dicetak tenant. */
     public const PRINTABLE_STATUS = 'Y';
 
-    /** Status yang bisa ditetapkan admin saat mengubah permit. */
-    public const ADMIN_STATUSES = [
-        'Y' => 'Approve',
-        'X' => 'Cancel',
-    ];
+    /** Status yang masih boleh diberi dokumen bertanda tangan (unggah ulang untuk Y = mengganti file). */
+    public const UPLOADABLE_STATUSES = ['R', 'M', 'Y'];
+
+    /** Dokumen bertanda tangan: tipe & ukuran maksimal (KB), folder di disk 'local'. */
+    public const SIGNED_TYPES = ['pdf', 'jpg', 'jpeg', 'png'];
+    public const SIGNED_MAX_KB = 5120;
+    protected const SIGNED_DIR = 'permit_signed';
 
     /**
      * Pilihan Jam Kerja Work Permit (sesuai form Surat Izin Kerja): kode -> [mulai, selesai].
@@ -99,17 +107,6 @@ abstract class BasePermitController extends Controller
         $labels = [];
         foreach (array_keys(self::STATUSES) as $code) {
             $labels[$code] = __('common.statuses.' . $code);
-        }
-
-        return $labels;
-    }
-
-    /** ADMIN_STATUSES dengan label sesuai bahasa aktif. */
-    public static function adminStatusLabels()
-    {
-        $labels = [];
-        foreach (array_keys(self::ADMIN_STATUSES) as $code) {
-            $labels[$code] = __('shared/permit.admin_statuses.' . $code);
         }
 
         return $labels;
@@ -198,7 +195,7 @@ abstract class BasePermitController extends Controller
 
         $status = trim((string) $permit['header']->status);
         if (!in_array($status, self::EDITABLE_STATUSES, true)) {
-            return redirect($this->base('history'))->with(
+            return redirect($this->base('index'))->with(
                 'alert',
                 __('shared/permit.cannot_change', ['no' => $doc_no, 'status' => self::statusLabel($status)])
             );
@@ -238,7 +235,6 @@ abstract class BasePermitController extends Controller
             'portal'       => $this->portal(),
             'is_admin'     => $this->isAdmin(),
             'types'        => self::typeLabels(),
-            'statuses'     => self::adminStatusLabels(),
             'office_hours' => self::OFFICE_HOURS,
             'work_shifts'  => self::WORK_SHIFTS,
             'tools'        => [],
@@ -406,19 +402,10 @@ abstract class BasePermitController extends Controller
             return $this->fail($validator->errors()->first(), 422, $validator->errors()->toArray());
         }
 
-        // Status baru + catatan log
+        // Menyimpan perubahan selalu -> Modify. Approve hanya lewat upload dokumen
+        // bertanda tangan (uploadSigned), Cancel lewat tombol di History (cancel()).
         $newStatus = 'M';
-        if ($this->isAdmin()) {
-            $chosen = strtoupper(trim((string) $request->input('set_status')));
-            if (isset(self::ADMIN_STATUSES[$chosen])) {
-                $newStatus = $chosen;
-            }
-        }
-        $remarks = [
-            'Y' => 'Approved by admin',
-            'X' => 'Cancelled by ' . $this->portal(),
-            'M' => 'Modified by ' . $this->portal(),
-        ][$newStatus];
+        $remarks = 'Modified by ' . $this->portal();
 
         try {
             $ctx = $this->contextOf($permit);
@@ -1150,6 +1137,8 @@ abstract class BasePermitController extends Controller
             })
             ->whereIn('sel.complain_type', array_keys(self::TYPES))
             ->select(
+                'sel.entity_cd as entity_cd',
+                'sel.project_no as project_no',
                 'sel.complain_no as complain_no',
                 'sel.complain_type as complain_type',
                 'sel.debtor_acct as debtor_acct',
@@ -1209,9 +1198,21 @@ abstract class BasePermitController extends Controller
         // escapeColumns([]): isi kolom dikirim apa adanya, karena history.blade sudah
         // meng-escape tiap kolom saat render (esc/dash). Kalau server juga meng-escape,
         // '&' tampil sebagai '&amp;'.
+        $isAdmin = $this->isAdmin();
+
         return DataTables::of($query)
             ->escapeColumns([])
             ->addIndexColumn()
+            // tombol di kolom Action (aturan yang sama dicek lagi di server saat diklik)
+            ->addColumn('can_print', function ($row) use ($isAdmin) {
+                return self::canPrint(trim((string) $row->status), $isAdmin);
+            })
+            ->addColumn('can_upload', function ($row) use ($isAdmin) {
+                return $isAdmin && in_array(trim((string) $row->status), self::UPLOADABLE_STATUSES, true);
+            })
+            ->addColumn('has_signed', function ($row) {
+                return $this->signedPath($row) !== null;
+            })
             ->order(function ($query) use ($request) {
                 // Kalau user klik header kolom, ikuti urutan itu. Kalau tidak
                 // (halaman baru dibuka), urutkan dari tanggal mulai terbaru, lalu
@@ -1250,14 +1251,24 @@ abstract class BasePermitController extends Controller
     public function printPage($doc_no)
     {
         $header = $this->printablePermit($doc_no)['header'];
+        $no = trim($header->complain_no);
+
+        // Tenant mencetak dokumen bertanda tangan; admin mencetak formulir untuk ditandatangani.
+        // Permit yang sudah Approved sebelum ada fitur upload (tanpa file) tetap memakai formulir.
+        $signed = $this->isAdmin() ? null : $this->signedPath($header);
 
         return view('permit.print_frame', [
-            'title'   => trim($header->complain_no),
-            'pdf_url' => $this->base('pdf/' . rawurlencode(trim($header->complain_no))),
+            'title'    => $no,
+            'pdf_url'  => $signed ? $this->base('signed/' . rawurlencode($no)) : $this->base('pdf/' . rawurlencode($no)),
+            'is_image' => $signed && !preg_match('/\.pdf$/i', $signed),
         ]);
     }
 
-    /** Permit yang boleh dicetak portal ini: hanya yang sudah Approved (Y). */
+    /**
+     * Permit yang boleh dicetak portal ini (abort kalau tidak):
+     * admin -> semua status kecuali Cancel (formulir dicetak untuk ditandatangani);
+     * tenant -> hanya Approved (Y), yaitu setelah admin mengunggah dokumen bertanda tangan.
+     */
     private function printablePermit($doc_no)
     {
         $permit = $this->findPermit($doc_no);
@@ -1269,18 +1280,160 @@ abstract class BasePermitController extends Controller
         $header = $permit['header'];
         $status = trim((string) $header->status);
 
-        if ($status !== self::PRINTABLE_STATUS) {
+        if (!self::canPrint($status, $this->isAdmin())) {
             abort(403, __('shared/permit.cannot_print', ['no' => trim($header->complain_no), 'status' => self::statusLabel($status)]));
         }
 
         return $permit;
     }
 
-    /** File PDF satu permit (dimuat oleh printPage), hanya yang masuk cakupan portal. */
+    /** Aturan cetak (dipakai server dan tombol di History). */
+    public static function canPrint($status, $isAdmin)
+    {
+        return $isAdmin ? $status !== 'X' : $status === self::PRINTABLE_STATUS;
+    }
+
+    // ------------------------------------------------------------------
+    // Dokumen bertanda tangan (upload admin -> Approved)
+    // ------------------------------------------------------------------
+
+    /** Folder dokumen satu permit di disk 'local' (per entity/project: nomor permit unik per project). */
+    private function signedDir($header)
+    {
+        $safe = function ($v) {
+            return preg_replace('/[^A-Za-z0-9_-]/', '_', trim((string) $v));
+        };
+
+        return self::SIGNED_DIR . '/' . $safe($header->entity_cd) . '/' . $safe($header->project_no);
+    }
+
+    /** Path dokumen bertanda tangan ({permit_no}.{ext}) kalau ada, selain itu null. */
+    protected function signedPath($header)
+    {
+        $disk = Storage::disk('local');
+        $base = $this->signedDir($header) . '/' . preg_replace('/[^A-Za-z0-9_-]/', '_', trim($header->complain_no));
+
+        foreach (self::SIGNED_TYPES as $ext) {
+            if ($disk->exists($base . '.' . $ext)) {
+                return $base . '.' . $ext;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Admin: unggah dokumen bertanda tangan (PDF / JPG / PNG). File disimpan dengan nama
+     * nomor permit ({permit_no}.{ext}, menggantikan file sebelumnya), lalu status -> Approved (Y).
+     */
+    public function uploadSigned(Request $request)
+    {
+        if (!$this->isAdmin()) {
+            abort(403);
+        }
+
+        $permit = $this->findPermit($request->input('doc_no'));
+        if (!$permit) {
+            return $this->fail(__('shared/permit.not_found'), 404);
+        }
+
+        $header = $permit['header'];
+        $status = trim((string) $header->status);
+        $no = trim($header->complain_no);
+
+        if (!in_array($status, self::UPLOADABLE_STATUSES, true)) {
+            return $this->fail(__('shared/permit.cannot_upload', ['no' => $no, 'status' => self::statusLabel($status)]), 422);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'signed_file' => ['required', 'file', 'mimes:' . implode(',', self::SIGNED_TYPES), 'max:' . self::SIGNED_MAX_KB],
+        ], [], ['signed_file' => __('shared/permit.attributes.signed_file')]);
+
+        if ($validator->fails()) {
+            return $this->fail($validator->errors()->first(), 422, $validator->errors()->toArray());
+        }
+
+        $file = $request->file('signed_file');
+        $ext = strtolower($file->getClientOriginalExtension());
+        $ext = $ext === 'jpeg' ? 'jpg' : $ext;
+        $dir = $this->signedDir($header);
+        $name = preg_replace('/[^A-Za-z0-9_-]/', '_', $no) . '.' . $ext;
+        $disk = Storage::disk('local');
+        $old = $this->signedPath($header);
+
+        try {
+            $disk->putFileAs($dir, $file, $name);
+
+            $ctx = $this->contextOf($permit);
+            DB::connection('dblive')->transaction(function () use ($ctx, $permit) {
+                $keys = $permit['keys'];
+                DB::connection('dblive')->table('mgr.sv_entry_letter')
+                    ->where('entity_cd', $keys['entity_cd'])
+                    ->where('project_no', $keys['project_no'])
+                    ->where('complain_no', $keys['doc_no'])
+                    ->update([
+                        'status'     => self::PRINTABLE_STATUS,
+                        'audit_user' => self::AUDIT_USER,
+                        'audit_date' => $ctx['audit_date'],
+                    ]);
+
+                $this->writeLog($ctx, 'Signed document uploaded, approved by admin');
+            });
+
+            // file lama dengan ekstensi lain (mis. .pdf -> .jpg) dibuang
+            if ($old && $old !== $dir . '/' . $name) {
+                $disk->delete($old);
+            }
+
+            return response()->json([
+                'status'    => 'OK',
+                'pesan'     => __('shared/permit.uploaded', ['no' => $no]),
+                'permit_no' => $no,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->serverError('uploadSigned', $e, __('shared/permit.upload_failed'));
+        }
+    }
+
+    /**
+     * Tampilkan dokumen bertanda tangan (inline). Tenant hanya untuk permit Approved,
+     * admin untuk semua permit dalam cakupan yang punya dokumen.
+     */
+    public function signed($doc_no)
+    {
+        $permit = $this->findPermit($doc_no);
+        if (!$permit) {
+            abort(404, __('shared/permit.not_found'));
+        }
+
+        $header = $permit['header'];
+        $status = trim((string) $header->status);
+        $no = trim($header->complain_no);
+
+        if (!$this->isAdmin() && $status !== self::PRINTABLE_STATUS) {
+            abort(403, __('shared/permit.cannot_print', ['no' => $no, 'status' => self::statusLabel($status)]));
+        }
+
+        $path = $this->signedPath($header);
+        if (!$path) {
+            abort(404, __('shared/permit.signed_not_found', ['no' => $no]));
+        }
+
+        return Storage::disk('local')->response($path, basename($path), [
+            'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
+        ]);
+    }
+
+    /** File PDF formulir satu permit (dimuat oleh printPage), hanya yang masuk cakupan portal. */
     public function printPdf($doc_no)
     {
         $permit = $this->printablePermit($doc_no);
         $header = $permit['header'];
+
+        // Tenant yang permitnya sudah punya dokumen bertanda tangan -> dokumen itu, bukan formulir
+        if (!$this->isAdmin() && $this->signedPath($header)) {
+            return redirect($this->base('signed/' . rawurlencode(trim($header->complain_no))));
+        }
 
         // Nama pengelola gedung & project untuk kop surat.
         $tenancy = DB::table('pm_tenancy')

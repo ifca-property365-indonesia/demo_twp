@@ -52,7 +52,7 @@
                     <a href="{{ $base . '/index' }}" class="btn btn-outline-secondary d-none d-sm-inline-flex">
                         <i class="cil-history"></i><span>{{ __('shared/permit.permit_history') }}</span>
                     </a>
-                    <a href="{{ $base . '/history' }}" class="btn btn-icon btn-outline-secondary d-inline-flex d-sm-none">
+                    <a href="{{ $base . '/index' }}" class="btn btn-icon btn-outline-secondary d-inline-flex d-sm-none">
                         <i class="cil-history"></i>
                     </a>
                 </div>
@@ -508,17 +508,8 @@
                         </section>
 
                         <div class="permit-actions">
-                            @if ($is_admin && $isEdit)
-                                <div class="permit-status">
-                                    <label class="form-label mb-1" for="set_status">{{ __('shared/permit.status_after_save') }}</label>
-                                    <select name="set_status" id="set_status" class="form-select">
-                                        <option value="">{{ __('shared/permit.modify') }}</option>
-                                        @foreach ($statuses as $code => $label)
-                                            <option value="{{ $code }}">{{ $label }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            @endif
+                            {{-- Status tidak dipilih di sini: simpan = Modify, Approve lewat upload
+                                 dokumen bertanda tangan dan Cancel lewat tombol di Permit History. --}}
                             <span class="hint">
                                 <span class="d-block"><span class="req">*</span> {{ __('common.required_fields') }}</span>
                                 <div class="form-note text-danger mt-0 mb-3">
@@ -550,7 +541,7 @@
     var URLS = {
         lots:     "{{ $base }}/lots",
         letterNo: "{{ $base }}/letterNo",
-        history:  "{{ $base }}/history"
+        history:  "{{ $base }}/index"
     };
     var TYPES    = @json($types);
     var IS_EDIT  = {{ $isEdit ? 'true' : 'false' }};

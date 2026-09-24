@@ -1,4 +1,5 @@
 @extends('admin.template.layout2.base')
+@section('title', __('admin/survey.survey_result'))
 @section('content')
 <div class="page-body">
     <div>

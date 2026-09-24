@@ -90,6 +90,17 @@
 .dropdown-menu-user .user-card .lead-text { font-weight: 600; display: block; }
 .dropdown-menu-user .user-card .sub-text { font-size: .75rem; color: var(--cui-secondary-color); display: block; word-break: break-all; }
 .dropdown-menu-user .dropdown-item i { width: 1.25rem; margin-right: .35rem; text-align: center; }
+/* pilihan bahasa: bendera (img/flags/*.svg) */
+.dropdown-menu-user .lang-flag {
+    flex: 0 0 auto;
+    width: 22px;
+    height: 15px;
+    margin-right: .6rem;
+    object-fit: cover;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, .12);
+}
+.dropdown-menu-user .dropdown-item.active .lang-flag { box-shadow: 0 0 0 1px rgba(255, 255, 255, .7); }
 
 /* ---------- page head (pengganti nk-block-head) ---------- */
 .page-head { margin-bottom: 1.25rem; }

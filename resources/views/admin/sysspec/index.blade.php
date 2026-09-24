@@ -1,4 +1,5 @@
 @extends('admin.template.layout2.base')
+@section('title', __('admin/sysspec.system_specification'))
 @section('content')
 <div class="page-body">
     <div>

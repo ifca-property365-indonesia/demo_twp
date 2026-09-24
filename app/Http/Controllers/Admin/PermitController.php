@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Session;
 /**
  * Permit Letter portal admin. Logika ada di BasePermitController; bedanya:
  * admin melihat & membuat permit untuk semua tenant, saat mengubah hanya boleh
- * mengganti Work Tools + jadwal/catatan/daftar, dan bisa menetapkan status
- * Approved (Y) / Cancel (X).
+ * mengganti jadwal/catatan/daftar, mencetak formulir untuk ditandatangani, dan
+ * meng-approve permit dengan mengunggah dokumen bertanda tangan (uploadSigned).
  */
 class PermitController extends BasePermitController
 {

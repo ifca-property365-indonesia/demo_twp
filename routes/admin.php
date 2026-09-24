@@ -135,4 +135,7 @@ Route::group(['middleware' => ['admin-auth', 'revalidate']], function () {
     Route::get('/permit/historyTable', [Permit::class, 'table']);
     Route::get('/permit/print/{doc_no}', [Permit::class, 'printPage'])->where('doc_no', '[A-Za-z0-9\-]+');
     Route::get('/permit/pdf/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');
+    // dokumen bertanda tangan: lihat, dan unggah (-> status Approved)
+    Route::get('/permit/signed/{doc_no}', [Permit::class, 'signed'])->where('doc_no', '[A-Za-z0-9\-]+');
+    Route::post('/permit/upload', [Permit::class, 'uploadSigned']);
 });
