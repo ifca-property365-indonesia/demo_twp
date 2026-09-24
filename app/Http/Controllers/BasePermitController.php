@@ -1243,24 +1243,45 @@ abstract class BasePermitController extends Controller
         return $m[3] . '-' . $m[2] . '-' . $m[1];
     }
 
-    /**
-     * Tombol Print di tabel: halaman HTML kecil yang menampilkan PDF (printPdf) dalam iframe.
-     * PDF sendiri tidak bisa membawa ikon, jadi tanpa halaman ini tab browser memakai
-     * favicon root domain (XAMPP), bukan ikon TWP.
+    /*
+     * Dokumen permit dibuka lewat dua halaman:
+     *   /permit/unsigned/{no}  formulir yang belum ditandatangani  -> unsignedPage()
+     *   /permit/signed/{no}    dokumen bertanda tangan (upload)    -> signedPage()
+     * Keduanya halaman HTML kecil (permit.print_frame) yang memuat file-nya dari
+     * .../{no}/file dalam iframe. File PDF / gambar sendiri tidak bisa membawa ikon,
+     * jadi tanpa halaman ini tab browser memakai favicon root domain (XAMPP).
      */
-    public function printPage($doc_no)
+
+    /** Halaman formulir belum ditandatangani (tombol Print admin). */
+    public function unsignedPage($doc_no)
     {
         $header = $this->printablePermit($doc_no)['header'];
         $no = trim($header->complain_no);
 
-        // Tenant mencetak dokumen bertanda tangan; admin mencetak formulir untuk ditandatangani.
-        // Permit yang sudah Approved sebelum ada fitur upload (tanpa file) tetap memakai formulir.
-        $signed = $this->isAdmin() ? null : $this->signedPath($header);
+        // Tenant mencetak dokumen bertanda tangan, bukan formulir. Permit yang Approved
+        // sebelum ada fitur upload (tanpa dokumen) tetap memakai formulir.
+        if (!$this->isAdmin() && $this->signedPath($header)) {
+            return redirect($this->base('signed/' . rawurlencode($no)));
+        }
 
+        return $this->documentPage($no, $this->base('unsigned/' . rawurlencode($no) . '/file'), false);
+    }
+
+    /** Halaman dokumen bertanda tangan (tombol Print tenant, tombol lihat dokumen admin). */
+    public function signedPage($doc_no)
+    {
+        [$header, $path] = $this->signedDocument($doc_no);
+        $no = trim($header->complain_no);
+
+        return $this->documentPage($no, $this->base('signed/' . rawurlencode($no) . '/file'), !preg_match('/\.pdf$/i', $path));
+    }
+
+    private function documentPage($no, $fileUrl, $isImage)
+    {
         return view('permit.print_frame', [
             'title'    => $no,
-            'pdf_url'  => $signed ? $this->base('signed/' . rawurlencode($no)) : $this->base('pdf/' . rawurlencode($no)),
-            'is_image' => $signed && !preg_match('/\.pdf$/i', $signed),
+            'pdf_url'  => $fileUrl,
+            'is_image' => $isImage,
         ]);
     }
 
@@ -1396,10 +1417,10 @@ abstract class BasePermitController extends Controller
     }
 
     /**
-     * Tampilkan dokumen bertanda tangan (inline). Tenant hanya untuk permit Approved,
-     * admin untuk semua permit dalam cakupan yang punya dokumen.
+     * [header, path] dokumen bertanda tangan yang boleh dibuka portal ini (abort kalau tidak):
+     * tenant hanya untuk permit Approved, admin untuk semua permit dalam cakupan yang punya dokumen.
      */
-    public function signed($doc_no)
+    private function signedDocument($doc_no)
     {
         $permit = $this->findPermit($doc_no);
         if (!$permit) {
@@ -1419,13 +1440,21 @@ abstract class BasePermitController extends Controller
             abort(404, __('shared/permit.signed_not_found', ['no' => $no]));
         }
 
+        return [$header, $path];
+    }
+
+    /** File dokumen bertanda tangan (inline), dimuat oleh signedPage(). */
+    public function signedFile($doc_no)
+    {
+        [, $path] = $this->signedDocument($doc_no);
+
         return Storage::disk('local')->response($path, basename($path), [
             'Content-Disposition' => 'inline; filename="' . basename($path) . '"',
         ]);
     }
 
-    /** File PDF formulir satu permit (dimuat oleh printPage), hanya yang masuk cakupan portal. */
-    public function printPdf($doc_no)
+    /** File PDF formulir (belum ditandatangani), dimuat oleh unsignedPage(). */
+    public function unsignedFile($doc_no)
     {
         $permit = $this->printablePermit($doc_no);
         $header = $permit['header'];

@@ -133,9 +133,12 @@ Route::group(['middleware' => ['admin-auth', 'revalidate']], function () {
     Route::post('/permit/cancel', [Permit::class, 'cancel']);
     Route::get('/permit/index', [Permit::class, 'history']);
     Route::get('/permit/historyTable', [Permit::class, 'table']);
-    Route::get('/permit/print/{doc_no}', [Permit::class, 'printPage'])->where('doc_no', '[A-Za-z0-9\-]+');
-    Route::get('/permit/pdf/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');
-    // dokumen bertanda tangan: lihat, dan unggah (-> status Approved)
-    Route::get('/permit/signed/{doc_no}', [Permit::class, 'signed'])->where('doc_no', '[A-Za-z0-9\-]+');
+    // formulir permit belum ditandatangani (dicetak untuk ditandatangani): halaman + file PDF
+    Route::get('/permit/unsigned/{doc_no}', [Permit::class, 'unsignedPage'])->where('doc_no', '[A-Za-z0-9\-]+');
+    Route::get('/permit/unsigned/{doc_no}/file', [Permit::class, 'unsignedFile'])->where('doc_no', '[A-Za-z0-9\-]+');
+    // dokumen bertanda tangan yang sudah diunggah: halaman + file
+    Route::get('/permit/signed/{doc_no}', [Permit::class, 'signedPage'])->where('doc_no', '[A-Za-z0-9\-]+');
+    Route::get('/permit/signed/{doc_no}/file', [Permit::class, 'signedFile'])->where('doc_no', '[A-Za-z0-9\-]+');
+    // unggah dokumen bertanda tangan (-> status Approved)
     Route::post('/permit/upload', [Permit::class, 'uploadSigned']);
 });

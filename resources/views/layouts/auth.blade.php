@@ -10,7 +10,7 @@
 
     <link rel="stylesheet" href="{{ url('assets/coreui/css/coreui.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/coreui/icons/css/free.min.css') }}">
-    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.7') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.8') }}">
     <style>
         :root { --login-bg: url("{{ asset('public/lainnya/img/Background_new.jpeg') }}"); }
     </style>

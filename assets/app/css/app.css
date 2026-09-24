@@ -258,6 +258,67 @@
 .form-control.date-picker,
 .form-control.time-picker:not([readonly]):not(:disabled) { cursor: pointer; }
 
+/* ---------- pilihan file (assets/app/js/file-input.js) ---------- */
+.file-drop {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .85rem;
+    padding: .9rem 1rem;
+    background: #fafbff;
+    border: 1.5px dashed #c9cdea;
+    border-radius: .75rem;
+    transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease;
+}
+.file-drop:hover,
+.file-drop.is-dragover { border-color: #4f5bd5; background: #f3f4ff; }
+.file-drop.is-dragover { box-shadow: 0 0 0 .2rem rgba(79, 91, 213, .15); }
+.file-drop:focus-within { border-color: #4f5bd5; box-shadow: 0 0 0 .2rem rgba(79, 91, 213, .15); }
+.file-drop.has-file { border-style: solid; border-color: #b9bff0; background: #fff; }
+.file-drop.is-disabled { opacity: .6; }
+/* input asli transparan menutupi seluruh kotak: klik & tarik-lepas tetap native */
+.file-drop .file-drop-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 2;
+}
+.file-drop.is-disabled .file-drop-input { cursor: not-allowed; }
+.file-drop-icon {
+    flex: 0 0 auto;
+    width: 2.6rem;
+    height: 2.6rem;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef0ff;
+    color: #4f5bd5;
+    font-size: 1.2rem;
+}
+.file-drop.has-file .file-drop-icon { background: #4f5bd5; color: #fff; }
+.file-drop-body { display: flex; flex-direction: column; min-width: 0; line-height: 1.35; }
+.file-drop-title { font-size: .85rem; color: var(--cui-body-color); }
+.file-drop-title strong { color: #4f5bd5; font-weight: 700; }
+.file-drop-name {
+    font-size: .75rem;
+    color: var(--cui-secondary-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.file-drop.has-file .file-drop-name { color: var(--cui-emphasis-color); font-weight: 600; }
+/* versi ringkas (input .form-control-sm, mis. gambar login di System Specification) */
+.file-drop.file-drop-sm { padding: .45rem .6rem; gap: .55rem; border-radius: .5rem; }
+.file-drop.file-drop-sm .file-drop-icon { width: 1.9rem; height: 1.9rem; font-size: .95rem; }
+.file-drop.file-drop-sm .file-drop-title { font-size: .78rem; }
+.file-drop.file-drop-sm .file-drop-name { font-size: .7rem; }
+/* di dalam dialog SweetAlert */
+.swal2-html-container .file-drop { margin-top: 1rem; text-align: left; }
+
 /* ---------- pemilih jam (assets/app/js/timepicker.js), gaya sama dengan datepicker ---------- */
 .timepicker-dropdown {
     position: absolute;

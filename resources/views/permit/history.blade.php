@@ -157,7 +157,6 @@
             'update_no'     => __('shared/permit.update_no'),
             'cancel_no'     => __('shared/permit.cancel_no'),
             'print_no'      => __('shared/permit.print_no'),
-            'only_approved' => __('shared/permit.only_approved'),
             'cancel_title'  => __('shared/permit.cancel_title'),
             'cancel_text'   => __('shared/permit.cancel_text'),
             'yes_cancel'    => __('shared/permit.yes_cancel'),
@@ -181,8 +180,9 @@
     @endphp
     var LANG = @json($jsLang);
     var IS_ADMIN   = @json((bool) $is_admin);
-    var PRINT_URL  = "{{ $base }}/print";
-    var SIGNED_URL = "{{ $base }}/signed";
+    // halaman dokumen: formulir belum ditandatangani / dokumen bertanda tangan
+    var UNSIGNED_URL = "{{ $base }}/unsigned";
+    var SIGNED_URL   = "{{ $base }}/signed";
     var UPLOAD_URL = "{{ $base }}/upload";
     var EDIT_URL   = "{{ $base }}/edit";
     var CANCEL_URL = "{{ $base }}/cancel";
@@ -301,21 +301,25 @@
                     // Cetak (aturan dari server, dicek lagi saat dibuka):
                     // admin = formulir untuk ditandatangani (kecuali Cancel);
                     // tenant = dokumen bertanda tangan, setelah Approved.
-                    if (status === 'X') {
-                        // permit batal: tidak ada aksi cetak / upload
-                    } else if (row.can_print) {
-                        html += '<a href="' + PRINT_URL + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
+                    // Admin & dokumen bertanda tangan sudah diunggah: tombol cetak formulir dan
+                    // upload disembunyikan (hanya tampilan; fungsinya tetap ada di server),
+                    // yang tampil hanya tombol lihat dokumen di bawah.
+                    var signedDone = IS_ADMIN && row.has_signed;
+
+                    // Tombol cetak hanya tampil kalau boleh dicetak; tenant sebelum dokumen
+                    // bertanda tangan diunggah tidak mendapat tombol sama sekali.
+                    if (row.can_print && status !== 'X' && !signedDone) {
+                        // admin: formulir; tenant: dokumen bertanda tangan (permit Approved lama
+                        // tanpa dokumen: formulir)
+                        var printUrl = (!IS_ADMIN && row.has_signed) ? SIGNED_URL : UNSIGNED_URL;
+                        html += '<a href="' + printUrl + '/' + encodeURIComponent(d) + '" target="_blank" rel="noopener" ' +
                             'class="btn btn-sm btn-outline-primary btn-print me-1" title="' +
                             esc(t(IS_ADMIN ? LANG.print_form_no : LANG.print_no, { no: d })) + '">' +
                             '<i class="cil-print"></i></a>';
-                    } else {
-                        html += '<span class="btn btn-sm btn-outline-primary btn-print disabled me-1" ' +
-                            'title="' + esc(LANG.only_approved) + '" aria-disabled="true">' +
-                            '<i class="cil-print"></i></span>';
                     }
 
                     // Admin: unggah dokumen bertanda tangan (-> Approved) & lihat dokumennya
-                    if (row.can_upload) {
+                    if (row.can_upload && !signedDone) {
                         html += '<button type="button" class="btn btn-sm btn-outline-success btn-print btn-upload me-1" ' +
                             'data-permit="' + esc(d) + '" data-signed="' + (row.has_signed ? 1 : 0) + '" ' +
                             'title="' + esc(t(LANG.upload_no, { no: d })) + '">' +
@@ -376,12 +380,15 @@
 
         Swal.fire({
             title: t(LANG.upload_title, { no: permitNo }),
+            // input file sendiri (bukan input:'file' SweetAlert) supaya tampil seperti
+            // pilihan file lain di portal (assets/app/js/file-input.js)
             html: esc(t(LANG.upload_text, { no: permitNo })) +
-                (hasSigned ? '<div class="text-warning small mt-2">' + esc(LANG.upload_replace) + '</div>' : ''),
-            input: 'file',
-            inputAttributes: {
-                accept: SIGNED_TYPES.map(function (x) { return '.' + x; }).join(','),
-                'aria-label': t(LANG.upload_title, { no: permitNo })
+                (hasSigned ? '<div class="text-warning small mt-2">' + esc(LANG.upload_replace) + '</div>' : '') +
+                '<input type="file" id="signedFile" class="form-control" accept="' +
+                    SIGNED_TYPES.map(function (x) { return '.' + x; }).join(',') + '" aria-label="' +
+                    esc(t(LANG.upload_title, { no: permitNo })) + '">',
+            didOpen: function () {
+                window.initFileInputs && window.initFileInputs(Swal.getHtmlContainer());
             },
             showCancelButton: true,
             confirmButtonText: LANG.upload_button,
@@ -389,7 +396,9 @@
             reverseButtons: true,
             showLoaderOnConfirm: true,
             allowOutsideClick: function () { return !Swal.isLoading(); },
-            preConfirm: function (file) {
+            preConfirm: function () {
+                var input = document.getElementById('signedFile');
+                var file = input && input.files ? input.files[0] : null;
                 if (!file) {
                     Swal.showValidationMessage(LANG.upload_choose);
                     return false;

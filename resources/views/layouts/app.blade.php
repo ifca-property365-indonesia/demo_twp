@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="{{ url('assets/vendor/bootstrap-datepicker/bootstrap-datepicker.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/vendor/cropperjs/cropper.min.css') }}">
     <!-- App -->
-    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.7') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.8') }}">
     @stack('styles')
 
     {{-- Script dimuat di <head> karena banyak halaman memakai jQuery/plugin langsung di dalam @section('content') --}}
@@ -52,6 +52,7 @@
     <script src="{{ url('assets/app/js/app.js?ver=1.0.0') }}"></script>
     <script src="{{ url('assets/app/js/timepicker.js?ver=1.0.0') }}"></script>
     @include('partials.i18n_plugins')
+    <script src="{{ url('assets/app/js/file-input.js?ver=1.0.0') }}"></script>
     @stack('head-scripts')
 </head>
 

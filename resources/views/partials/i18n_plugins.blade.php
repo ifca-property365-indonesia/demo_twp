@@ -10,6 +10,14 @@
 <script>
     window.APP_LOCALE = @json($locale);
 
+    // teks pilihan file (assets/app/js/file-input.js)
+    window.FILE_INPUT_LANG = {
+        choose: @json(__('common.choose_file')),
+        drop: @json(__('common.drop_file')),
+        none: @json(__('common.no_file')),
+        many: @json(__('common.files_chosen'))
+    };
+
     if ($.fn.dataTable) {
         $.extend(true, $.fn.dataTable.defaults, {
             language: {

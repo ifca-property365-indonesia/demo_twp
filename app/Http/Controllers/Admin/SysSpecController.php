@@ -71,24 +71,30 @@ class SysSpecController extends Controller
     }
     public function imgLogin(Request $request)
     {
-        $namagambar = $request->namagambar;
-        $web = $request->web;
+        // web & seq dipakai sebagai nama folder / file: hanya nilai yang dikenal
+        $web = in_array($request->web, ['admin', 'tenant'], true) ? $request->web : null;
+        $seq = (int) $request->seq;
+        $url = '';
+        $descs = '';
 
         $files = $_FILES;
         $picture = !empty($_FILES) ? $picture = $_FILES["imglogin"] : '';
-        if (!empty($picture["name"])) {
-            $tipegambar = pathinfo($_FILES["imglogin"]["name"], PATHINFO_EXTENSION);
-            $nama = basename($namagambar);
-            $nama2 = pathinfo($nama, PATHINFO_FILENAME);
-            $picname = $nama2 . "." . $tipegambar;
+        if ($web && $seq >= 1 && $seq <= 6 && !empty($picture["name"])) {
+            $tipegambar = strtolower(pathinfo($_FILES["imglogin"]["name"], PATHINFO_EXTENSION));
+            // nama tetap per slot (images/slides/{web}/login-{seq}.{ext}), tidak bergantung
+            // pada nama gambar lama yang bisa berupa URL server lain atau kosong
+            $picname = 'login-' . $seq . '.' . $tipegambar;
 
             $psn = '';
             $msg = '';
             $picture = array_filter($picture);
 
-            $target_dir = "./images/slides/".$web."/";
+            // path absolut di folder proyek; dulu './images/slides/..' relatif terhadap folder
+            // kerja PHP dan mkdir() tidak rekursif -> gagal kalau images/slides belum ada
+            $relative_dir = 'images/slides/' . $web . '/';
+            $target_dir = base_path($relative_dir);
             if (!is_dir($target_dir)) {
-                mkdir($target_dir);
+                mkdir($target_dir, 0775, true);
             }
             $target_file = $target_dir . $picname;
             $uploadOk = 1;
@@ -127,15 +133,16 @@ class SysSpecController extends Controller
 
                 if (move_uploaded_file($_FILES["imglogin"]["tmp_name"], $target_file)) {
                     
-                    $descs = $target_dir . $picname;
-                    $url = url($descs);
+                    $descs = $relative_dir . $picname;
+                    // ?v= supaya browser tidak menampilkan gambar lama dari cache (nama file tetap)
+                    $url = url($descs) . '?v=' . time();
                     try{
                         $dataup = array(
-                            'seq_no' => $request->seq, 
+                            'seq_no' => $seq,
                             'image_url' => $url,
-                            'webname'=>$request->web
+                            'webname'=> $web
                         );
-                        $where = array('seq_no' => $request->seq,'webname'=>$request->web);
+                        $where = array('seq_no' => $seq, 'webname' => $web);
                         $cek = DB::connection('ifcaadm')
                             ->table('image_login')
                             ->where($where)

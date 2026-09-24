@@ -107,8 +107,10 @@ Route::group(['middleware' => ['tenant-auth', 'revalidate']], function () {
 	Route::post('/permit/cancel', [Permit::class, 'cancel']);
 	Route::get('/permit/index', [Permit::class, 'history']);
 	Route::get('/permit/historyTable', [Permit::class, 'table']);
-	Route::get('/permit/print/{doc_no}', [Permit::class, 'printPage'])->where('doc_no', '[A-Za-z0-9\-]+');
-	Route::get('/permit/pdf/{doc_no}', [Permit::class, 'printPdf'])->where('doc_no', '[A-Za-z0-9\-]+');
-	// dokumen bertanda tangan yang diunggah admin (dicetak tenant setelah Approved)
-	Route::get('/permit/signed/{doc_no}', [Permit::class, 'signed'])->where('doc_no', '[A-Za-z0-9\-]+');
+	// formulir permit belum ditandatangani (tenant: hanya permit Approved lama tanpa dokumen): halaman + file PDF
+	Route::get('/permit/unsigned/{doc_no}', [Permit::class, 'unsignedPage'])->where('doc_no', '[A-Za-z0-9\-]+');
+	Route::get('/permit/unsigned/{doc_no}/file', [Permit::class, 'unsignedFile'])->where('doc_no', '[A-Za-z0-9\-]+');
+	// dokumen bertanda tangan yang diunggah admin (dicetak tenant setelah Approved): halaman + file
+	Route::get('/permit/signed/{doc_no}', [Permit::class, 'signedPage'])->where('doc_no', '[A-Za-z0-9\-]+');
+	Route::get('/permit/signed/{doc_no}/file', [Permit::class, 'signedFile'])->where('doc_no', '[A-Za-z0-9\-]+');
 });
