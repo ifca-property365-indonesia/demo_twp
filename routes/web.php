@@ -23,6 +23,14 @@ Route::get('/switch/admin', [PortalLoginController::class, 'switchAdmin']);
 Route::get('/switch/tenant/{id}', [PortalLoginController::class, 'switchTenant'])->where('id', '[0-9]+');
 Route::get('/logout', [PortalLoginController::class, 'logout']);
 
+// Ganti bahasa tampilan (menu "Language" di header). Disimpan di session dan cookie
+// 1 tahun; dibaca App\Http\Middleware\SetLocale di setiap request.
+Route::get('/language/{locale}', function (string $locale) {
+    session(['locale' => $locale]);
+
+    return redirect()->back()->withCookie(cookie()->forever('locale', $locale));
+})->whereIn('locale', array_keys(\App\Http\Middleware\SetLocale::LOCALES));
+
 Route::prefix('admin')->group(base_path('routes/admin.php'));
 Route::prefix('tenant')->group(base_path('routes/tenant.php'));
 

@@ -14,12 +14,12 @@
     }
 @endphp
 @if ($switchAdmin || count($switchTenants) > 0)
-    <div class="dropdown-header bg-body-tertiary fw-semibold text-body-secondary small">Switch portal</div>
+    <div class="dropdown-header bg-body-tertiary fw-semibold text-body-secondary small">{{ __($current . '.header.switch_portal') }}</div>
     @if ($switchAdmin)
-        <a class="dropdown-item" href="{{ url('/switch/admin') }}"><i class="cil-swap-horizontal"></i> Switch to Admin</a>
+        <a class="dropdown-item" href="{{ url('/switch/admin') }}"><i class="cil-swap-horizontal"></i> {{ __($current . '.header.switch_admin') }}</a>
     @endif
     @foreach ($switchTenants as $t)
-        <a class="dropdown-item" href="{{ url('/switch/tenant/'.$t['id']) }}"><i class="cil-swap-horizontal"></i> Switch to Tenant: {{ $t['name'] }}</a>
+        <a class="dropdown-item" href="{{ url('/switch/tenant/'.$t['id']) }}"><i class="cil-swap-horizontal"></i> {{ __($current . '.header.switch_tenant') }} {{ $t['name'] }}</a>
     @endforeach
     <div class="dropdown-divider"></div>
 @endif

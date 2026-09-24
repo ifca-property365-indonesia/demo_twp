@@ -14,8 +14,8 @@
             <i class="cil-menu"></i>
         </button>
         <div class="header-app-info ms-2 ms-lg-0">
-            <span class="sub-text">Web Admin</span>
-            <span class="lead-text">Tenant Web Portal</span>
+            <span class="sub-text">{{ __('admin.header.sub_title') }}</span>
+            <span class="lead-text">{{ __('admin.header.title') }}</span>
         </div>
         <ul class="header-nav ms-auto">
             <li class="nav-item dropdown">
@@ -35,9 +35,10 @@
                         </div>
                     </div>
                     @include('partials.portal_switch', ['current' => 'admin'])
-                    <a class="dropdown-item" href="#" id="profile"><i class="cil-user"></i> View Profile</a>
+                    @include('partials.language_switch', ['current' => 'admin'])
+                    <a class="dropdown-item" href="#" id="profile"><i class="cil-user"></i> {{ __('admin.header.view_profile') }}</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ url('/admin/logout') }}"><i class="cil-account-logout"></i> Sign out</a>
+                    <a class="dropdown-item" href="{{ url('/admin/logout') }}"><i class="cil-account-logout"></i> {{ __('admin.header.sign_out') }}</a>
                 </div>
             </li>
         </ul>
@@ -47,7 +48,7 @@
     $('#profile').on('click', function (e) {
         e.preventDefault();
         $('#modaldialog').removeClass('modal-md').addClass('modal-lg');
-        $('#modaltitle').html('Edit Profile');
+        $('#modaltitle').text(@json(__('admin.header.edit_profile')));
         $('#modalbody').load("{{ url('admin/account/profile') }}");
         $('#modal').data('Id', "{{ $useremail }}");
         $('#modalfooter').hide();

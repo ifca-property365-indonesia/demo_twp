@@ -1,7 +1,7 @@
 @php
     // Semua nilai sudah disiapkan Tenant\LoginController::createSession (dan diperbarui
     // Tenant\AccountController::updateprofile); view tidak perlu query.
-    $portalType = Session::get('Tflag') === 'O' ? 'Operational' : '';
+    $portalType = Session::get('Tflag') === 'O' ? __('tenant.header.operational') : '';
     $username   = Session::get('Tdisplay_name') ?: Session::get('TCompany');   // all_login.name
     $contact    = Session::get('Tuname');                                        // tenant.contact_name
     $useremail  = Session::get('Tenemail');
@@ -15,8 +15,8 @@
             <i class="cil-menu"></i>
         </button>
         <div class="header-app-info ms-2 ms-lg-0">
-            <span class="sub-text">Web Tenant</span>
-            <span class="lead-text">Tenant Web Portal{{ $portalType ? " ({$portalType})" : '' }}</span>
+            <span class="sub-text">{{ __('tenant.header.sub_title') }}</span>
+            <span class="lead-text">{{ __('tenant.header.title') }}{{ $portalType ? " ({$portalType})" : '' }}</span>
         </div>
         <ul class="header-nav ms-auto">
             <li class="nav-item dropdown">
@@ -37,9 +37,10 @@
                         </div>
                     </div>
                     @include('partials.portal_switch', ['current' => 'tenant'])
-                    <a class="dropdown-item" href="#" id="profile"><i class="cil-user"></i> View Profile</a>
+                    @include('partials.language_switch', ['current' => 'tenant'])
+                    <a class="dropdown-item" href="#" id="profile"><i class="cil-user"></i> {{ __('tenant.header.view_profile') }}</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item" href="{{ url('tenant/logout') }}"><i class="cil-account-logout"></i> Sign out</a>
+                    <a class="dropdown-item" href="{{ url('tenant/logout') }}"><i class="cil-account-logout"></i> {{ __('tenant.header.sign_out') }}</a>
                 </div>
             </li>
         </ul>
@@ -49,7 +50,7 @@
     $('#profile').on('click', function (e) {
         e.preventDefault();
         $('#modaldialog').removeClass('modal-md').addClass('modal-lg');
-        $('#modaltitle').html('Edit Profile');
+        $('#modaltitle').text(@json(__('tenant.header.edit_profile')));
         $('#modalbody').load("{{ url('tenant/account/profile') }}");
         $('#modal').data('Id', "{{ $useremail }}");
         $('#modalfooter').hide();

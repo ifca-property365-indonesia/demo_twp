@@ -13,34 +13,34 @@
         <div class="sidebar-brand">
             <a href="{{ url('/admin/dash') }}" class="d-flex align-items-center gap-2 text-decoration-none text-white">
                 <img src="{{ url('/images/logoweb/logoweb.png') }}" alt="IFCA">
-                <span class="fw-bold">Web Admin</span>
+                <span class="fw-bold">{{ __('admin.menu.brand') }}</span>
             </a>
         </div>
         <button class="btn-close d-lg-none" type="button" data-coreui-theme="dark" aria-label="Close"
                 onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
     </div>
     <ul class="sidebar-nav" data-coreui="navigation">
-        <li class="nav-title">Dashboards</li>
+        <li class="nav-title">{{ __('admin.menu.dashboards') }}</li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('admin/dash*') ? 'active' : '' }}" href="{{ url('/admin/dash') }}">
-                <i class="nav-icon cil-speedometer"></i> Dashboard
+                <i class="nav-icon cil-speedometer"></i> {{ __('admin.menu.dashboard') }}
             </a>
         </li>
 
-        <li class="nav-title">Menu</li>
+        <li class="nav-title">{{ __('admin.menu.menu') }}</li>
 
         {{-- News feed --}}
         <li class="nav-group {{ $newsOpen ? 'show' : '' }}">
-            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-newspaper"></i> News Feed</a>
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-newspaper"></i> {{ __('admin.menu.news_feed') }}</a>
             <ul class="nav-group-items compact">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/news/form/*') ? 'active' : '' }}" href="{{ url('/admin/news/form/A') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Create News
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.create_news') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ $isExact('admin/news') ? 'active' : '' }}" href="{{ url('/admin/news') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> List News
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.list_news') }}
                     </a>
                 </li>
             </ul>
@@ -48,16 +48,16 @@
 
         {{-- Online survey --}}
         <li class="nav-group {{ $surveyOpen ? 'show' : '' }}">
-            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-task"></i> Online Survey</a>
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-task"></i> {{ __('admin.menu.online_survey') }}</a>
             <ul class="nav-group-items compact">
                 <li class="nav-item">
                     <a class="nav-link {{ $isExact('admin/usersurvey') ? 'active' : '' }}" href="{{ url('/admin/usersurvey/') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Survey Questions
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.survey_questions') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/usersurvey/results*') ? 'active' : '' }}" href="{{ url('/admin/usersurvey/results') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Survey Results
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.survey_results') }}
                     </a>
                 </li>
             </ul>
@@ -66,29 +66,29 @@
         @if(Session::get('Tsuname') == 'Admin Management')
         <li class="nav-item">
             <a class="nav-link {{ request()->is('admin/management*') ? 'active' : '' }}" href="{{ url('/admin/management') }}">
-                <i class="nav-icon cil-bar-chart"></i> Graph Management
+                <i class="nav-icon cil-bar-chart"></i> {{ __('admin.menu.graph_management') }}
             </a>
         </li>
         @endif
 
         <li class="nav-item">
             <a class="nav-link {{ request()->is('admin/permit*') ? 'active' : '' }}" href="{{ url('/admin/permit/history') }}">
-                <i class="nav-icon cil-clipboard"></i> Letter Permit
+                <i class="nav-icon cil-clipboard"></i> {{ __('admin.menu.letter_permit') }}
             </a>
         </li>
 
         {{-- History --}}
         <li class="nav-group {{ $historyOpen ? 'show' : '' }}">
-            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-history"></i> History</a>
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-history"></i> {{ __('admin.menu.history') }}</a>
             <ul class="nav-group-items compact">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/history/ticket*') ? 'active' : '' }}" href="{{ url('/admin/history/ticket') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Ticket
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.ticket') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/history/users*') ? 'active' : '' }}" href="{{ url('/admin/history/users') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Log User
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.log_user') }}
                     </a>
                 </li>
             </ul>
@@ -96,16 +96,16 @@
 
         {{-- Password --}}
         <li class="nav-group {{ $passwordOpen ? 'show' : '' }}">
-            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-lock-locked"></i> Password</a>
+            <a class="nav-link nav-group-toggle" href="#"><i class="nav-icon cil-lock-locked"></i> {{ __('admin.menu.password') }}</a>
             <ul class="nav-group-items compact">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/account/reset*') ? 'active' : '' }}" href="{{ url('/admin/account/reset') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Password Reset
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.password_reset') }}
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('admin/systemspec/defaultpass*') ? 'active' : '' }}" href="{{ url('/admin/systemspec/defaultpass') }}">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Default Password
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('admin.menu.default_password') }}
                     </a>
                 </li>
             </ul>

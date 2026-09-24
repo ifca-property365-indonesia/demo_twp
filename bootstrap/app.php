@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'tenant-auth' => \App\Http\Middleware\TenantAuth::class,
             'revalidate'  => \App\Http\Middleware\RevalidateBackHistory::class,
         ]);
+
+        // Bahasa pilihan user (session / cookie 'locale') untuk semua halaman web.
+        $middleware->appendToGroup('web', \App\Http\Middleware\SetLocale::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
     })->create();

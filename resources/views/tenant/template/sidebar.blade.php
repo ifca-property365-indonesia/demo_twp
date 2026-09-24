@@ -14,45 +14,45 @@
                 onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
     </div>
     <ul class="sidebar-nav" data-coreui="navigation">
-        <li class="nav-title">Dashboard</li>
+        <li class="nav-title">{{ __('tenant.menu.dashboard') }}</li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/dash*') ? 'active' : '' }}" href="{{ url('/tenant/dash') }}">
-                <i class="nav-icon cil-speedometer"></i> Dashboard
+                <i class="nav-icon cil-speedometer"></i> {{ __('tenant.menu.dashboard') }}
             </a>
         </li>
 
-        <li class="nav-title">Menu</li>
+        <li class="nav-title">{{ __('tenant.menu.menu') }}</li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/ticket*') ? 'active' : '' }}" href="{{ url('/tenant/ticket') }}">
-                <i class="nav-icon cil-tags"></i> Ticket
+                <i class="nav-icon cil-tags"></i> {{ __('tenant.menu.ticket') }}
             </a>
         </li>
         @unless($isOperational)
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/proforma*') ? 'active' : '' }}" href="{{ url('/tenant/proforma') }}">
-                <i class="nav-icon cil-description"></i> Proforma Invoice
+                <i class="nav-icon cil-description"></i> {{ __('tenant.menu.proforma_invoice') }}
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/invoice*') ? 'active' : '' }}" href="{{ url('/tenant/invoice') }}">
-                <i class="nav-icon cil-wallet"></i> Invoice Outstanding
+                <i class="nav-icon cil-wallet"></i> {{ __('tenant.menu.invoice_outstanding') }}
             </a>
         </li>
         @endunless
         <li class="nav-group {{ $historyOpen ? 'show' : '' }}">
             <a class="nav-link nav-group-toggle" href="#">
-                <i class="nav-icon cil-history"></i> History
+                <i class="nav-icon cil-history"></i> {{ __('tenant.menu.history') }}
             </a>
             <ul class="nav-group-items compact">
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('tenant/history/ticket*') ? 'active' : '' }}" href="{{ url('/tenant/history/ticket') }}" id="ht">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Ticket
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('tenant.menu.history_ticket') }}
                     </a>
                 </li>
                 @unless($isOperational)
                 <li class="nav-item">
                     <a class="nav-link {{ request()->is('tenant/history/invoice*') ? 'active' : '' }}" href="{{ url('/tenant/history/invoice') }}" id="hb">
-                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> Invoice
+                        <span class="nav-icon"><span class="nav-icon-bullet"></span></span> {{ __('tenant.menu.history_invoice') }}
                     </a>
                 </li>
                 @endunless
@@ -60,17 +60,17 @@
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/news*') ? 'active' : '' }}" href="{{ url('/tenant/news') }}">
-                <i class="nav-icon cil-newspaper"></i> News
+                <i class="nav-icon cil-newspaper"></i> {{ __('tenant.menu.news') }}
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/usersurvey*') || request()->is('tenant/online_survey*') ? 'active' : '' }}" href="{{ url('/tenant/usersurvey/index') }}">
-                <i class="nav-icon cil-task"></i> Online Survey
+                <i class="nav-icon cil-task"></i> {{ __('tenant.menu.online_survey') }}
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link {{ request()->is('tenant/permit*') ? 'active' : '' }}" href="{{ url('/tenant/permit/history') }}">
-                <i class="nav-icon cil-clipboard"></i> Letter Permit
+                <i class="nav-icon cil-clipboard"></i> {{ __('tenant.menu.letter_permit') }}
             </a>
         </li>
     </ul>
