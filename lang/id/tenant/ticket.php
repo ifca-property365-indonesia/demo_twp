@@ -63,7 +63,7 @@ return [
     // status ticket (kode sv_entry_*) versi label tenant
     'statuses' => [
         'R' => 'Diajukan',
-        'O' => 'Baru',
+        'O' => 'Terbuka',
         'A' => 'Diterima',
         'S' => 'Survei',
         'P' => 'Diproses',

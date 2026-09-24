@@ -43,6 +43,9 @@ return [
         'closed' => 'Ditutup',
     ],
 
+    // status ticket di luar common.statuses (kode dari sistem IFCA)
+    'ticket_status_open' => 'Terbuka',
+
     // pesan
     'search_error'    => ':status Pencarian : :error',
 ];

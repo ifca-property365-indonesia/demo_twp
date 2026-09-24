@@ -30,6 +30,7 @@ return [
     // label status ticket di tabel Ticket History (kunci = kode status)
     'ticket_statuses' => [
         'R' => 'Baru',
+        'O' => 'Terbuka',
         'A' => 'Diterima',
         'S' => 'Survei',
         'P' => 'Diproses',

@@ -63,7 +63,8 @@
     </div>
 
     <script type="text/javascript">
-    	var STATUS_LABELS = @json(__('common.statuses'));
+    	// 'O' (Open) dipakai sistem IFCA untuk ticket, tidak ada di common.statuses
+    	var STATUS_LABELS = @json(__('common.statuses') + ['O' => __('tenant/history.ticket_status_open')]);
     	$(document).ready(function(){
 			$('.date-picker').datepicker('setEndDate', new Date());
 	    	$('#tblTicket').DataTable({
@@ -112,6 +113,7 @@
 		                        Y: 'badge-soft-success',
 		                        C: 'badge-soft-success',
 		                        R: 'badge-soft-info',
+		                        O: 'badge-soft-info',
 		                        X: 'badge-soft-secondary'
 		                    };
 		                    var code = data == null ? '' : String(data).trim();

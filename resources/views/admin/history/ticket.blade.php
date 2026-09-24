@@ -145,6 +145,10 @@
                 render:function (data,type,row) {
                     var label,status;
                     switch (data) {
+                        case 'O':
+                            status = STATUS_LABELS.O;
+                            label = "info";
+                            break;
                         case 'R':
                             status = STATUS_LABELS.R;
                             label = "info";

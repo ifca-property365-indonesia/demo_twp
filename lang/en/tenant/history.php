@@ -43,6 +43,9 @@ return [
         'closed' => 'Closed',
     ],
 
+    // status ticket di luar common.statuses (kode dari sistem IFCA)
+    'ticket_status_open' => 'Open',
+
     // pesan
     'search_error'    => ':status Search : :error',
 ];
