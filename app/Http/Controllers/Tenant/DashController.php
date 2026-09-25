@@ -170,7 +170,7 @@ if (!empty($htenants)) {
             .$data_status["status"].
             '</span></td>';
 
-        // Edit hanya untuk WO yang belum dikerjakan (R / O / A) dan berasal dari ticket TWP
+        // Edit hanya untuk WO berstatus R (TicketController::EDITABLE_STATUSES) dari ticket TWP
         // (id-nya di MySQL sv_entry_multi)
         $editId = null;
         if (in_array(trim((string) $tenant->status), \App\Http\Controllers\Tenant\TicketController::EDITABLE_STATUSES, true) && $tenant->complain_no) {

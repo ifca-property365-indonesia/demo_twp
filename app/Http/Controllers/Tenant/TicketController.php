@@ -349,8 +349,8 @@ class TicketController extends Controller
         echo json_encode($res);
     }
 
-    /** Status work order yang masih boleh diedit tenant (belum dikerjakan). */
-    const EDITABLE_STATUSES = ['R', 'O', 'A'];
+    /** Status work order yang masih boleh diedit tenant: hanya R. */
+    const EDITABLE_STATUSES = ['R'];
 
     /**
      * Perbarui work order (mgr.sv_entry_hd) milik ticket ini (note1 = complain_no) kalau
@@ -679,7 +679,7 @@ class TicketController extends Controller
                 ->update($dataServ1);
 
                 // Edit ikut ke work order (sv_entry_hd, yang tampil di tabel ticket) selama
-                // belum dikerjakan (R / O / A); gambar baru saat edit -> sv_attachment.
+                // statusnya masih EDITABLE_STATUSES (R); gambar baru saat edit -> sv_attachment.
                 try {
                     $editReportNo = $this->updateWorkOrder($entity, $project, $typeformat2, [
                         'work_requested' => mb_substr((string) $description, 0, 255),
