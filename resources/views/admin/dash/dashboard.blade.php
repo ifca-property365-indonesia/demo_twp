@@ -255,9 +255,10 @@ $(function () {
             { data: 'reported_date', name: 'reported_date', render: ymdToDmy },
             { data: 'serv_req_by', name: 'serv_req_by' },
             { data: 'lot_no', name: 'lot_no' },
-            { data: 'status', name: 'status', render: function (d) {
+            { data: 'status', name: 'status', className: 'text-nowrap', render: function (d, type, row) {
                 var s = STATUS[d] || [d, 'secondary'];
-                return '<span class="badge rounded-pill badge-soft-' + s[1] + '">' + s[0] + '</span>';
+                return '<span class="badge rounded-pill badge-soft-' + s[1] + '">' + s[0] + '</span>'
+                    + (type === 'display' ? ticketPictureButton(row.picture_url) : '');
             } }
         ]
     });

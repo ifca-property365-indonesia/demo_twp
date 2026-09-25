@@ -56,6 +56,7 @@ class HistoryController extends Controller
                 ->orderBy('t.reported_date', 'desc')
                 ->orderBy('t.report_no', 'desc')
                 ->get();
+            $response = TicketHd::withPictures($response);   // picture_url untuk tombol lihat gambar
 
             return Datatables::of($response)->make(true);
         }

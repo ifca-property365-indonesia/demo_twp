@@ -308,6 +308,7 @@ class DashController extends Controller
             ->orderBy('t.reported_date', 'desc')
             ->orderBy('t.report_no', 'desc')
             ->get();
+        $query = TicketHd::withPictures($query);   // picture_url untuk tombol lihat gambar
 
         foreach ($query as $i => $row) {
             $row->row_number = $i + 1;

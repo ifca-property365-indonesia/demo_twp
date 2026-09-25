@@ -128,6 +128,7 @@ class DashController extends Controller
     ->orderBy('t.reported_date', 'desc')
     ->orderBy('t.report_no', 'desc')
     ->get();
+$htenants = TicketHd::withPictures($htenants);   // picture_url untuk tombol lihat gambar
 
 if (!empty($htenants)) {
     foreach ($htenants as $tenant)
@@ -165,9 +166,17 @@ if (!empty($htenants)) {
 
         $list_hticket .= '<td>'.$billingType.'</td>';
 
-        $list_hticket .= '<td><span class="badge '.$data_status["color"].'">'
+        // tombol kecil lihat gambar (assets/app/js/app.js: .btn-ticket-picture)
+        $pictureBtn = '';
+        if (!empty($tenant->picture_url)) {
+            $pictureBtn = ' <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 ms-1 align-baseline btn-ticket-picture"'
+                .' data-url="'.e($tenant->picture_url).'" title="'.e(__('common.view_picture')).'" aria-label="'.e(__('common.view_picture')).'">'
+                .'<i class="cil-image"></i></button>';
+        }
+
+        $list_hticket .= '<td class="text-nowrap"><span class="badge '.$data_status["color"].'">'
             .$data_status["status"].
-            '</span></td>';
+            '</span>'.$pictureBtn.'</td>';
 
         // Edit hanya untuk WO berstatus R yang berasal dari ticket TWP (id-nya di MySQL sv_entry_multi)
         $editId = null;

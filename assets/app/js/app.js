@@ -148,4 +148,36 @@
     window.escapeHtml = function (s) {
         return $('<div>').text(s == null ? '' : String(s)).html();
     };
+
+    /**
+     * Tombol kecil "lihat gambar" untuk tabel ticket (dipasang di samping badge status);
+     * '' kalau ticket tidak punya gambar (url dari App\Support\TicketHd::withPictures).
+     * Klik -> gambar tampil di #modallg (layouts/app). Teks dari window.TICKET_PICTURE_LANG.
+     */
+    window.ticketPictureButton = function (url) {
+        if (!url) {
+            return '';
+        }
+        var title = (window.TICKET_PICTURE_LANG || {}).button || 'View picture';
+        return ' <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 ms-1 align-baseline btn-ticket-picture"'
+            + ' data-url="' + window.escapeHtml(url) + '" title="' + window.escapeHtml(title) + '" aria-label="' + window.escapeHtml(title) + '">'
+            + '<i class="cil-image"></i></button>';
+    };
+
+    $(document).on('click', '.btn-ticket-picture', function (e) {
+        e.preventDefault();
+        e.stopPropagation();   // baris tabel yang bisa dipilih tidak ikut terpilih
+        var url = $(this).data('url');
+        var L = window.TICKET_PICTURE_LANG || {};
+        var $img = $('<img class="img-fluid rounded border d-block mx-auto" alt="">').attr('src', url)
+            .on('error', function () {
+                $(this).replaceWith($('<p class="text-body-secondary text-center mb-0"></p>').text(L.failed || 'Picture could not be loaded.'));
+            });
+        $('#modaltitlelg').text(L.title || 'Picture');
+        $('#modalbodylg').empty().append($img, $('<div class="text-center mt-2"></div>').append(
+            $('<a target="_blank" rel="noopener" class="small"></a>').attr('href', url).text(L.open || 'Open in new tab')
+        ));
+        $('#modalfooterlg').empty();
+        $('#modallg').modal('show');
+    });
 })(jQuery);

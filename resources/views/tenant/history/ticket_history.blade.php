@@ -128,8 +128,10 @@
 		                    var code = data == null ? '' : String(data).trim();
 		                    var known = Object.prototype.hasOwnProperty.call(colors, code) && Object.prototype.hasOwnProperty.call(STATUS_LABELS, code);
 		                    var item = known ? [STATUS_LABELS[code], colors[code]] : [code || '-', 'badge-soft-secondary'];
-		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>';
-		                }
+		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>'
+		                        + (type === 'display' ? ticketPictureButton(row.picture_url) : '');
+		                },
+		                className: 'text-nowrap'
 		            },
 		        ],
 		        dom : "Bfrtip",

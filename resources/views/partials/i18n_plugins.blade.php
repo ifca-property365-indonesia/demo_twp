@@ -18,6 +18,14 @@
         many: @json(__('common.files_chosen'))
     };
 
+    // tombol & popup gambar ticket (assets/app/js/app.js: ticketPictureButton)
+    window.TICKET_PICTURE_LANG = {
+        button: @json(__('common.view_picture')),
+        title: @json(__('common.ticket_picture')),
+        open: @json(__('common.open_new_tab')),
+        failed: @json(__('common.picture_failed'))
+    };
+
     // teks PDF tombol DataTables (assets/app/js/pdf-export.js)
     window.PDF_EXPORT_LANG = {
         button: @json(__('common.generate_pdf')),

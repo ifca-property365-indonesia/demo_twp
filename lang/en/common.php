@@ -97,6 +97,10 @@ return [
     'lot_no'        => 'Lot No',
     'category'      => 'Category',
     'picture'       => 'Picture',
+    'view_picture'  => 'View picture',
+    'ticket_picture'=> 'Ticket Picture',
+    'open_new_tab'  => 'Open in new tab',
+    'picture_failed'=> 'Picture could not be loaded.',
 
     // status ticket / permit (kode sv_entry_*)
     'statuses' => [

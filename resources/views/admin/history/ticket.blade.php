@@ -177,9 +177,10 @@
                             status = $('<div>').text(data == null || String(data).trim() === '' ? '-' : String(data).trim()).html();
                             label = "secondary";
                     }
-                    return '<span class="badge badge-soft-'+label+'">'+status+'</span>';
-             
-                }}
+                    return '<span class="badge badge-soft-'+label+'">'+status+'</span>'
+                        + (type === 'display' ? ticketPictureButton(row.picture_url) : '');
+
+                }, className: 'text-nowrap'}
           ],
       });
    

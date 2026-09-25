@@ -97,6 +97,10 @@ return [
     'lot_no'        => 'No. Lot',
     'category'      => 'Kategori',
     'picture'       => 'Gambar',
+    'view_picture'  => 'Lihat gambar',
+    'ticket_picture'=> 'Gambar Tiket',
+    'open_new_tab'  => 'Buka di tab baru',
+    'picture_failed'=> 'Gambar tidak dapat dimuat.',
 
     // status ticket / permit (kode sv_entry_*)
     'statuses' => [

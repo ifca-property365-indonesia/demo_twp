@@ -74,6 +74,7 @@ class HistoryController extends Controller
         $date_end = $request->date_end ?: null;
         $date_start = $request->date_start ?: null;
         $query = $this->ticketRows($date_start, $date_end, (string) $debtor);
+        $query = TicketHd::withPictures($query);   // picture_url untuk tombol lihat gambar
         return DataTables::of($query)->make(true);
     }
     public function overtime(){
