@@ -61,6 +61,7 @@
                                     <th>{{ __('admin/history.request_by') }}</th>
                                     <th>{{ __('admin/history.lot_number') }}</th>
                                     <th>{{ __('admin/history.ticket_status') }}</th>
+                                    <th class="no-export">{{ __('common.action') }}</th>
                                 </tr>
                             </thead>
                         </table>
@@ -177,10 +178,12 @@
                             status = $('<div>').text(data == null || String(data).trim() === '' ? '-' : String(data).trim()).html();
                             label = "secondary";
                     }
-                    return '<span class="badge badge-soft-'+label+'">'+status+'</span>'
-                        + (type === 'display' ? ticketPictureButton(row.picture_url) : '');
+                    return '<span class="badge badge-soft-'+label+'">'+status+'</span>';
 
-                }, className: 'text-nowrap'}
+                }},
+            // Aksi: tombol lihat gambar ticket (kalau ada)
+            {data:"picture_url", name:"picture_url", orderable: false, searchable: false, className: 'text-center',
+                render: function (data, type) { return type === 'display' ? ticketPictureButton(data) : ''; }}
           ],
       });
    

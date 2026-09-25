@@ -150,7 +150,7 @@
     };
 
     /**
-     * Tombol kecil "lihat gambar" untuk tabel ticket (dipasang di samping badge status);
+     * Tombol kecil "lihat gambar" untuk kolom Aksi tabel ticket;
      * '' kalau ticket tidak punya gambar (url dari App\Support\TicketHd::withPictures).
      * Klik -> gambar tampil di #modallg (layouts/app). Teks dari window.TICKET_PICTURE_LANG.
      */
@@ -159,7 +159,7 @@
             return '';
         }
         var title = (window.TICKET_PICTURE_LANG || {}).button || 'View picture';
-        return ' <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 ms-1 align-baseline btn-ticket-picture"'
+        return '<button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 btn-ticket-picture"'
             + ' data-url="' + window.escapeHtml(url) + '" title="' + window.escapeHtml(title) + '" aria-label="' + window.escapeHtml(title) + '">'
             + '<i class="cil-image"></i></button>';
     };

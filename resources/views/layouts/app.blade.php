@@ -50,7 +50,7 @@
     <script src="{{ url('assets/vendor/bootstrap-datepicker/bootstrap-datepicker.min.js') }}"></script>
     <script src="{{ url('assets/vendor/chartjs/chart.umd.min.js') }}"></script>
     <script src="{{ url('assets/vendor/cropperjs/cropper.min.js') }}"></script>
-    <script src="{{ url('assets/app/js/app.js?ver=1.0.1') }}"></script>
+    <script src="{{ url('assets/app/js/app.js?ver=1.0.2') }}"></script>
     <script src="{{ url('assets/app/js/timepicker.js?ver=1.0.0') }}"></script>
     @include('partials.i18n_plugins')
     <script src="{{ url('assets/app/js/file-input.js?ver=1.0.0') }}"></script>

@@ -51,6 +51,7 @@
 		                                    <th class="sorting text-center" style="width: 24px;">{{ __('tenant/history.request_by') }}</th>
 		                                    <th class="sorting text-center" style="width: 80px; vertical-align: middle;">{{ __('tenant/history.lot_no') }}</th>
 		                                    <th class="sorting text-center" style="width: 10px;">{{ __('tenant/history.ticket_status') }}</th>
+		                                    <th class="text-center no-export" style="width: 10px;">{{ __('common.action') }}</th>
 		                                </tr>
 		                            </thead>
 		                            <tbody>
@@ -128,10 +129,12 @@
 		                    var code = data == null ? '' : String(data).trim();
 		                    var known = Object.prototype.hasOwnProperty.call(colors, code) && Object.prototype.hasOwnProperty.call(STATUS_LABELS, code);
 		                    var item = known ? [STATUS_LABELS[code], colors[code]] : [code || '-', 'badge-soft-secondary'];
-		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>'
-		                        + (type === 'display' ? ticketPictureButton(row.picture_url) : '');
-		                },
-		                className: 'text-nowrap'
+		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>';
+		                }
+		            },
+		            // Aksi: tombol lihat gambar ticket (kalau ada)
+		            {data:"picture_url", orderable: false, searchable: false, className: 'text-center',
+		                render: function (data, type) { return type === 'display' ? ticketPictureButton(data) : ''; }
 		            },
 		        ],
 		        dom : "Bfrtip",

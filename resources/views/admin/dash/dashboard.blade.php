@@ -122,6 +122,7 @@
                             <th>{{ __('admin/dashboard.request_by') }}</th>
                             <th>{{ __('common.lot_no') }}</th>
                             <th>{{ __('admin/dashboard.ticket_status') }}</th>
+                            <th class="no-export">{{ __('common.action') }}</th>
                         </tr>
                     </thead>
                 </table>
@@ -255,11 +256,13 @@ $(function () {
             { data: 'reported_date', name: 'reported_date', render: ymdToDmy },
             { data: 'serv_req_by', name: 'serv_req_by' },
             { data: 'lot_no', name: 'lot_no' },
-            { data: 'status', name: 'status', className: 'text-nowrap', render: function (d, type, row) {
+            { data: 'status', name: 'status', render: function (d) {
                 var s = STATUS[d] || [d, 'secondary'];
-                return '<span class="badge rounded-pill badge-soft-' + s[1] + '">' + s[0] + '</span>'
-                    + (type === 'display' ? ticketPictureButton(row.picture_url) : '');
-            } }
+                return '<span class="badge rounded-pill badge-soft-' + s[1] + '">' + s[0] + '</span>';
+            } },
+            // Aksi: tombol lihat gambar ticket (kalau ada)
+            { data: 'picture_url', name: 'picture_url', orderable: false, searchable: false, className: 'text-center',
+              render: function (d, type) { return type === 'display' ? ticketPictureButton(d) : ''; } }
         ]
     });
 });

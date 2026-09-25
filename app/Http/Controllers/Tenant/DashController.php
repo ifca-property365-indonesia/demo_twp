@@ -166,17 +166,9 @@ if (!empty($htenants)) {
 
         $list_hticket .= '<td>'.$billingType.'</td>';
 
-        // tombol kecil lihat gambar (assets/app/js/app.js: .btn-ticket-picture)
-        $pictureBtn = '';
-        if (!empty($tenant->picture_url)) {
-            $pictureBtn = ' <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 ms-1 align-baseline btn-ticket-picture"'
-                .' data-url="'.e($tenant->picture_url).'" title="'.e(__('common.view_picture')).'" aria-label="'.e(__('common.view_picture')).'">'
-                .'<i class="cil-image"></i></button>';
-        }
-
-        $list_hticket .= '<td class="text-nowrap"><span class="badge '.$data_status["color"].'">'
+        $list_hticket .= '<td><span class="badge '.$data_status["color"].'">'
             .$data_status["status"].
-            '</span>'.$pictureBtn.'</td>';
+            '</span></td>';
 
         // Edit hanya untuk WO berstatus R yang berasal dari ticket TWP (id-nya di MySQL sv_entry_multi)
         $editId = null;
@@ -188,11 +180,19 @@ if (!empty($htenants)) {
                 ->value('id');
         }
 
+        // Aksi: Edit + tombol kecil lihat gambar (assets/app/js/app.js: .btn-ticket-picture)
+        $actions = '';
         if ($editId) {
-            $list_hticket .= '<td><button class="btn btn-warning btn-sm w-100" onclick="location.href=\''.url('tenant/ticket').'/'.$editId.'/edit\'"> '.e(__('common.edit')).'</button></td>';
-        } else {
-            $list_hticket .= '<td></td>'."\n";
+            $actions .= '<button class="btn btn-warning btn-sm" onclick="location.href=\''.url('tenant/ticket').'/'.$editId.'/edit\'"> '.e(__('common.edit')).'</button>';
         }
+        if (!empty($tenant->picture_url)) {
+            $actions .= '<button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 btn-ticket-picture"'
+                .' data-url="'.e($tenant->picture_url).'" title="'.e(__('common.view_picture')).'" aria-label="'.e(__('common.view_picture')).'">'
+                .'<i class="cil-image"></i></button>';
+        }
+        $list_hticket .= '<td class="text-center text-nowrap">'
+            .($actions !== '' ? '<div class="d-inline-flex align-items-center gap-1">'.$actions.'</div>' : '')
+            .'</td>'."\n";
 
         $list_hticket .= '</tr>';
 
