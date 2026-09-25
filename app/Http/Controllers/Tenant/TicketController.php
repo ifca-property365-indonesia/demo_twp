@@ -445,10 +445,10 @@ class TicketController extends Controller
                 'project_no'      => $project
             );
             if ($id > 0) {
-                // ===== start insert ke HD (edit tidak mengembalikan status O ke R, MySQL) =====
+                // ===== start insert ke HD (edit tidak mengembalikan status O / A ke R, MySQL) =====
                 $oldStatus = DB::table('sv_entry_multi')->where($critedit)->value('status');
-                if (trim((string) $oldStatus) === 'O') {
-                    $data['status'] = 'O';
+                if (in_array(trim((string) $oldStatus), ['O', 'A'], true)) {
+                    $data['status'] = trim((string) $oldStatus);
                 }
                 // ===== end insert ke HD =====
                 $updated = DB::table('sv_entry_multi')->where($critedit)->update($data);
@@ -501,7 +501,8 @@ class TicketController extends Controller
                 // Ticket baru juga dibuat di mgr.sv_entry_hd dengan report_no WOyymmnnnn
                 // (nnnn = urutan dalam bulan berjalan, mulai 0001 setiap bulan baru).
                 // complain_no disimpan di note1 sebagai penghubung ke sv_entry_multi.
-                // Setelah berhasil, status sv_entry_multi (SQL Server & MySQL) -> O.
+                // Work order langsung berstatus A (assigned ke staff sv_labour).
+                // Setelah berhasil, status sv_entry_multi (SQL Server & MySQL) -> A.
                 // Kalau gagal, ticket tetap tersimpan (status tetap R) dan error dicatat di log.
                 try {
                     $hdReportNo = DB::connection('dblive')->transaction(function () use ($entity, $project, $data_tenant, $webuser, $req_by, $description, $location, $floor, $contact_no, $lot_no, $ticket_type, $category, $typeformat2, $critedit2) {
@@ -547,7 +548,7 @@ class TicketController extends Controller
                             'serv_req_by'     => $req_by,
                             'contact_no'      => $contact_no,
                             'billing_type'    => 'T',
-                            'status'          => 'O',
+                            'status'          => 'A',
                             'audit_user'      => 'MGR',
                             'audit_date'      => $now,
                             'complain_source' => 'TWP',
@@ -560,26 +561,26 @@ class TicketController extends Controller
 
                         $db->table('mgr.sv_entry_multi')
                             ->where($critedit2)
-                            ->update(['status' => 'O']);
+                            ->update(['status' => 'A']);
 
                         \Log::info('Ticket masuk sv_entry_hd', ['complain_no' => $typeformat2, 'report_no' => $reportNo]);
 
                         return $reportNo;
                     });
 
-                    // salinan ticket di MySQL (demo_twp.sv_entry_multi) ikut -> O;
+                    // salinan ticket di MySQL (demo_twp.sv_entry_multi) ikut -> A;
                     // dijalankan setelah transaksi SQL Server commit (koneksi berbeda)
                     DB::table('sv_entry_multi')
                         ->where($critedit2)
-                        ->update(['status' => 'O']);
+                        ->update(['status' => 'A']);
                 } catch (\Throwable $e) {
                     \Log::error('Insert sv_entry_hd gagal: ' . $e->getMessage(), ['complain_no' => $typeformat2]);
                 }
                 // ===== end insert ke HD =====
             } else {
-                // ===== start insert ke HD (edit tidak mengembalikan status O ke R, SQL Server) =====
-                if (trim((string) $checkdataServ1[0]->status) === 'O') {
-                    $dataServ1['status'] = 'O';
+                // ===== start insert ke HD (edit tidak mengembalikan status O / A ke R, SQL Server) =====
+                if (in_array(trim((string) $checkdataServ1[0]->status), ['O', 'A'], true)) {
+                    $dataServ1['status'] = trim((string) $checkdataServ1[0]->status);
                 }
                 // ===== end insert ke HD =====
                 DB::connection('dblive')
