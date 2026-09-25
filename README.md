@@ -180,9 +180,6 @@ Keadaan akhir lokal: `tenant` id 1 (IFCA), 2 (00050-A Aditya), 3 (00050-A Ilham)
 - `all_login.pict` admin dan `image_login.image_url` menyimpan URL absolut project lama
   (`.../demo_twp/webadmin/...`, `.../Carstensz/webadmin/...`) -> foto profil/slide login 404 sampai datanya
   diperbarui (lewat menu profil / System Spec).
-- Pengiriman email memakai SP SQL Server `mgr.x_send_mail_twp`; ketiga pemanggilannya sengaja masih
-  di-comment (`Admin/AccountController::resetpass`, `Tenant/TicketController::save`; yang ketiga ada di
-  `Tenant/OvertimeController` yang sudah dihapus karena fiturnya mati).
 
 ## Changelog 2026-09-18
 
