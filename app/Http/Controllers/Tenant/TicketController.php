@@ -349,6 +349,34 @@ class TicketController extends Controller
         echo json_encode($res);
     }
 
+    /** Status work order yang masih boleh diedit tenant (belum dikerjakan). */
+    const EDITABLE_STATUSES = ['R', 'O', 'A'];
+
+    /**
+     * Perbarui work order (mgr.sv_entry_hd) milik ticket ini (note1 = complain_no) kalau
+     * statusnya masih EDITABLE_STATUSES. Mengembalikan report_no-nya, atau null kalau tidak ada.
+     */
+    private function updateWorkOrder($entity, $project, $complainNo, array $data)
+    {
+        $hd = DB::connection('dblive')->table('mgr.sv_entry_hd')
+            ->where('entity_cd', $entity)
+            ->where('project_no', $project)
+            ->where('note1', $complainNo)
+            ->whereIn(DB::raw('RTRIM(status)'), self::EDITABLE_STATUSES)
+            ->first(['report_no']);
+        if (!$hd) {
+            return null;
+        }
+
+        DB::connection('dblive')->table('mgr.sv_entry_hd')
+            ->where('entity_cd', $entity)
+            ->where('project_no', $project)
+            ->where('report_no', $hd->report_no)
+            ->update($data);
+
+        return trim($hd->report_no);
+    }
+
     /**
      * Gambar ticket baru -> mgr.sv_attachment (dipanggil setelah work order sv_entry_hd dibuat).
      * File di storage/file_ticket diganti nama jadi <report_no>_ddmmyyyy_hhmm.<ext>, lalu:
@@ -649,6 +677,28 @@ class TicketController extends Controller
                 ->table('mgr.sv_entry_multi')
                 ->where($critedit2)
                 ->update($dataServ1);
+
+                // Edit ikut ke work order (sv_entry_hd, yang tampil di tabel ticket) selama
+                // belum dikerjakan (R / O / A); gambar baru saat edit -> sv_attachment.
+                try {
+                    $editReportNo = $this->updateWorkOrder($entity, $project, $typeformat2, [
+                        'work_requested' => mb_substr((string) $description, 0, 255),
+                        'location'       => $location,
+                        'floor'          => $floor,
+                        'serv_req_by'    => $req_by,
+                        'contact_no'     => $contact_no,
+                        'lot_no'         => $lot_no,
+                        'request_type'   => $ticket_type,
+                        'category_cd'    => $category,
+                        'audit_date'     => date('d M Y H:i:s'),
+                    ]);
+                    if ($editReportNo && !empty($picture)
+                        && strpos(basename((string) parse_url($picture, PHP_URL_PATH)), trim($editReportNo) . '_') !== 0) {
+                        $this->attachPicture($entity, $project, $editReportNo, $typeformat2, $picture, $critedit2);
+                    }
+                } catch (\Throwable $e) {
+                    \Log::error('Update sv_entry_hd / sv_attachment (edit ticket) gagal: ' . $e->getMessage(), ['complain_no' => $typeformat2]);
+                }
             }
             
             $dataServ2 = array(
