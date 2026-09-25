@@ -26,6 +26,19 @@
         failed: @json(__('common.picture_failed'))
     };
 
+    // tombol tutup ticket tenant, status F -> C (assets/app/js/app.js: ticketCloseButton)
+    window.TICKET_CLOSE = {
+        url: @json(url('tenant/ticket/close')),
+        status: @json(\App\Http\Controllers\Tenant\TicketController::CLOSABLE_STATUS),
+        button: @json(__('tenant/ticket.close_button')),
+        title: @json(__('tenant/ticket.close_title')),
+        confirm: @json(__('tenant/ticket.close_confirm')),
+        yes: @json(__('common.yes')),
+        no: @json(__('common.no')),
+        info: @json(__('common.information')),
+        error: @json(__('common.error'))
+    };
+
     // teks PDF tombol DataTables (assets/app/js/pdf-export.js)
     window.PDF_EXPORT_LANG = {
         button: @json(__('common.generate_pdf')),

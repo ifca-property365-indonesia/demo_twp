@@ -164,6 +164,56 @@
             + '<i class="cil-image"></i></button>';
     };
 
+    /**
+     * Tombol "Selesai" untuk kolom Aksi tabel ticket tenant: hanya work order berstatus
+     * TICKET_CLOSE.status (F). Klik -> konfirmasi -> POST TICKET_CLOSE.url -> status C.
+     */
+    window.ticketCloseButton = function (reportNo, status) {
+        var C = window.TICKET_CLOSE || {};
+        if (!reportNo || !C.url || String(status == null ? '' : status).trim() !== C.status) {
+            return '';
+        }
+        return '<button type="button" class="btn btn-success btn-sm py-0 px-2 btn-ticket-close" data-report="'
+            + window.escapeHtml(String(reportNo).trim()) + '"><i class="cil-check-circle"></i> ' + window.escapeHtml(C.button || 'Done') + '</button>';
+    };
+
+    $(document).on('click', '.btn-ticket-close', function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var $btn = $(this);
+        var C = window.TICKET_CLOSE || {};
+        var report = $btn.data('report');
+        Swal.fire({
+            title: C.title,
+            text: (C.confirm || '').replace(':report', report),
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: C.yes,
+            cancelButtonText: C.no
+        }).then(function (a) {
+            if (!a.value) { return; }
+            $btn.prop('disabled', true);
+            $.post(C.url, { report_no: report }, null, 'json')
+                .done(function (res) {
+                    Swal.fire({ title: C.info, text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
+                        .then(function () {
+                            if (res.status !== 'OK') { $btn.prop('disabled', false); return; }
+                            // tabel DataTables (History) dimuat ulang; tabel biasa (Dashboard) -> reload halaman
+                            var $table = $btn.closest('table');
+                            if ($.fn.dataTable && $.fn.dataTable.isDataTable($table) && $table.DataTable().ajax && $table.DataTable().ajax.url()) {
+                                $table.DataTable().ajax.reload(null, false);
+                            } else {
+                                window.location.reload();
+                            }
+                        });
+                })
+                .fail(function (xhr, textStatus, errorThrown) {
+                    $btn.prop('disabled', false);
+                    Swal.fire({ title: C.error, text: textStatus + ' : ' + errorThrown, icon: 'error' });
+                });
+        });
+    });
+
     $(document).on('click', '.btn-ticket-picture', function (e) {
         e.preventDefault();
         e.stopPropagation();   // baris tabel yang bisa dipilih tidak ikut terpilih

@@ -60,6 +60,14 @@ return [
     'doc_control_not_found' => 'Document control not found for :entity / :prefix',
     'doc_format_not_found'  => 'Document format not found (rowId=:row, type_format=:format)',
 
+    // tombol tutup ticket (status F -> C)
+    'close_button'        => 'Done',
+    'close_title'         => 'Is the work done?',
+    'close_confirm'       => 'Work order :report will be closed as Done. Continue?',
+    'closed'              => 'Work order :report has been closed as Done.',
+    'close_not_found'     => 'Work order not found.',
+    'close_not_allowed'   => 'This work order is not waiting for confirmation, so it cannot be closed.',
+
     // status ticket (kode sv_entry_*) versi label tenant
     'statuses' => [
         'R' => 'Submit',

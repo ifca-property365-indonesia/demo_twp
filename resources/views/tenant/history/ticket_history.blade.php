@@ -132,9 +132,13 @@
 		                    return '<span class="badge ' + item[1] + '">' + $('<div>').text(item[0]).html() + '</span>';
 		                }
 		            },
-		            // Aksi: tombol lihat gambar ticket (kalau ada)
-		            {data:"picture_url", orderable: false, searchable: false, className: 'text-center',
-		                render: function (data, type) { return type === 'display' ? ticketPictureButton(data) : ''; }
+		            // Aksi: tombol Selesai (status F -> C) & lihat gambar ticket (kalau ada)
+		            {data:"picture_url", orderable: false, searchable: false, className: 'text-center text-nowrap',
+		                render: function (data, type, row) {
+		                    if (type !== 'display') { return ''; }
+		                    var html = ticketCloseButton(row.report_no, row.status) + ticketPictureButton(data);
+		                    return html ? '<div class="d-inline-flex align-items-center gap-1">' + html + '</div>' : '';
+		                }
 		            },
 		        ],
 		        dom : "Bfrtip",

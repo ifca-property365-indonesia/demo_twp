@@ -61,6 +61,7 @@ Route::group(['middleware' => ['tenant-auth', 'revalidate']], function () {
 	Route::post('/ticket/getLotNo', [Ticket::class, 'getLotNo']);
 	Route::get('/ticket/getLotNoEdit/{tenant_no}/{lot_no}', [Ticket::class, 'getLotnoEdit']);
 	Route::post('/ticket/savepic', [Ticket::class, 'savepic']);
+	Route::post('/ticket/close', [Ticket::class, 'close']);
 	Route::get('/ticketharga/getHargaItem', [Ticket::class, 'getHargaItem']);
 	Route::get('/ticketharga/getHargaJasa', [Ticket::class, 'getHargaJasa']);
 

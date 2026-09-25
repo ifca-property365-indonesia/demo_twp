@@ -349,6 +349,56 @@ class TicketController extends Controller
         echo json_encode($res);
     }
 
+    /** Status work order yang bisa ditutup tenant (F = Konfirmasi -> C = Selesai). */
+    const CLOSABLE_STATUS = 'F';
+
+    /**
+     * Tenant menyatakan pekerjaan selesai: work order (mgr.sv_entry_hd) berstatus F milik tenant
+     * yang login -> status C, response_time = waktu klik. Status ticket asalnya
+     * (sv_entry_multi SQL Server & MySQL, lewat note1 = complain_no) ikut C.
+     */
+    public function close(Request $request)
+    {
+        $reportNo = trim((string) $request->report_no);
+        $db = DB::connection('dblive');
+        $hd = $reportNo === '' ? null : $db->table('mgr.sv_entry_hd')
+            ->where('report_no', $reportNo)
+            ->whereIn('debtor_acct', TenantScope::tenantNos())
+            ->first(['entity_cd', 'project_no', 'report_no', 'status', 'note1']);
+
+        if (!$hd) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('tenant/ticket.close_not_found')]);
+        }
+        if (trim((string) $hd->status) !== self::CLOSABLE_STATUS) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('tenant/ticket.close_not_allowed')]);
+        }
+
+        $crit = ['entity_cd' => $hd->entity_cd, 'project_no' => $hd->project_no];
+        $complainNo = trim((string) $hd->note1);
+        try {
+            $db->transaction(function () use ($db, $hd, $crit, $complainNo) {
+                $db->table('mgr.sv_entry_hd')->where($crit)->where('report_no', $hd->report_no)
+                    ->where('status', self::CLOSABLE_STATUS)
+                    ->update([
+                        'status'        => 'C',
+                        'response_time' => date('Ymd H:i:s'),   // yyyymmdd: aman untuk DATEFORMAT sesi
+                    ]);
+                if ($complainNo !== '') {
+                    $db->table('mgr.sv_entry_multi')->where($crit)->where('complain_no', $complainNo)->update(['status' => 'C']);
+                }
+            });
+            if ($complainNo !== '') {
+                DB::table('sv_entry_multi')->where('complain_no', $complainNo)
+                    ->where('entity_cd', trim($hd->entity_cd))->where('project_no', trim($hd->project_no))
+                    ->update(['status' => 'C']);
+            }
+        } catch (\Illuminate\Database\QueryException $ex) {
+            return response()->json(['status' => 'Failed', 'pesan' => __('common.update_failed', ['message' => $ex->getMessage()])]);
+        }
+
+        return response()->json(['status' => 'OK', 'pesan' => __('tenant/ticket.closed', ['report' => trim($hd->report_no)])]);
+    }
+
     /** Status work order yang masih boleh diedit tenant: hanya R. */
     const EDITABLE_STATUSES = ['R'];
 

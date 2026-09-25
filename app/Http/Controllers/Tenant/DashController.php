@@ -186,6 +186,11 @@ if (!empty($htenants)) {
         if ($editId) {
             $actions .= '<button class="btn btn-warning btn-sm" onclick="location.href=\''.url('tenant/ticket').'/'.$editId.'/edit\'"> '.e(__('common.edit')).'</button>';
         }
+        // Selesai: WO berstatus F (Konfirmasi) -> C (assets/app/js/app.js: .btn-ticket-close)
+        if (trim((string) $tenant->status) === \App\Http\Controllers\Tenant\TicketController::CLOSABLE_STATUS) {
+            $actions .= '<button type="button" class="btn btn-success btn-sm py-0 px-2 btn-ticket-close" data-report="'.e(trim($tenant->report_no)).'">'
+                .'<i class="cil-check-circle"></i> '.e(__('tenant/ticket.close_button')).'</button>';
+        }
         if (!empty($tenant->picture_url)) {
             $actions .= '<button type="button" class="btn btn-outline-secondary btn-sm py-0 px-1 btn-ticket-picture"'
                 .' data-url="'.e($tenant->picture_url).'" title="'.e(__('common.view_picture')).'" aria-label="'.e(__('common.view_picture')).'">'
