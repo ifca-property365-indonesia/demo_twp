@@ -54,6 +54,10 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    // Alamat portal yang dikirim ke tenant lewat email (link login & gambar logo), mis.
+    // https://demo.property365.co.id:4421/demo_twp/ . Kosong = APP_URL.
+    'portal_url' => env('PORTAL_URL', env('APP_URL', 'http://localhost')),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

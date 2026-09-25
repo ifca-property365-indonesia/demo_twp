@@ -95,7 +95,8 @@ class WsbangunController extends Controller
                 echo 'Bad request';
                 return;
             }
-            $this->syncBusiness($all);
+            $result = $this->syncBusiness($all);
+            $this->sendAccessMails($result['notify']);
             echo json_encode($rows);
         } catch (\Illuminate\Database\QueryException $ex) {
             echo "Insert failed: " . $ex->getMessage();
@@ -112,6 +113,7 @@ class WsbangunController extends Controller
                 return;
             }
             $result = $this->syncBusiness($all);
+            $this->sendAccessMails($result['notify']);
             echo 'Tenant id: ' . $result['id'] . ' data ' . ($result['created'] ? 'inserted' : 'updated') . '!';
         } catch (\Illuminate\Database\QueryException $ex) {
             echo "Update failed: " . $ex->getMessage();
@@ -161,7 +163,8 @@ class WsbangunController extends Controller
      *   user lewat View Profile TWP). Baris lain tidak dihapus.
      *   email_addr_fin kosong/NULL/tidak ada = tidak ada.
      * - all_login tiap baris tenant: belum ada -> dibuat dengan password default; sudah ada ->
-     *   nama & email diperbarui (password tidak diubah).
+     *   nama & email diperbarui (password tidak diubah, kecuali emailnya berganti -> direset ke
+     *   password default). Akun baru / email berganti dikirimi email akses (sendAccessMails).
      * - pm_tenancy: satu baris per business berisi debtor utama (kontrak terbaru); sudah ada ->
      *   diperbarui (status tidak diubah); belum ada -> dibuat (status 'A', id = id tenant F).
      *   tenant.tenant_no_df ikut debtor utama.
@@ -251,11 +254,22 @@ class WsbangunController extends Controller
             $firstId = $tenants->firstWhere('flag', 'F')->id ?? $tenants[0]->id;
 
             // --- all_login ---
+            // Akun baru -> password default. Email akun diganti dari IFCA (mis. karyawan resign)
+            // -> password direset ke password default supaya pemilik email baru bisa masuk.
+            // Keduanya dikirimi email akses (sendAccessMails, setelah transaksi selesai).
             $password = null;
+            $notify = array();
             foreach ($tenants as $tenant) {
                 $crit = array('tableforeign' => 'tenant', 'idforeign' => $tenant->id);
-                if ($db->table('all_login')->where($crit)->exists()) {
-                    $db->table('all_login')->where($crit)->update(array('name' => $tenant->name, 'email' => $tenant->email));
+                $login = $db->table('all_login')->where($crit)->first(['email']);
+                if ($login) {
+                    $update = array('name' => $tenant->name, 'email' => $tenant->email);
+                    if (strcasecmp(trim((string) $login->email), trim((string) $tenant->email)) !== 0) {
+                        $password = $password ?: DefaultPassword::hash();
+                        $update['password'] = $password;
+                        $notify[] = array('name' => $tenant->name, 'email' => $tenant->email, 'reason' => 'email_changed');
+                    }
+                    $db->table('all_login')->where($crit)->update($update);
                 } else {
                     // password awal akun tenant baru: tabel defaultpassword (menu Default Password)
                     $password = $password ?: DefaultPassword::hash();
@@ -264,6 +278,7 @@ class WsbangunController extends Controller
                         'email'    => $tenant->email,
                         'password' => $password,
                     ));
+                    $notify[] = array('name' => $tenant->name, 'email' => $tenant->email, 'reason' => 'created');
                 }
             }
 
@@ -289,8 +304,33 @@ class WsbangunController extends Controller
                 $db->table('pm_tenancy')->insert($tenancy + array('id' => $firstId, 'status' => 'A'));
             }
 
-            return array('id' => $firstId, 'created' => $created);
+            return array('id' => $firstId, 'created' => $created, 'notify' => $notify);
         });
+    }
+
+    /**
+     * Kirim email akses (URL portal, email, password default) ke akun yang baru dibuat atau
+     * emailnya diganti. Gagal kirim tidak membatalkan sinkron: hanya dicatat di log.
+     */
+    private function sendAccessMails(array $notify)
+    {
+        if (!$notify) {
+            return;
+        }
+        $plain = DefaultPassword::get();
+        foreach ($notify as $n) {
+            if (!filter_var($n['email'], FILTER_VALIDATE_EMAIL)) {
+                \Log::warning('Email akses tenant tidak dikirim: alamat tidak valid', $n);
+                continue;
+            }
+            try {
+                \Illuminate\Support\Facades\Mail::to($n['email'])
+                    ->send(new \App\Mail\TenantAccessMail((string) $n['name'], $n['email'], $plain, $n['reason']));
+                \Log::info('Email akses tenant terkirim', $n);
+            } catch (\Throwable $e) {
+                \Log::error('Email akses tenant gagal: ' . $e->getMessage(), $n);
+            }
+        }
     }
 
     /** Tanggal SQL Server -> Y-m-d (null tetap null) */
