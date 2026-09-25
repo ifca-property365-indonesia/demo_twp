@@ -113,9 +113,15 @@ class AccountController extends Controller
         }
         $criteria = array('email' => $email);
 
-        
-        try { 
-            
+        // Ganti email (opsional): dicek dulu sebelum ada yang disimpan
+        $newEmail = trim((string) $request->email);
+        $emailChanged = $newEmail !== '' && strcasecmp($newEmail, $email) !== 0;
+        if ($emailChanged && ($error = $this->emailChangeError($email, $newEmail, (string) $request->current_password))) {
+            return response()->json(['status' => 'Failed', 'pesan' => $error]);
+        }
+
+        try {
+
                 DB::table('all_login')
                     ->where($criteria)
                     ->update($data);
@@ -134,18 +140,73 @@ class AccountController extends Controller
                 if ($image !== null) {
                     Session::put('Tpict', $image);
                 }
-                
-                $msg = __('common.updated');
+
+                if ($emailChanged) {
+                    $this->changeEmail($email, $newEmail);
+                }
+
+                $msg = $emailChanged ? __('tenant/account.email_changed', ['email' => $newEmail]) : __('common.updated');
                 $st  = 'OK';
-             
-        } catch(\Illuminate\Database\QueryException $ex){ 
+
+        } catch(\Illuminate\Database\QueryException $ex){
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
         return response()->json([
             'status' => $st,
-            'pesan' => $msg
+            'pesan' => $msg,
+            'email' => ($st === 'OK' && $emailChanged) ? $newEmail : null,
         ]);
+    }
+
+    /**
+     * Alasan email baru ditolak, atau null kalau boleh: format email, belum dipakai akun lain
+     * (all_login / tenant), dan password saat ini benar (konfirmasi pemilik akun).
+     */
+    private function emailChangeError($email, $newEmail, $password)
+    {
+        if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL) || strlen($newEmail) > 100) {
+            return __('tenant/account.email_invalid');
+        }
+        $taken = DB::table('all_login')->where('email', $newEmail)->exists()
+            || DB::table('tenant')->where('email', $newEmail)->exists();
+        if ($taken) {
+            return __('tenant/account.email_taken');
+        }
+        $hashes = DB::table('all_login')->where('email', $email)->where('tableforeign', 'tenant')->pluck('password');
+        if ($password === '' || !$hashes->contains(function ($hash) use ($password) { return Password::check($password, $hash); })) {
+            return __('tenant/account.current_password_wrong');
+        }
+        return null;
+    }
+
+    /**
+     * Pindahkan email akun tenant: login (all_login baris tenant), tenant, pilihan bahasa
+     * (user_locale) dan penanda survei yang sudah dijawab (survey_respondents), lalu session.
+     * Akun admin dengan email yang sama (all_login baris administrator) tidak ikut berubah.
+     */
+    private function changeEmail($email, $newEmail)
+    {
+        DB::transaction(function () use ($email, $newEmail) {
+            DB::table('all_login')->where('email', $email)->where('tableforeign', 'tenant')->update(['email' => $newEmail]);
+            DB::table('tenant')->where('email', $email)->update(['email' => $newEmail]);
+            // user_locale memakai email huruf kecil (App\Support\UserLocale::key). Kalau email lama
+            // masih dipakai akun admin, pilihan bahasanya disalin (bukan dipindah).
+            $locale = DB::table('user_locale')->where('email', strtolower($email))->first();
+            if ($locale && !DB::table('user_locale')->where('email', strtolower($newEmail))->exists()) {
+                if (DB::table('all_login')->where('email', $email)->exists()) {
+                    DB::table('user_locale')->insert(array_merge((array) $locale, ['email' => strtolower($newEmail)]));
+                } else {
+                    DB::table('user_locale')->where('email', strtolower($email))->update(['email' => strtolower($newEmail)]);
+                }
+            }
+            DB::table('survey_respondents')->where('email', $email)->update(['email' => $newEmail]);
+        });
+
+        Session::put('Tenemail', $newEmail);
+        if (strcasecmp((string) Session::get('login_email'), $email) === 0) {
+            Session::put('login_email', strtolower($newEmail));
+        }
     }
     public function changepass(Request $request)
     {

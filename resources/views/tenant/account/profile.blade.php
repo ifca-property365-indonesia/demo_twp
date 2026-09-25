@@ -68,7 +68,16 @@
                     </div>
                     <div class="mb-3">
                         <label for="email" class="form-label">{{ __('common.email') }}</label>
-                        <input type="text" class="form-control" id="email" name="email" readonly>
+                        {{-- Ganti email sementara dinonaktifkan dari tampilan (readonly). Fungsi di
+                             Tenant\AccountController::updateprofile tetap ada: hapus "readonly" untuk
+                             mengaktifkannya lagi (kolom password konfirmasi di bawah muncul otomatis). --}}
+                        <input type="email" class="form-control" id="email" name="email" maxlength="100" autocomplete="email" readonly>
+                    </div>
+                    {{-- muncul kalau email diubah: konfirmasi pemilik akun --}}
+                    <div class="mb-3 d-none" id="emailConfirm">
+                        <label for="current_password" class="form-label">{{ __('tenant/account.current_password') }} <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" autocomplete="current-password">
+                        <div class="form-note">{{ __('tenant/account.current_password_note') }}</div>
                     </div>
                     <div class="mb-3">
                         <label for="handphone" class="form-label">{{ __('tenant/account.handphone') }} <span class="text-danger">*</span></label>
@@ -119,8 +128,24 @@
     }, @json(__('tenant/account.password_mismatch')));
 
     $('#frmEditor').validate($.extend({}, validateOpts, {
-        rules: { name: { required: true }, handphone: { required: true } }
+        rules: {
+            name: { required: true },
+            handphone: { required: true },
+            email: { required: true, email: true },
+            current_password: { required: function () { return emailChanged(); } }
+        }
     }));
+
+    // Email diubah -> minta password saat ini
+    var originalEmail = '';
+    function emailChanged() {
+        return $.trim($('#email').val()).toLowerCase() !== originalEmail.toLowerCase();
+    }
+    $('#email').on('input change', function () {
+        var changed = emailChanged();
+        $('#emailConfirm').toggleClass('d-none', !changed);
+        if (!changed) { $('#current_password').val('').removeClass('is-invalid').next('.invalid-feedback').remove(); }
+    });
 
     $('#frmchangepass').validate($.extend({}, validateOpts, {
         rules: { password1: { required: true }, password2: { required: true, confirmpass: true } }
@@ -269,6 +294,12 @@
                 $('.header .user-name, .dropdown-menu-user .user-card .lead-text').text($('#name').val());
                 $('.header .user-role, .dropdown-menu-user .user-card .sub-text:first').text($.trim($('#contact_name').val()));
                 $('.header .user-avatar img').attr('src', $('#picturebox').attr('src'));
+                if (res.email) {
+                    // email baru: header & data modal profil berikutnya ikut email baru
+                    $('.dropdown-menu-user .user-card .sub-text:last').text(res.email);
+                    $('#modal').data('Id', res.email);
+                    originalEmail = res.email;
+                }
                 $('#picturebox').removeClass('profile-changed');
                 $('#pictureHint').addClass('d-none');
             }
@@ -311,6 +342,7 @@
             $('#handphone').val(data[0].handphone);
             $('#contact_name').val(data[0].contact_name || '');
             $('#email').val(data[0].email);
+            originalEmail = data[0].email || '';
             $('#image').val(data[0].pict);
             $('#labelimage').val(data[0].pict);
             if (data[0].pict) {
