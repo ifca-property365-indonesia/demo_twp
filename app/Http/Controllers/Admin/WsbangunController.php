@@ -96,6 +96,10 @@ class WsbangunController extends Controller
                 return;
             }
             $result = $this->syncBusiness($all);
+            if ($result === null) {
+                echo 'Bad request';   // email_addr & email_addr_fin kosong
+                return;
+            }
             $this->sendAccessMails($result['notify']);
             echo json_encode($rows);
         } catch (\Illuminate\Database\QueryException $ex) {
@@ -113,6 +117,10 @@ class WsbangunController extends Controller
                 return;
             }
             $result = $this->syncBusiness($all);
+            if ($result === null) {
+                echo 'Bad request';   // email_addr & email_addr_fin kosong
+                return;
+            }
             $this->sendAccessMails($result['notify']);
             echo 'Tenant id: ' . $result['id'] . ' data ' . ($result['created'] ? 'inserted' : 'updated') . '!';
         } catch (\Illuminate\Database\QueryException $ex) {
@@ -156,12 +164,11 @@ class WsbangunController extends Controller
 
     /**
      * Upsert akun tenant dari baris mgr.v_tenant_login (semua business_id yang sama):
-     * - tenant (per business_no + flag): hanya email_addr -> satu baris F; ada email_addr_fin ->
-     *   F (email_addr_fin) + O (email_addr). Baris yang belum ada dibuat, yang sudah ada diperbarui
-     *   (nama, telepon, alamat, email). contact_name diisi dari contact_person hanya saat baris
-     *   dibuat; contact_mobile selalu kosong saat dibuat. Keduanya tidak pernah ditimpa (diisi
-     *   user lewat View Profile TWP). Baris lain tidak dihapus.
-     *   email_addr_fin kosong/NULL/tidak ada = tidak ada.
+     * - tenant (per business_no + flag): email_addr -> baris O, email_addr_fin -> baris F; kolom
+     *   kosong -> baris flag itu tidak dibuat / diubah. Baris yang belum ada dibuat, yang sudah ada
+     *   diperbarui (nama, telepon, alamat, email). contact_name diisi dari contact_person hanya
+     *   saat baris dibuat; contact_mobile selalu kosong saat dibuat. Keduanya tidak pernah ditimpa
+     *   (diisi user lewat View Profile TWP). Baris lain tidak dihapus.
      * - all_login tiap baris tenant: belum ada -> dibuat dengan password default; sudah ada ->
      *   nama & email diperbarui (password tidak diubah, kecuali emailnya berganti -> direset ke
      *   password default). Akun baru / email berganti dikirimi email akses (sendAccessMails).
@@ -169,7 +176,9 @@ class WsbangunController extends Controller
      *   diperbarui (status tidak diubah); belum ada -> dibuat (status 'A', id = id tenant F).
      *   tenant.tenant_no_df ikut debtor utama.
      *
-     * @return array ['id' => id tenant untuk pm_tenancy, 'created' => true kalau tenant baru dibuat]
+     * @return array|null ['id' => id tenant untuk pm_tenancy, 'created' => true kalau tenant baru
+     *                    dibuat, 'notify' => akun yang dikirimi email akses]; null kalau
+     *                    email_addr & email_addr_fin kosong (tidak ada yang diubah)
      */
     private function syncBusiness(array $rows)
     {
@@ -195,16 +204,21 @@ class WsbangunController extends Controller
             'phone'          => $text($src->tel_no),
             'address'        => $text($src->address1 . ' ' . $src->address2 . ' ' . $src->address3 . ' ' . $src->post_cd),
         );
-        $email = trim((string) $src->email_addr);
         // kolom email_addr_fin belum ada di view: otomatis terpakai begitu kolomnya ditambahkan
         $emailFin = property_exists($src, 'email_addr_fin') ? trim((string) $src->email_addr_fin) : '';
 
-        // Flag tenant: F = Finance (semua menu), O = Operational (tanpa menu Invoice).
-        // Hanya email_addr -> satu baris F. Ada email_addr_fin -> F (email_addr_fin) + O (email_addr).
-        // F dibuat lebih dulu supaya id-nya yang dipakai pm_tenancy (sama seperti data yang sudah ada).
-        $want = $emailFin !== '' ? array('F' => $emailFin, 'O' => $email) : array('F' => $email);
+        // Flag tenant: email_addr -> selalu O (Operational, tanpa menu Invoice),
+        // email_addr_fin -> selalu F (Finance, semua menu). Kolom kosong -> baris flag itu tidak
+        // dibuat / diubah. Isi kolom sepenuhnya tanggung jawab pengisi data di IFCA.
+        $want = array_filter(array(
+            'F' => $emailFin,
+            'O' => trim((string) $src->email_addr),
+        ), 'strlen');
+        if (!$want) {
+            return null;   // email_addr & email_addr_fin kosong: tidak ada akun yang bisa dibuat
+        }
 
-        return $db->transaction(function () use ($db, $rows, $src, $businessNo, $info, $email, $emailFin, $want, $text) {
+        return $db->transaction(function () use ($db, $rows, $src, $businessNo, $info, $want, $text) {
             // --- tenant (per business_no + flag) ---
             $existing = array();
             foreach ($db->table('tenant')->where('business_no', $businessNo)->orderBy('id')->get() as $t) {
@@ -212,28 +226,9 @@ class WsbangunController extends Controller
             }
             $created = empty($existing);
 
-            // email_addr_fin baru terisi untuk business yang selama ini hanya punya F (email_addr):
-            // baris itu jadi O (akun login email_addr tetap), lalu F baru untuk email finance
-            if ($emailFin !== '' && !isset($existing['O']) && isset($existing['F'])
-                && strcasecmp(trim((string) $existing['F']->email), $email) === 0) {
-                $db->table('tenant')->where('id', $existing['F']->id)->update(array('flag' => 'O'));
-                $existing['O'] = $existing['F'];
-                unset($existing['F']);
-            }
-
             foreach ($want as $flag => $mail) {
                 if (isset($existing[$flag])) {
-                    $update = $info;
-                    // email yang sudah dipakai baris lain business ini (mis. email_addr_fin dikosongkan
-                    // lagi: F jangan ikut memakai email O) tidak dipasang -> email F tetap yang lama
-                    $taken = false;
-                    foreach ($existing as $f => $t) {
-                        $taken = $taken || ($f !== $flag && strcasecmp(trim((string) $t->email), $mail) === 0);
-                    }
-                    if (!$taken) {
-                        $update['email'] = $mail;
-                    }
-                    $db->table('tenant')->where('id', $existing[$flag]->id)->update($update);
+                    $db->table('tenant')->where('id', $existing[$flag]->id)->update($info + array('email' => $mail));
                 } else {
                     $db->table('tenant')->insert($info + array(
                         // nama kontak hanya diisi saat baris baru dibuat; sesudahnya diubah user
