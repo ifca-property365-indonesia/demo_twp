@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Session;
 
 class TicketController extends Controller
 {
+    /** Folder gambar ticket, relatif ke root web (URL: url(TICKET_FILE_DIR . '/nama')). */
+    const TICKET_FILE_DIR = 'storage/file_ticket';
+
     public function index($id=null, $form=null)
     {
         $buss_id = Session::get('business_no');
@@ -271,7 +274,10 @@ class TicketController extends Controller
         $files = $_FILES;
         $picture = !empty($_FILES) ? $picture = $_FILES["ticket_image"] : '';
         if (!empty($picture["name"])) {
-            $picname = str_replace(' ', '_', $picture["name"]);
+            // nama sementara unik (nama asli + waktu upload) supaya file tenant lain dengan nama
+            // sama tidak tertimpa; saat ticket disimpan diganti jadi report_no_ddmmyyyy_hhmm.ext
+            $picname = preg_replace('/[^A-Za-z0-9_-]+/', '_', pathinfo($picture["name"], PATHINFO_FILENAME))
+                . '_' . date('YmdHis') . '.' . strtolower(pathinfo($picture["name"], PATHINFO_EXTENSION));
             $picture = $_FILES["ticket_image"];
             $tmpName = $_FILES['ticket_image']['tmp_name'];
             $imgString = file_get_contents($tmpName);
@@ -285,7 +291,7 @@ class TicketController extends Controller
             if (!is_dir($target_dir)) {
                 mkdir($target_dir);
             }
-            $target_file = $target_dir . str_replace(' ', '_', basename($_FILES["ticket_image"]["name"]));
+            $target_file = $target_dir . $picname;
             $uploadOk = 1;
             $imageFileType = pathinfo($target_file, PATHINFO_EXTENSION);
 
@@ -322,8 +328,8 @@ class TicketController extends Controller
                 if (move_uploaded_file($_FILES["ticket_image"]["tmp_name"], $target_file)) {
                     $msg = __('common.upload_done', ['name' => basename($_FILES["ticket_image"]["name"])]);
                     $psn = "OK";
-                    $descs = "/storage/file_ticket/" . $picname;
-                    $url = url('/tenant') . $descs;
+                    // folder storage/ di root web (dulu url('/tenant') . ... -> 404)
+                    $url = url(self::TICKET_FILE_DIR . '/' . $picname);
                 } else {
                     $msg = __('common.upload_error');
                     $psn = "Failed";
@@ -343,7 +349,52 @@ class TicketController extends Controller
         echo json_encode($res);
     }
 
-    public function update(Request $request) 
+    /**
+     * Gambar ticket baru -> mgr.sv_attachment (dipanggil setelah work order sv_entry_hd dibuat).
+     * File di storage/file_ticket diganti nama jadi <report_no>_ddmmyyyy_hhmm.<ext>, lalu:
+     *   entity_cd, project_no, report_no = work order, document_no = complain_no (note1 HD),
+     *   file_attachment = nama file, file_url = URL file, audit_user / audit_date.
+     * sv_entry_multi.picture (MySQL) ikut URL baru. Gambar dari luar folder itu dilewati.
+     */
+    private function attachPicture($entity, $project, $reportNo, $complainNo, $pictureUrl, array $critMulti)
+    {
+        $path = rawurldecode((string) parse_url($pictureUrl, PHP_URL_PATH));
+        if (strpos($path, '/' . self::TICKET_FILE_DIR . '/') === false) {
+            return;
+        }
+
+        $dir = base_path(self::TICKET_FILE_DIR);
+        $src = $dir . '/' . basename($path);
+        if (!is_file($src)) {
+            throw new \RuntimeException('File gambar ticket tidak ditemukan: ' . basename($path));
+        }
+
+        $name = trim($reportNo) . '_' . date('dmY_Hi') . '.' . strtolower(pathinfo($src, PATHINFO_EXTENSION));
+        if (!rename($src, $dir . '/' . $name)) {
+            throw new \RuntimeException('Gagal mengganti nama file ' . basename($src) . ' -> ' . $name);
+        }
+        $url = url(self::TICKET_FILE_DIR . '/' . $name);
+
+        try {
+            DB::connection('dblive')->table('mgr.sv_attachment')->insert([
+                'entity_cd'       => $entity,
+                'project_no'      => $project,
+                'report_no'       => trim($reportNo),
+                'document_no'     => is_numeric(trim((string) $complainNo)) ? trim((string) $complainNo) : null,
+                'file_attachment' => $name,
+                'file_url'        => $url,
+                'audit_user'      => 'MGR',
+                'audit_date'      => date('d M Y H:i:s'),
+            ]);
+        } catch (\Throwable $e) {
+            rename($dir . '/' . $name, $src);   // kembalikan nama file supaya gambar ticket tetap tampil
+            throw $e;
+        }
+
+        DB::table('sv_entry_multi')->where($critMulti)->update(['picture' => $url]);
+    }
+
+    public function update(Request $request)
     {
         try {
             
@@ -555,6 +606,8 @@ class TicketController extends Controller
                             'lot_no'          => $lot_no,
                             'request_type'    => $ticket_type,
                             'category_cd'     => $category,
+                            // belum ada pilihan di form ticket: selalu U
+                            'location_type'   => 'U',
                             'assign_to'       => $staffId ? trim($staffId) : null,
                             'note1'           => $typeformat2,   // complain_no sv_entry_multi
                         ]);
@@ -575,6 +628,15 @@ class TicketController extends Controller
                         ->update(['status' => 'A']);
                 } catch (\Throwable $e) {
                     \Log::error('Insert sv_entry_hd gagal: ' . $e->getMessage(), ['complain_no' => $typeformat2]);
+                }
+
+                // gambar ticket -> mgr.sv_attachment (terpisah: kalau gagal, work order tetap ada)
+                if ($hdReportNo && !empty($picture)) {
+                    try {
+                        $this->attachPicture($entity, $project, $hdReportNo, $typeformat2, $picture, $critedit2);
+                    } catch (\Throwable $e) {
+                        \Log::error('Insert sv_attachment gagal: ' . $e->getMessage(), ['report_no' => $hdReportNo]);
+                    }
                 }
                 // ===== end insert ke HD =====
             } else {
