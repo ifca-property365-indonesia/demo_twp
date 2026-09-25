@@ -525,6 +525,13 @@ class TicketController extends Controller
                         }
                         $reportNo = $prefix . str_pad($lastSeq + 1, 4, '0', STR_PAD_LEFT);
 
+                        // Staff penanggung jawab work order dari mgr.sv_labour: yang kategorinya
+                        // sama dengan kategori ticket, kalau tidak ada -> staff pertama.
+                        $staffId = $db->table('mgr.sv_labour')
+                            ->orderByRaw('CASE WHEN RTRIM(category_cd) = ? THEN 0 ELSE 1 END', [trim((string) $category)])
+                            ->orderBy('rowID')
+                            ->value('staff_id');
+
                         $now = date('d M Y H:i:s');
                         $db->table('mgr.sv_entry_hd')->insert([
                             'entity_cd'       => $entity,
@@ -547,6 +554,7 @@ class TicketController extends Controller
                             'lot_no'          => $lot_no,
                             'request_type'    => $ticket_type,
                             'category_cd'     => $category,
+                            'assign_to'       => $staffId ? trim($staffId) : null,
                             'note1'           => $typeformat2,   // complain_no sv_entry_multi
                         ]);
 
