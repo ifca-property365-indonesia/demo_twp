@@ -174,6 +174,9 @@
 .select2-container--bootstrap-5 .select2-selection { min-height: calc(1.5em + .75rem + 2px); }
 .select2-container--bootstrap-5 .select2-selection--single .select2-selection__rendered { line-height: 1.5; }
 .form-control-wrap .select2-container { z-index: 3; }
+/* Select2 di dalam .form-control-wrap berikon: teks tidak menimpa ikon */
+.form-control-wrap .form-icon-left ~ .select2-container .select2-selection { padding-left: 2.4rem; }
+.form-control-wrap .form-icon-left ~ .select2-container .select2-selection--single .select2-selection__rendered { padding-left: 0; }
 .is-invalid + .select2-container--bootstrap-5 .select2-selection { border-color: var(--cui-form-invalid-border-color); }
 .is-invalid ~ .invalid-feedback { display: block; }
 

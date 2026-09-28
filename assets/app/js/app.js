@@ -72,14 +72,53 @@
     }
     window.initDatepickers = initDatepickers;
 
+    /**
+     * Semua dropdown tampil seperti Select2 di form Ticket tenant (tema bootstrap-5):
+     * <select class="form-select|form-control"> yang belum Select2 otomatis dijadikan Select2.
+     * - placeholder dari data-placeholder
+     * - lebar dari style="width: ..." tetap dipakai; .form-select-sm -> versi kecil
+     * - dilewati: <select data-native>, pilihan "Show n entries" DataTables
+     * Dipanggil setelah semua script halaman jalan (halaman yang memanggil .select2() sendiri
+     * tidak diinisialisasi dua kali) dan setiap ada elemen baru (modal, baris dinamis).
+     */
+    function initSelects(root) {
+        if (!$.fn.select2) {
+            return;
+        }
+        $(root || document).find('select.form-select, select.form-control').each(function () {
+            var $s = $(this);
+            if ($s.hasClass('select2-hidden-accessible') || $s.is('[data-native]')
+                || $s.closest('.dt-length, .dataTables_length').length) {
+                return;
+            }
+            var width = (this.style && this.style.width) || '';
+            var small = $s.hasClass('form-select-sm') || $s.hasClass('form-control-sm');
+            $s.select2({
+                placeholder: $s.data('placeholder') || undefined,
+                selectionCssClass: small ? 'select2--small' : '',
+                dropdownCssClass: small ? 'select2--small' : ''
+            });
+            if (width) {
+                // app.css memaksa lebar 100% (!important); dropdown berlebar tetap di toolbar
+                var $c = $s.next('.select2-container');
+                $c.attr('style', ($c.attr('style') || '') + ';width:' + width + ' !important');
+            }
+        });
+    }
+    window.initSelects = initSelects;
+
     $(function () {
         initDatepickers();
+        setTimeout(function () { initSelects(document); }, 0);
 
         if (window.MutationObserver) {
             var pending = null;
             new MutationObserver(function () {
                 clearTimeout(pending);
-                pending = setTimeout(initDatepickers, 50);
+                pending = setTimeout(function () {
+                    initDatepickers();
+                    initSelects(document);
+                }, 50);
             }).observe(document.body, { childList: true, subtree: true });
         }
 

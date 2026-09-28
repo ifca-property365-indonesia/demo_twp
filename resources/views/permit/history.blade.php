@@ -436,7 +436,7 @@
     });
 
     $('#btnReset').on('click', function () {
-        $('#permit_no, #permit_type, #status, #tenant_no').val('');
+        $('#permit_no, #permit_type, #status, #tenant_no').val('').trigger('change.select2');   // tampilan Select2 ikut kosong
         $('#start_date').val('');
         if ($.fn.datepicker) {
             $('#start_date').datepicker('update', '');

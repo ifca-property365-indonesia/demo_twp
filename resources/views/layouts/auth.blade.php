@@ -10,7 +10,9 @@
 
     <link rel="stylesheet" href="{{ url('assets/coreui/css/coreui.min.css') }}">
     <link rel="stylesheet" href="{{ url('assets/coreui/icons/css/free.min.css') }}">
-    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.9') }}">
+    <link rel="stylesheet" href="{{ url('assets/vendor/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ url('assets/vendor/select2/select2-bootstrap-5-theme.min.css') }}">
+    <link rel="stylesheet" href="{{ url('assets/app/css/app.css?ver=1.0.10') }}">
     <style>
         :root { --login-bg: url("{{ asset('public/lainnya/img/Background_new.jpeg') }}"); }
     </style>
@@ -29,7 +31,15 @@
 
     <script src="{{ url('assets/vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ url('assets/coreui/js/coreui.bundle.min.js') }}"></script>
+    <script src="{{ url('assets/vendor/select2/select2.full.min.js') }}"></script>
     <script>
+        // Dropdown tampil seperti Select2 di portal (tema bootstrap-5, lihat assets/app/js/app.js)
+        $(function () {
+            $('select.form-select, select.form-control').not('[data-native]').each(function () {
+                $(this).select2({ theme: 'bootstrap-5', width: '100%', placeholder: $(this).data('placeholder') || undefined });
+            });
+        });
+
         // Tombol lihat/sembunyikan password
         document.querySelectorAll('.toggle-password').forEach(function (el) {
             el.addEventListener('click', function () {

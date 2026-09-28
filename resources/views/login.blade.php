@@ -104,6 +104,7 @@
             });
             select.required = list.length > 1;
             group.style.display = '';
+            $(select).trigger('change.select2');   // tampilan Select2 ikut isi baru
         }
 
         var EMPTY = { admin: false, tenants: [] };
