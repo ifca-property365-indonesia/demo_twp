@@ -46,19 +46,14 @@
                             <input type="text" class="form-control" name="floor" id="floor" readonly>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label" for="angka">{{ __('tenant/ticket.ticket_number') }}</label>
-                            <input type="text" class="form-control" name="angka" id="angka" readonly>
-                            <input type="hidden" name="pre" id="pre">
-                        </div>
-                        <div class="col-md-4">
                             <label class="form-label" for="location">{{ __('tenant/ticket.location') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" maxlength="20" id="location" name="location">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label" for="req_by">{{ __('tenant/ticket.requested_by') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="req_by" name="req_by">
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label class="form-label" for="contact_no">{{ __('tenant/ticket.contact_no') }} <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" maxlength="20" id="contact_no" name="contact_no">
                         </div>
@@ -96,6 +91,9 @@
                         <button type="button" id="btnReset" class="btn btn-outline-secondary"><i class="cil-reload"></i><span>{{ __('common.reset') }}</span></button>
                         <button type="button" id="btnSave" class="btn btn-primary"><i class="cil-send"></i><span>{{ __('common.submit') }}</span></button>
                     </div>
+                    {{-- Ticket Number (complain_no) tidak ditampilkan, tetap dikirim saat simpan --}}
+                    <input type="hidden" name="angka" id="angka">
+                    <input type="hidden" name="pre" id="pre">
                     <input type="hidden" name="entity" id="entity">
                     <input type="hidden" name="project" id="project">
                 </form>

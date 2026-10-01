@@ -403,6 +403,73 @@ class TicketController extends Controller
     const EDITABLE_STATUSES = ['R'];
 
     /**
+     * Nomor work order berikutnya untuk mgr.sv_entry_hd. Harus dipanggil di dalam transaksi
+     * koneksi $db; setelah insert HD berhasil, next_doc_no baris rowID yang dikembalikan
+     * dinaikkan 1 oleh pemanggil.
+     *
+     *   tenant_prefix : mgr.sv_spec (entity_cd, project_no)
+     *   next_doc_no   : mgr.cf_document_ctl_dtl (entity_cd, prefix = tenant_prefix,
+     *                   year & month berjalan)
+     *   report_no     : tenant_prefix + yy + mm + next_doc_no 4 digit, mis. WO26100002
+     *
+     * Kalau baris bulan/tahun berjalan belum ada (mis. masuk November, atau Januari tahun
+     * baru), dibuat baris baru hasil salinan baris terakhir prefix tsb dengan year/month
+     * berjalan dan next_doc_no = 1 -> nomor pertama bulan itu ...0001.
+     *
+     * @return array [report_no, rowID cf_document_ctl_dtl]
+     */
+    private function nextWorkOrderNo($db, $entity, $project)
+    {
+        $prefix = trim((string) $db->table('mgr.sv_spec')
+            ->where('entity_cd', $entity)
+            ->where('project_no', $project)
+            ->value('tenant_prefix'));
+        if ($prefix === '') {
+            throw new \RuntimeException("tenant_prefix mgr.sv_spec kosong (entity {$entity}, project {$project})");
+        }
+
+        $year = (int) date('Y');
+        $month = (int) date('n');
+        $crit = ['entity_cd' => $entity, 'prefix' => $prefix];
+
+        // dikunci sampai commit supaya dua submit bersamaan tidak mendapat nomor yang sama
+        $ctl = $db->table('mgr.cf_document_ctl_dtl')
+            ->where($crit)->where('year', $year)->where('month', $month)
+            ->lockForUpdate()
+            ->first(['rowID', 'next_doc_no']);
+
+        if (!$ctl) {
+            $last = $db->table('mgr.cf_document_ctl_dtl')
+                ->where($crit)
+                ->orderBy('year', 'desc')->orderBy('month', 'desc')
+                ->lockForUpdate()
+                ->first();
+            if (!$last) {
+                throw new \RuntimeException("mgr.cf_document_ctl_dtl prefix {$prefix} entity {$entity} belum ada");
+            }
+
+            $copy = (array) $last;
+            unset($copy['rowID']);   // identity
+            $copy['year'] = $year;
+            $copy['month'] = $month;
+            $copy['next_doc_no'] = 1;
+            $copy['audit_date'] = date('d M Y H:i:s');
+
+            $rowId = $db->table('mgr.cf_document_ctl_dtl')->insertGetId($copy, 'rowID');
+            $ctl = (object) ['rowID' => $rowId, 'next_doc_no' => 1];
+        }
+
+        $seq = (int) $ctl->next_doc_no;
+        if ($seq > 9999) {
+            throw new \RuntimeException("next_doc_no {$prefix} {$year}-{$month} sudah melewati 9999");
+        }
+
+        $reportNo = $prefix . date('ym') . str_pad($seq, 4, '0', STR_PAD_LEFT);
+
+        return [$reportNo, $ctl->rowID];
+    }
+
+    /**
      * Perbarui work order (mgr.sv_entry_hd) milik ticket ini (note1 = complain_no) kalau
      * statusnya masih EDITABLE_STATUSES. Mengembalikan report_no-nya, atau null kalau tidak ada.
      */
@@ -627,8 +694,8 @@ class TicketController extends Controller
                 ->insert($dataServ1);
 
                 // ===== start insert ke HD =====
-                // Ticket baru juga dibuat di mgr.sv_entry_hd dengan report_no WOyymmnnnn
-                // (nnnn = urutan dalam bulan berjalan, mulai 0001 setiap bulan baru).
+                // Ticket baru juga dibuat di mgr.sv_entry_hd dengan report_no dari
+                // nextWorkOrderNo() (tenant_prefix + yymm + next_doc_no cf_document_ctl_dtl).
                 // complain_no disimpan di note1 sebagai penghubung ke sv_entry_multi.
                 // Work order langsung berstatus A (assigned ke staff sv_labour).
                 // Setelah berhasil, status sv_entry_multi (SQL Server & MySQL) -> A.
@@ -637,23 +704,9 @@ class TicketController extends Controller
                     $hdReportNo = DB::connection('dblive')->transaction(function () use ($entity, $project, $data_tenant, $webuser, $req_by, $description, $location, $floor, $contact_no, $lot_no, $ticket_type, $category, $typeformat2, $critedit2) {
                         $db = DB::connection('dblive');
 
-                        // report_no terakhir di bulan berjalan (WOyymm....); belum ada -> mulai 0001.
-                        // Baris dikunci sampai commit supaya dua submit bersamaan tidak
-                        // mendapat nomor yang sama.
-                        $prefix = 'WO' . date('ym');
-                        $lastReportNo = $db->table('mgr.sv_entry_hd')
-                            ->where('entity_cd', $entity)
-                            ->where('project_no', $project)
-                            ->where('report_no', 'like', $prefix . '%')
-                            ->orderBy('report_no', 'desc')
-                            ->lockForUpdate()
-                            ->value('report_no');
-
-                        $lastSeq = $lastReportNo ? (int) substr(trim($lastReportNo), -4) : 0;
-                        if ($lastSeq >= 9999) {
-                            throw new \RuntimeException('report_no ' . $prefix . ' sudah mencapai 9999');
-                        }
-                        $reportNo = $prefix . str_pad($lastSeq + 1, 4, '0', STR_PAD_LEFT);
+                        // report_no = tenant_prefix (sv_spec) + yymm + next_doc_no 4 digit
+                        // (cf_document_ctl_dtl bulan berjalan), mis. WO26100002
+                        [$reportNo, $docCtlRowId] = $this->nextWorkOrderNo($db, $entity, $project);
 
                         // Staff penanggung jawab work order dari mgr.sv_labour: yang kategorinya
                         // sama dengan kategori ticket, kalau tidak ada -> staff pertama.
@@ -689,6 +742,14 @@ class TicketController extends Controller
                             'assign_to'       => $staffId ? trim($staffId) : null,
                             'note1'           => $typeformat2,   // complain_no sv_entry_multi
                         ]);
+
+                        // nomor sudah terpakai -> next_doc_no + 1
+                        $db->table('mgr.cf_document_ctl_dtl')
+                            ->where('rowID', $docCtlRowId)
+                            ->update([
+                                'next_doc_no' => $db->raw('next_doc_no + 1'),
+                                'audit_date'  => $now,
+                            ]);
 
                         $db->table('mgr.sv_entry_multi')
                             ->where($critedit2)
