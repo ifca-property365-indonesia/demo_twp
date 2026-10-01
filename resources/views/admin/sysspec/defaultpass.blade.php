@@ -67,7 +67,8 @@
                                 </label>
 
                                 <input
-                                    type="password"
+                                    type="text"
+                                    autocomplete="off"
                                     class="form-control"
                                     name="newpass"
                                     id="newpass"
@@ -82,7 +83,8 @@
                                 </label>
 
                                 <input
-                                    type="password"
+                                    type="text"
+                                    autocomplete="off"
                                     class="form-control"
                                     name="confirmpass"
                                     id="confirmpass"
