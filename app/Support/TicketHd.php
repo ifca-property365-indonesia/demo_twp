@@ -7,8 +7,8 @@ use Illuminate\Support\Facades\DB;
 /**
  * Sumber data semua tabel ticket (dasbor & history, tenant & admin): mgr.sv_entry_hd.
  *
- * Setiap baris = satu work order (report_no WOyymmnnnn) dengan reported_by = TWP
- * (TicketHd::REPORTED_BY); WO yang dibuat langsung di sistem IFCA desktop tidak ikut.
+ * Setiap baris = satu work order (report_no WOyymmnnnn) dengan complain_source = TWP
+ * (TicketHd::COMPLAIN_SOURCE); WO yang dibuat langsung di sistem IFCA desktop tidak ikut.
  * Ticket yang belum punya baris HD tidak ikut tampil.
  * Insert/update ke sv_entry_multi (MySQL & SQL Server) tetap berjalan seperti biasa;
  * lihat TicketController::update (blok "insert ke HD").
@@ -18,8 +18,8 @@ use Illuminate\Support\Facades\DB;
  */
 class TicketHd
 {
-    /** Hanya work order yang dibuat dari portal ini (sv_entry_hd.reported_by). */
-    const REPORTED_BY = 'TWP';
+    /** Hanya work order yang dibuat dari portal ini (sv_entry_hd.complain_source). */
+    const COMPLAIN_SOURCE = 'TWP';
 
     /**
      * Query builder (koneksi dblive) yang siap diberi where / orderBy memakai alias "t.".
@@ -54,7 +54,7 @@ class TicketHd
                   AND m.complain_no = " . $linkedComplainNo . "
             )) AS category_cd")
         )
-            ->where('hd.reported_by', self::REPORTED_BY);
+            ->where('hd.complain_source', self::COMPLAIN_SOURCE);
 
         return $db->query()
             ->fromSub($hd, 't')

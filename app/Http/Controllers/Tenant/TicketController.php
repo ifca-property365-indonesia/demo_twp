@@ -364,7 +364,7 @@ class TicketController extends Controller
         $db = DB::connection('dblive');
         $hd = $reportNo === '' ? null : $db->table('mgr.sv_entry_hd')
             ->where('report_no', $reportNo)
-            ->where('reported_by', TicketHd::REPORTED_BY)
+            ->where('complain_source', TicketHd::COMPLAIN_SOURCE)
             ->whereIn('debtor_acct', TenantScope::tenantNos())
             ->first(['entity_cd', 'project_no', 'report_no', 'status', 'note1']);
 
@@ -481,7 +481,7 @@ class TicketController extends Controller
             ->where('entity_cd', $entity)
             ->where('project_no', $project)
             ->where('note1', $complainNo)
-            ->where('reported_by', TicketHd::REPORTED_BY)
+            ->where('complain_source', TicketHd::COMPLAIN_SOURCE)
             ->whereIn(DB::raw('RTRIM(status)'), self::EDITABLE_STATUSES)
             ->first(['report_no']);
         if (!$hd) {
@@ -563,7 +563,7 @@ class TicketController extends Controller
             $pic_attached = $request->pictureattach;
             $entity = $request->entity;
             $project = $request->project;
-            $webuser = TicketHd::REPORTED_BY;   // sv_entry_hd.reported_by; tabel ticket hanya menampilkan WO ini
+            $webuser = 'TWP';
 
             $crit_spec = ['category_cd' => $category];
             $dataspec = DB::connection('dblive')
@@ -736,7 +736,7 @@ class TicketController extends Controller
                             'status'          => 'A',
                             'audit_user'      => 'MGR',
                             'audit_date'      => $now,
-                            'complain_source' => 'TWP',
+                            'complain_source' => TicketHd::COMPLAIN_SOURCE,   // tabel ticket hanya menampilkan WO ini
                             'lot_no'          => $lot_no,
                             'request_type'    => $ticket_type,
                             'category_cd'     => $category,
