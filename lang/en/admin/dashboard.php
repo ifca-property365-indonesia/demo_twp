@@ -6,6 +6,7 @@ return [
     'heading'          => 'Dashboard Administrator',
     'welcome'          => 'Welcome to Tenant Web Portal.',
     'work_order_graphic' => 'Work Order Graphic',
+    'all_data' => 'All Data',
     'utility_usage'    => 'Utility Usage',
     'water'            => 'Water',
     'gas'              => 'Gas',
@@ -24,8 +25,6 @@ return [
 
     // baris grafik status work order (kunci = kode baris, jangan diubah)
     'wo_status' => [
-        'Submit'    => 'Submit',
-        'Open'      => 'Open',
         'Assigned'  => 'Assigned',
         'Process'   => 'Process',
         'Confirm'   => 'Confirm',

@@ -12,9 +12,8 @@
 
 @section('content')
 @php
+    // status work order dari mgr.sv_entry_hd (Admin\DashController): A, P, F, C, X
     $statusRows = [
-        ['Submit',    '#5B8FF9', $submit],
-        ['Open',      '#36CFC9', $open],
         ['Assigned',  '#7C5CFC', $assigned],
         ['Process',   '#F5A623', $process],
         ['Confirm',   '#1890FF', $confirm],

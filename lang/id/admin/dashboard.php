@@ -6,6 +6,7 @@ return [
     'heading'          => 'Dasbor Administrator',
     'welcome'          => 'Selamat datang di Portal Web Tenant.',
     'work_order_graphic' => 'Grafik Work Order',
+    'all_data' => 'Semua Data',
     'utility_usage'    => 'Pemakaian Utilitas',
     'water'            => 'Air',
     'gas'              => 'Gas',
@@ -24,8 +25,6 @@ return [
 
     // baris grafik status work order (kunci = kode baris, jangan diubah)
     'wo_status' => [
-        'Submit'    => 'Dikirim',
-        'Open'      => 'Terbuka',
         'Assigned'  => 'Ditugaskan',
         'Process'   => 'Diproses',
         'Confirm'   => 'Konfirmasi',

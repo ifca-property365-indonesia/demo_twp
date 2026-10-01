@@ -56,91 +56,31 @@ class DashController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        $dt_Status = DB::connection('ifcapb')->select("
-            SELECT 
-                MONTH(dt.reported_date) AS Monthly,
-                YEAR(dt.reported_date) AS Yearly,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) IN ('R') 
-                    THEN 1 ELSE 0 
-                END) AS submitt,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) IN ('O') 
-                    THEN 1 ELSE 0 
-                END) AS openn,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) = 'A' 
-                    THEN 1 ELSE 0 
-                END) AS assigned,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) IN ('P','S','M','Z','Y') 
-                    THEN 1 ELSE 0 
-                END) AS process,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) = 'F' 
-                    THEN 1 ELSE 0 
-                END) AS confirm,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) = 'C' 
-                    THEN 1 ELSE 0 
-                END) AS closed,
-
-                SUM(CASE 
-                    WHEN COALESCE(hd.status, dt.status) = 'X' 
-                    THEN 1 ELSE 0 
-                END) AS cancelled,
-
-                COUNT(*) AS total_all
-
-            FROM mgr.sv_entry_multi_dt dt
-
-            LEFT JOIN mgr.sv_entry_hd hd
-                ON hd.report_no = dt.report_no
-
-            WHERE dt.reported_date >= DATEFROMPARTS(
-                    YEAR(DATEADD(MONTH,-3,GETDATE())),
-                    MONTH(DATEADD(MONTH,-3,GETDATE())),
-                    1
-                )
-                AND dt.entity_cd = '01'
-
-            GROUP BY
-                MONTH(dt.reported_date),
-                YEAR(dt.reported_date)
-
-            ORDER BY
-                YEAR(dt.reported_date),
-                MONTH(dt.reported_date);
+        // Status work order dari mgr.sv_entry_hd, seluruh data (tanpa batas bulan/tahun):
+        // A = Assigned, P = Process, F = Confirm, C = Closed, X = Cancelled.
+        // Status lain (mis. R / O) tidak ditampilkan; Total = jumlah kelima status tersebut.
+        $row = DB::connection('ifcapb')->selectOne("
+            SELECT
+                SUM(CASE WHEN RTRIM(hd.status) = 'A' THEN 1 ELSE 0 END) AS assigned,
+                -- Process hanya status P. Dulu S, M, Z, Y ikut dihitung sebagai Process;
+                -- sengaja dihilangkan. Kalau perlu lagi: RTRIM(hd.status) IN ('P','S','M','Z','Y')
+                SUM(CASE WHEN RTRIM(hd.status) = 'P' THEN 1 ELSE 0 END) AS process,
+                SUM(CASE WHEN RTRIM(hd.status) = 'F' THEN 1 ELSE 0 END) AS confirm,
+                SUM(CASE WHEN RTRIM(hd.status) = 'C' THEN 1 ELSE 0 END) AS closed,
+                SUM(CASE WHEN RTRIM(hd.status) = 'X' THEN 1 ELSE 0 END) AS cancelled,
+                SUM(CASE WHEN RTRIM(hd.status) IN ('A', 'P', 'F', 'C', 'X') THEN 1 ELSE 0 END) AS total_all
+            FROM mgr.sv_entry_hd hd
+            WHERE hd.entity_cd = '01'
         ");
 
-        $labels_status = [];
-        $openn = [];
-        $assigned = [];
-        $process = [];
-        $confirm = [];
-        $closed = [];
-        $submitt = [];
-        $cancelled = [];
-        $total = [];
-
-        foreach ($dt_Status as $row) {
-
-            $labels_status[] = $m[$row->Monthly].' '.$row->Yearly;
-            $submitt[] = $row->submitt ?? 0;
-            $openn[] = $row->openn ?? 0;
-            $assigned[] = $row->assigned ?? 0;
-            $process[] = $row->process ?? 0;
-            $confirm[] = $row->confirm ?? 0;
-            $closed[] = $row->closed ?? 0;
-            $cancelled[] = $row->cancelled ?? 0;
-            $total[] = $row->total_all ?? 0;
-        }
+        // satu kolom saja (bukan per bulan); tabel & chart di view tetap memakai array
+        $labels_status = [__('admin/dashboard.all_data')];
+        $assigned = [(int) ($row->assigned ?? 0)];
+        $process = [(int) ($row->process ?? 0)];
+        $confirm = [(int) ($row->confirm ?? 0)];
+        $closed = [(int) ($row->closed ?? 0)];
+        $cancelled = [(int) ($row->cancelled ?? 0)];
+        $total = [(int) ($row->total_all ?? 0)];
 
         /*
         |--------------------------------------------------------------------------
@@ -158,8 +98,6 @@ class DashController extends Controller
 
             'labels_status' => json_encode($labels_status),
             'assigned' => json_encode($assigned),
-            'open' => json_encode($openn),
-            'submit' => json_encode($submitt),
             'process' => json_encode($process),
             'confirm' => json_encode($confirm),
             'closed' => json_encode($closed),
