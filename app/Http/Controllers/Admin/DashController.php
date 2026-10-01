@@ -56,7 +56,7 @@ class DashController extends Controller
         |--------------------------------------------------------------------------
         */
 
-        // Status work order dari mgr.sv_entry_hd, seluruh data (tanpa batas bulan/tahun):
+        // Status work order dari mgr.sv_entry_hd (reported_by = TWP), seluruh data (tanpa batas bulan/tahun):
         // A = Assigned, P = Process, F = Confirm, C = Closed, X = Cancelled.
         // Status lain (mis. R / O) tidak ditampilkan; Total = jumlah kelima status tersebut.
         $row = DB::connection('ifcapb')->selectOne("
@@ -71,7 +71,8 @@ class DashController extends Controller
                 SUM(CASE WHEN RTRIM(hd.status) IN ('A', 'P', 'F', 'C', 'X') THEN 1 ELSE 0 END) AS total_all
             FROM mgr.sv_entry_hd hd
             WHERE hd.entity_cd = '01'
-        ");
+                AND hd.reported_by = ?
+        ", [TicketHd::REPORTED_BY]);
 
         // satu kolom saja (bukan per bulan); tabel & chart di view tetap memakai array
         $labels_status = [__('admin/dashboard.all_data')];
