@@ -28,7 +28,7 @@ class WsbangunController extends Controller
         );
         try{
             DB::connection('ifcaadm')
-                ->table('sv_entry_multi')
+                ->table('mgr.sv_entry_multi')
                 ->where($crit1)
                 ->update($data);
             $feedback = "Data has been updated successfully";
@@ -221,16 +221,16 @@ class WsbangunController extends Controller
         return $db->transaction(function () use ($db, $rows, $src, $businessNo, $info, $want, $text) {
             // --- tenant (per business_no + flag) ---
             $existing = array();
-            foreach ($db->table('tenant')->where('business_no', $businessNo)->orderBy('id')->get() as $t) {
+            foreach ($db->table('mgr.tenant')->where('business_no', $businessNo)->orderBy('id')->get() as $t) {
                 $existing[$t->flag ?: 'O'] = $existing[$t->flag ?: 'O'] ?? $t;
             }
             $created = empty($existing);
 
             foreach ($want as $flag => $mail) {
                 if (isset($existing[$flag])) {
-                    $db->table('tenant')->where('id', $existing[$flag]->id)->update($info + array('email' => $mail));
+                    $db->table('mgr.tenant')->where('id', $existing[$flag]->id)->update($info + array('email' => $mail));
                 } else {
-                    $db->table('tenant')->insert($info + array(
+                    $db->table('mgr.tenant')->insert($info + array(
                         // nama kontak hanya diisi saat baris baru dibuat; sesudahnya diubah user
                         // lewat View Profile TWP, jadi sinkron berikutnya tidak menimpanya
                         'contact_name'   => $text($src->contact_person),
@@ -244,7 +244,7 @@ class WsbangunController extends Controller
                 }
             }
 
-            $tenants = $db->table('tenant')->where('business_no', $businessNo)->orderBy('id')->get();
+            $tenants = $db->table('mgr.tenant')->where('business_no', $businessNo)->orderBy('id')->get();
             // id baris pm_tenancy baru: baris F (kalau tidak ada, baris pertama)
             $firstId = $tenants->firstWhere('flag', 'F')->id ?? $tenants[0]->id;
 
@@ -256,7 +256,7 @@ class WsbangunController extends Controller
             $notify = array();
             foreach ($tenants as $tenant) {
                 $crit = array('tableforeign' => 'tenant', 'idforeign' => $tenant->id);
-                $login = $db->table('all_login')->where($crit)->first(['email']);
+                $login = $db->table('mgr.all_login')->where($crit)->first(['email']);
                 if ($login) {
                     $update = array('name' => $tenant->name, 'email' => $tenant->email);
                     if (strcasecmp(trim((string) $login->email), trim((string) $tenant->email)) !== 0) {
@@ -264,11 +264,11 @@ class WsbangunController extends Controller
                         $update['password'] = $password;
                         $notify[] = array('name' => $tenant->name, 'email' => $tenant->email, 'reason' => 'email_changed');
                     }
-                    $db->table('all_login')->where($crit)->update($update);
+                    $db->table('mgr.all_login')->where($crit)->update($update);
                 } else {
                     // password awal akun tenant baru: tabel defaultpassword (menu Default Password)
                     $password = $password ?: DefaultPassword::hash();
-                    $db->table('all_login')->insert($crit + array(
+                    $db->table('mgr.all_login')->insert($crit + array(
                         'name'     => $tenant->name,
                         'email'    => $tenant->email,
                         'password' => $password,
@@ -291,12 +291,18 @@ class WsbangunController extends Controller
                 'entity_desc'   => $src->entity_desc,
                 'project_desc'  => $src->project_desc,
             );
-            $current = $db->table('pm_tenancy')->where('business_no', $businessNo)->orderBy('id')->first()
-                ?: $db->table('pm_tenancy')->where('id', $firstId)->first();
+            $current = $db->table('mgr.pm_tenancy')->where('business_no', $businessNo)->orderBy('id')->first()
+                ?: $db->table('mgr.pm_tenancy')->where('id', $firstId)->first();
             if ($current) {
-                $db->table('pm_tenancy')->where('id', $current->id)->update($tenancy);
+                $db->table('mgr.pm_tenancy')->where('id', $current->id)->update($tenancy);
             } else {
-                $db->table('pm_tenancy')->insert($tenancy + array('id' => $firstId, 'status' => 'A'));
+                // id pm_tenancy sengaja = id tenant; kolom id IDENTITY -> IDENTITY_INSERT sementara
+                $db->unprepared('SET IDENTITY_INSERT mgr.pm_tenancy ON');
+                try {
+                    $db->table('mgr.pm_tenancy')->insert($tenancy + array('id' => $firstId, 'status' => 'A'));
+                } finally {
+                    $db->unprepared('SET IDENTITY_INSERT mgr.pm_tenancy OFF');
+                }
             }
 
             return array('id' => $firstId, 'created' => $created, 'notify' => $notify);
@@ -342,7 +348,7 @@ class WsbangunController extends Controller
     {
         $db = DB::connection('ifcaadm');
         try {
-            $tenancy = $db->table('pm_tenancy')
+            $tenancy = $db->table('mgr.pm_tenancy')
                 ->where('entity_cd', trim($value['entity_cd']))
                 ->where('project_no', trim($value['project_no']))
                 ->where('tenant_no', $value['tenant_no'])
@@ -353,12 +359,12 @@ class WsbangunController extends Controller
             }
 
             $db->transaction(function () use ($db, $tenancy) {
-                $db->table('pm_tenancy')->where('id', $tenancy->id)->delete();
+                $db->table('mgr.pm_tenancy')->where('id', $tenancy->id)->delete();
 
-                if (!$db->table('pm_tenancy')->where('business_no', $tenancy->business_no)->exists()) {
-                    $ids = $db->table('tenant')->where('business_no', $tenancy->business_no)->pluck('id');
-                    $db->table('all_login')->where('tableforeign', 'tenant')->whereIn('idforeign', $ids)->delete();
-                    $db->table('tenant')->where('business_no', $tenancy->business_no)->delete();
+                if (!$db->table('mgr.pm_tenancy')->where('business_no', $tenancy->business_no)->exists()) {
+                    $ids = $db->table('mgr.tenant')->where('business_no', $tenancy->business_no)->pluck('id');
+                    $db->table('mgr.all_login')->where('tableforeign', 'tenant')->whereIn('idforeign', $ids)->delete();
+                    $db->table('mgr.tenant')->where('business_no', $tenancy->business_no)->delete();
                 }
             });
             echo 'Tenant no : ' . $tenancy->tenant_no . ' deleted!';

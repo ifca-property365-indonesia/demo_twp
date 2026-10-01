@@ -3,6 +3,26 @@
 use Illuminate\Support\Str;
 use Pdo\Mysql;
 
+// SQL Server jbc_twp (schema mgr): data portal TWP (dulu MySQL demo_twp).
+// Server & login default sama dengan jbc_live (DB_*2), database dari DB_DATABASE_TWP.
+// Login masuk sebagai dbo, jadi nama tabel di kode selalu ditulis lengkap: mgr.<tabel>.
+// FETCHES_NUMERIC_TYPE: kolom int dikembalikan sebagai int (seperti MySQL dulu), bukan string.
+$twp = [
+    'driver' => 'sqlsrv',
+    'host' => env('DB_HOST_TWP', env('DB_HOST2')),
+    'port' => env('DB_PORT_TWP', env('DB_PORT2', '1433')),
+    'database' => env('DB_DATABASE_TWP', 'jbc_twp'),
+    'username' => env('DB_USERNAME_TWP', env('DB_USERNAME2', 'forge')),
+    'password' => env('DB_PASSWORD_TWP', env('DB_PASSWORD2', '')),
+    'charset' => 'utf8',
+    'prefix' => '',
+    'prefix_indexes' => true,
+    'trust_server_certificate' => env('DB_TRUST_SERVER_CERTIFICATE2', true),
+    'options' => defined('PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE')
+        ? [PDO::SQLSRV_ATTR_FETCHES_NUMERIC_TYPE => true]
+        : [],
+];
+
 return [
 
     /*
@@ -17,7 +37,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_CONNECTION', 'twp'),
 
     /*
     |--------------------------------------------------------------------------
@@ -28,9 +48,10 @@ return [
     | yang sama tetapi dengan nama koneksi yang berbeda di kodenya, jadi semua
     | nama tetap didefinisikan agar controller lama tidak perlu diubah:
     |
-    |   MySQL demo_twp  (DB_*)  : 'mysql'   (default, dipakai kode tenant)
-    |                             'ifcaadm' (dipakai kode admin)
-    |   SQL Server jbc_live (DB_*2) : 'TWP'    (dipakai kode tenant)
+    |   SQL Server jbc_twp (DB_*_TWP) : 'twp'     (default, dipakai kode tenant)
+    |                                   'ifcaadm' (dipakai kode admin)
+    |   MySQL demo_twp  (DB_*)  : 'mysql' (lama, tidak dipakai lagi)
+    |   SQL Server jbc_live (DB_*2) : 'dblive' (dipakai kode tenant)
     |                                 'ifcapb' (dipakai kode admin)
     |
     */
@@ -49,7 +70,7 @@ return [
             'transaction_mode' => 'DEFERRED',
         ],
 
-        // MySQL demo_twp - default (kode tenant memakai DB::table() tanpa nama koneksi)
+        // MySQL demo_twp - lama, tidak dipakai lagi (default sekarang 'twp')
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),
@@ -70,26 +91,9 @@ return [
             ]) : [],
         ],
 
-        // MySQL demo_twp - nama koneksi yang dipakai kode admin (strict = false seperti semula)
-        'ifcaadm' => [
-            'driver' => 'mysql',
-            'url' => env('DB_URL'),
-            'host' => env('DB_HOST', '127.0.0.1'),
-            'port' => env('DB_PORT', '3306'),
-            'database' => env('DB_DATABASE', 'demo_twp'),
-            'username' => env('DB_USERNAME', 'ifcadev'),
-            'password' => env('DB_PASSWORD', ''),
-            'unix_socket' => env('DB_SOCKET', ''),
-            'charset' => 'utf8mb4',
-            'collation' => 'utf8mb4_unicode_ci',
-            'prefix' => '',
-            'prefix_indexes' => true,
-            'strict' => false,
-            'engine' => null,
-            'options' => extension_loaded('pdo_mysql') ? array_filter([
-                (PHP_VERSION_ID >= 80500 ? Mysql::ATTR_SSL_CA : PDO::MYSQL_ATTR_SSL_CA) => env('MYSQL_ATTR_SSL_CA'),
-            ]) : [],
-        ],
+        // SQL Server jbc_twp - koneksi default; 'ifcaadm' = nama yang dipakai kode admin
+        'twp' => $twp,
+        'ifcaadm' => $twp,
 
         // SQL Server jbc_live - nama koneksi yang dipakai kode tenant
         // ODBC Driver 18 mewajibkan sertifikat tepercaya; server memakai self-signed,
@@ -187,7 +191,7 @@ return [
     */
 
     'migrations' => [
-        'table' => 'migrations',
+        'table' => 'mgr.migrations',   // jbc_twp: login dbo, tabel di schema mgr
         'update_date_on_publish' => true,
     ],
 

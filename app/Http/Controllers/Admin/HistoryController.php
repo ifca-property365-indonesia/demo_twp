@@ -134,15 +134,13 @@ class HistoryController extends Controller
         }else{
             $date_start=$date_start." 00:00:00";
         }
-        $where = '';
-        $sql ="SELECT * FROM (
-            SELECT 
-                @rownum := @rownum + 1 AS row_number,idforeign,logintime,ipaddress,name,email 
-            FROM log_login join tenant on tenant.id = log_login.idforeign
-            JOIN (SELECT @rownum := 0) r
-            ) sub
-        where sub.logintime between '".$date_start."' and '".$date_end."' ".$where."";
-        $query = DB::connection('ifcaadm')->select($sql);
+        $sql = "SELECT ROW_NUMBER() OVER (ORDER BY l.logintime, l.id) AS [row_number],
+                l.idforeign, l.logintime, l.ipaddress, t.name, t.email
+            FROM mgr.log_login l
+            JOIN mgr.tenant t ON t.id = l.idforeign
+            WHERE l.logintime BETWEEN ? AND ?
+            ORDER BY l.logintime, l.id";
+        $query = DB::connection('ifcaadm')->select($sql, [$date_start, $date_end]);
         return DataTables::of($query)->make(true);
         
     }
@@ -255,13 +253,11 @@ class HistoryController extends Controller
                 ]);
 
             case 'log':
-                $sql ="SELECT * FROM (
-                    SELECT
-                        @rownum := @rownum + 1 AS row_number,idforeign,logintime,ipaddress,name,email
-                    FROM log_login join tenant on tenant.id = log_login.idforeign
-                    JOIN (SELECT @rownum := 0) r
-                    ) sub
-                where sub.logintime between ? and ?";
+                $sql = "SELECT l.idforeign, l.logintime, l.ipaddress, t.name, t.email
+                    FROM mgr.log_login l
+                    JOIN mgr.tenant t ON t.id = l.idforeign
+                    WHERE l.logintime BETWEEN ? AND ?
+                    ORDER BY l.logintime, l.id";
                 $dtUsers = DB::connection('ifcaadm')->select($sql, [$date_start, $date_end]);
                 $rows = [];
                 foreach ($dtUsers as $i => $logUsers) {

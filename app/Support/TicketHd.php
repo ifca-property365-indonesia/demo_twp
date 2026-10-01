@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
  * Setiap baris = satu work order (report_no WOyymmnnnn) dengan complain_source = TWP
  * (TicketHd::COMPLAIN_SOURCE); WO yang dibuat langsung di sistem IFCA desktop tidak ikut.
  * Ticket yang belum punya baris HD tidak ikut tampil.
- * Insert/update ke sv_entry_multi (MySQL & SQL Server) tetap berjalan seperti biasa;
+ * Insert/update ke sv_entry_multi (jbc_twp & jbc_live) tetap berjalan seperti biasa;
  * lihat TicketController::update (blok "insert ke HD").
  *
  * Kolom hasil (alias t): report_no, entity_cd, project_no, debtor_acct, reported_date,
@@ -72,7 +72,7 @@ class TicketHd
      * tombol "lihat gambar" di tabel ticket.
      *   1. mgr.sv_attachment per report_no (ticket baru; tabel ini belum ada di sebagian
      *      database -> dilewati tanpa error)
-     *   2. kalau tidak ada: gambar di ticket TWP (MySQL sv_entry_multi.picture) per complain_no
+     *   2. kalau tidak ada: gambar di ticket TWP (jbc_twp mgr.sv_entry_multi.picture) per complain_no
      * Hanya file yang benar-benar ada di folder gambar ticket (URL dari luar diabaikan);
      * URL dibuat ulang dengan alamat situs yang sedang dibuka.
      */
@@ -108,7 +108,7 @@ class TicketHd
         $byComplain = [];
         $complainNos = $rows->pluck('complain_no')->filter()->map('trim')->unique();
         foreach ($complainNos->chunk(500) as $chunk) {
-            $tickets = DB::table('sv_entry_multi')
+            $tickets = DB::table('mgr.sv_entry_multi')
                 ->whereIn('complain_no', $chunk->values()->all())
                 ->whereNotNull('picture')->where('picture', '<>', '')
                 ->get(['entity_cd', 'project_no', 'complain_no', 'picture']);

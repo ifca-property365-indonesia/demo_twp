@@ -32,10 +32,10 @@ class AccountController extends Controller
             return $this->forbidden();
         }
         // tanpa kolom password
-        $data = DB::select("SELECT id, name, email, handphone, pict, tableforeign, idforeign from all_login where email = ?", [$email]);
+        $data = DB::select("SELECT id, name, email, handphone, pict, tableforeign, idforeign from mgr.all_login where email = ?", [$email]);
         // contact_name dari tabel tenant (business yang sedang dibuka, kalau emailnya sama)
-        $tenant = DB::table('tenant')->where('email', $email)
-            ->orderByRaw('id = ? DESC', [(int) Session::get('Tuser_id')])
+        $tenant = DB::table('mgr.tenant')->where('email', $email)
+            ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [(int) Session::get('Tuser_id')])
             ->first(['contact_name']);
         foreach ($data as $row) {
             $row->contact_name = $tenant->contact_name ?? null;
@@ -122,14 +122,14 @@ class AccountController extends Controller
 
         try {
 
-                DB::table('all_login')
+                DB::table('mgr.all_login')
                     ->where($criteria)
                     ->update($data);
 
                 // Contact name -> tabel tenant, semua baris dengan email yang sedang login
                 $contact = trim((string) $request->contact_name);
                 if ($request->has('contact_name')) {
-                    DB::table('tenant')
+                    DB::table('mgr.tenant')
                         ->where('email', $email)
                         ->update(['contact_name' => $contact === '' ? null : $contact]);
                     Session::put('Tuname', $contact);
@@ -168,12 +168,12 @@ class AccountController extends Controller
         if (!filter_var($newEmail, FILTER_VALIDATE_EMAIL) || strlen($newEmail) > 100) {
             return __('tenant/account.email_invalid');
         }
-        $taken = DB::table('all_login')->where('email', $newEmail)->exists()
-            || DB::table('tenant')->where('email', $newEmail)->exists();
+        $taken = DB::table('mgr.all_login')->where('email', $newEmail)->exists()
+            || DB::table('mgr.tenant')->where('email', $newEmail)->exists();
         if ($taken) {
             return __('tenant/account.email_taken');
         }
-        $hashes = DB::table('all_login')->where('email', $email)->where('tableforeign', 'tenant')->pluck('password');
+        $hashes = DB::table('mgr.all_login')->where('email', $email)->where('tableforeign', 'tenant')->pluck('password');
         if ($password === '' || !$hashes->contains(function ($hash) use ($password) { return Password::check($password, $hash); })) {
             return __('tenant/account.current_password_wrong');
         }
@@ -188,19 +188,19 @@ class AccountController extends Controller
     private function changeEmail($email, $newEmail)
     {
         DB::transaction(function () use ($email, $newEmail) {
-            DB::table('all_login')->where('email', $email)->where('tableforeign', 'tenant')->update(['email' => $newEmail]);
-            DB::table('tenant')->where('email', $email)->update(['email' => $newEmail]);
+            DB::table('mgr.all_login')->where('email', $email)->where('tableforeign', 'tenant')->update(['email' => $newEmail]);
+            DB::table('mgr.tenant')->where('email', $email)->update(['email' => $newEmail]);
             // user_locale memakai email huruf kecil (App\Support\UserLocale::key). Kalau email lama
             // masih dipakai akun admin, pilihan bahasanya disalin (bukan dipindah).
-            $locale = DB::table('user_locale')->where('email', strtolower($email))->first();
-            if ($locale && !DB::table('user_locale')->where('email', strtolower($newEmail))->exists()) {
-                if (DB::table('all_login')->where('email', $email)->exists()) {
-                    DB::table('user_locale')->insert(array_merge((array) $locale, ['email' => strtolower($newEmail)]));
+            $locale = DB::table('mgr.user_locale')->where('email', strtolower($email))->first();
+            if ($locale && !DB::table('mgr.user_locale')->where('email', strtolower($newEmail))->exists()) {
+                if (DB::table('mgr.all_login')->where('email', $email)->exists()) {
+                    DB::table('mgr.user_locale')->insert(array_merge((array) $locale, ['email' => strtolower($newEmail)]));
                 } else {
-                    DB::table('user_locale')->where('email', strtolower($email))->update(['email' => strtolower($newEmail)]);
+                    DB::table('mgr.user_locale')->where('email', strtolower($email))->update(['email' => strtolower($newEmail)]);
                 }
             }
-            DB::table('survey_respondents')->where('email', $email)->update(['email' => $newEmail]);
+            DB::table('mgr.survey_respondents')->where('email', $email)->update(['email' => $newEmail]);
         });
 
         Session::put('Tenemail', $newEmail);
@@ -225,7 +225,7 @@ class AccountController extends Controller
 
         try { 
             
-                DB::table('all_login')
+                DB::table('mgr.all_login')
                     ->where($criteria)
                     ->update($data);
                 

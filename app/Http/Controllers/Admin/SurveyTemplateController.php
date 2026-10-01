@@ -13,14 +13,14 @@ class SurveyTemplateController extends Controller
 {
     public function getTable()
     {
-        $query = DB::connection('ifcaadm')->select("SELECT @rownum := @rownum + 1 AS row_number, t.* FROM v_tmpsurvey t, (SELECT @rownum := 0) r");
+        $query = DB::connection('ifcaadm')->select("SELECT ROW_NUMBER() OVER (ORDER BY t.tmpsurvey_id) AS [row_number], t.* FROM mgr.v_tmpsurvey t ORDER BY t.tmpsurvey_id");
         return DataTables::of($query)->make(true);
     }
     public function getByID($id = '')
     {
         $where = array('tmpsurvey_id' => $id);
         $data = DB::connection('ifcaadm')
-            ->table('v_pm_tmpsurvey_all')
+            ->table('mgr.v_pm_tmpsurvey_all')
             ->where($where)
             ->get();
         echo json_encode($data);
@@ -53,12 +53,12 @@ class SurveyTemplateController extends Controller
                 $criteriahd = array('id' => $tmpsurvey_id);
                 
                 DB::connection('ifcaadm')
-                    ->table('pm_tmpsurvey')
+                    ->table('mgr.pm_tmpsurvey')
                     ->where($criteriahd)
                     ->update($datahdr);
                 $criteriadt = array('tmpsurvey_id' => $tmpsurvey_id);
                 DB::connection('ifcaadm')
-                ->table('pm_tmpsurvey_dtl')
+                ->table('mgr.pm_tmpsurvey_dtl')
                 ->where($criteriadt)
                 ->delete();
                 for($i=0; $i < $batasLoop; $i++){
@@ -72,21 +72,21 @@ class SurveyTemplateController extends Controller
                     );
                 }
                 DB::connection('ifcaadm')
-                    ->table('pm_tmpsurvey_dtl')
+                    ->table('mgr.pm_tmpsurvey_dtl')
                     ->insert($datadtl);
                 $msg = __('common.updated');
                 $st = 'OK';
             } else {//create
                 
                 DB::connection('ifcaadm')
-                    ->table('pm_tmpsurvey')
+                    ->table('mgr.pm_tmpsurvey')
                     ->insert($datahdr);
 
                 $whereid = $datahdr;
                 unset($whereid['content']);
                 unset($whereid['date_created']);
                 $data = DB::connection('ifcaadm')
-                ->table('pm_tmpsurvey')
+                ->table('mgr.pm_tmpsurvey')
                 ->where($whereid)
                 ->get();
                 
@@ -102,7 +102,7 @@ class SurveyTemplateController extends Controller
                         );
                     }//end looping detail
                 DB::connection('ifcaadm')
-                    ->table('pm_tmpsurvey_dtl')
+                    ->table('mgr.pm_tmpsurvey_dtl')
                     ->insert($datadtl);
                 $msg = __('common.saved');
                 $st = 'OK';
@@ -126,11 +126,11 @@ class SurveyTemplateController extends Controller
         $criteriadt = array('tmpsurvey_id' => $request->id);
         try { 
             DB::connection('ifcaadm')
-            ->table('pm_tmpsurvey')
+            ->table('mgr.pm_tmpsurvey')
             ->where($criteriahd)
             ->delete();
             DB::connection('ifcaadm')
-            ->table('pm_tmpsurvey_dtl')
+            ->table('mgr.pm_tmpsurvey_dtl')
             ->where($criteriadt)
             ->delete();
             $msg = __('common.deleted');

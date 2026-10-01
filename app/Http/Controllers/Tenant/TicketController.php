@@ -24,7 +24,7 @@ class TicketController extends Controller
             'tenant_no'   => $tenant_no
         );
 
-        $data_tenancy = DB::table('pm_tenancy')->where($crit)->get();
+        $data_tenancy = DB::table('mgr.pm_tenancy')->where($crit)->get();
         $combo_tenant='';
         if($data_tenancy){
             $combo_tenant = $this->get_combo($buss_id, $data_tenancy[0]->id, $project_no);
@@ -70,7 +70,7 @@ class TicketController extends Controller
     public function getByID($id = '')
     {
         $where = array('id' => $id);
-        $data = DB::table('sv_entry_multi')->where($where)->get();
+        $data = DB::table('mgr.sv_entry_multi')->where($where)->get();
         echo json_encode($data);
     }
 
@@ -127,11 +127,11 @@ class TicketController extends Controller
     function get_combo($business_no = "", $selected_id = "", $project_no = "")
     {
         if (TenantScope::all()) {
-            $query = DB::table('pm_tenancy')->where('status', 'A')->orderBy('tenant_no')->get();
+            $query = DB::table('mgr.pm_tenancy')->where('status', 'A')->orderBy('tenant_no')->get();
         } else {
             $where = array('business_no'=> $business_no,
                     'project_no'=>$project_no);
-            $query = DB::table('pm_tenancy')->where($where)->get();
+            $query = DB::table('mgr.pm_tenancy')->where($where)->get();
         }
         $combo[] = '<option></option>';
         $combo[] = "\n";
@@ -197,7 +197,7 @@ class TicketController extends Controller
      */
     public function getLotNo(Request $request)
     {
-        $tenancy = DB::table('pm_tenancy')->where('id', (int) $request->id_tenancy)->first();
+        $tenancy = DB::table('mgr.pm_tenancy')->where('id', (int) $request->id_tenancy)->first();
 
         if (!$tenancy || !in_array((string) $tenancy->tenant_no, TenantScope::tenantNos(), true)) {
             return response('<option></option>');
@@ -244,7 +244,7 @@ class TicketController extends Controller
 
     public function getLotnoEdit($tenant_no, $lot_no)
     {
-        $data_tenancy = DB::table('pm_tenancy')
+        $data_tenancy = DB::table('mgr.pm_tenancy')
             ->where('id', $tenant_no)
             ->get();
 
@@ -356,7 +356,7 @@ class TicketController extends Controller
     /**
      * Tenant menyatakan pekerjaan selesai: work order (mgr.sv_entry_hd) berstatus F milik tenant
      * yang login -> status C, response_time = waktu klik. Status ticket asalnya
-     * (sv_entry_multi SQL Server & MySQL, lewat note1 = complain_no) ikut C.
+     * (sv_entry_multi jbc_live & jbc_twp, lewat note1 = complain_no) ikut C.
      */
     public function close(Request $request)
     {
@@ -390,7 +390,7 @@ class TicketController extends Controller
                 }
             });
             if ($complainNo !== '') {
-                DB::table('sv_entry_multi')->where('complain_no', $complainNo)
+                DB::table('mgr.sv_entry_multi')->where('complain_no', $complainNo)
                     ->where('entity_cd', trim($hd->entity_cd))->where('project_no', trim($hd->project_no))
                     ->update(['status' => 'C']);
             }
@@ -502,7 +502,7 @@ class TicketController extends Controller
      * File di storage/file_ticket diganti nama jadi <report_no>_ddmmyyyy_hhmm.<ext>, lalu:
      *   entity_cd, project_no, report_no = work order, document_no = complain_no (note1 HD),
      *   file_attachment = nama file, file_url = URL file, audit_user / audit_date.
-     * sv_entry_multi.picture (MySQL) ikut URL baru. Gambar dari luar folder itu dilewati.
+     * sv_entry_multi.picture (jbc_twp) ikut URL baru. Gambar dari luar folder itu dilewati.
      */
     private function attachPicture($entity, $project, $reportNo, $complainNo, $pictureUrl, array $critMulti)
     {
@@ -539,7 +539,7 @@ class TicketController extends Controller
             throw $e;
         }
 
-        DB::table('sv_entry_multi')->where($critMulti)->update(['picture' => $url]);
+        DB::table('mgr.sv_entry_multi')->where($critMulti)->update(['picture' => $url]);
     }
 
     public function update(Request $request)
@@ -574,7 +574,7 @@ class TicketController extends Controller
                 
             $assign_to = $dataspec[0]->descs ?? null;
 
-            $data_tenant = DB::table('pm_tenancy')->where('id', $tenant_no)->get();
+            $data_tenant = DB::table('mgr.pm_tenancy')->where('id', $tenant_no)->get();
 
             if ($data_tenant->isEmpty()) {
                 throw new \Exception(__('tenant/ticket.tenant_not_found', ['tenant' => $tenant_no]));
@@ -644,15 +644,15 @@ class TicketController extends Controller
                 'project_no'      => $project
             );
             if ($id > 0) {
-                // ===== start insert ke HD (edit tidak mengembalikan status O / A ke R, MySQL) =====
-                $oldStatus = DB::table('sv_entry_multi')->where($critedit)->value('status');
+                // ===== start insert ke HD (edit tidak mengembalikan status O / A ke R di jbc_twp) =====
+                $oldStatus = DB::table('mgr.sv_entry_multi')->where($critedit)->value('status');
                 if (in_array(trim((string) $oldStatus), ['O', 'A'], true)) {
                     $data['status'] = trim((string) $oldStatus);
                 }
                 // ===== end insert ke HD =====
-                $updated = DB::table('sv_entry_multi')->where($critedit)->update($data);
+                $updated = DB::table('mgr.sv_entry_multi')->where($critedit)->update($data);
             } else {
-                $updated = DB::table('sv_entry_multi')->insert($data);
+                $updated = DB::table('mgr.sv_entry_multi')->insert($data);
             }
             
             $critedit2 = [
@@ -701,7 +701,7 @@ class TicketController extends Controller
                 // nextWorkOrderNo() (tenant_prefix + yymm + next_doc_no cf_document_ctl_dtl).
                 // complain_no disimpan di note1 sebagai penghubung ke sv_entry_multi.
                 // Work order langsung berstatus A (assigned ke staff sv_labour).
-                // Setelah berhasil, status sv_entry_multi (SQL Server & MySQL) -> A.
+                // Setelah berhasil, status sv_entry_multi (jbc_live & jbc_twp) -> A.
                 // Kalau gagal, ticket tetap tersimpan (status tetap R) dan error dicatat di log.
                 try {
                     $hdReportNo = DB::connection('dblive')->transaction(function () use ($entity, $project, $data_tenant, $webuser, $req_by, $description, $location, $floor, $contact_no, $lot_no, $ticket_type, $category, $typeformat2, $critedit2) {
@@ -763,9 +763,9 @@ class TicketController extends Controller
                         return $reportNo;
                     });
 
-                    // salinan ticket di MySQL (demo_twp.sv_entry_multi) ikut -> A;
-                    // dijalankan setelah transaksi SQL Server commit (koneksi berbeda)
-                    DB::table('sv_entry_multi')
+                    // salinan ticket di jbc_twp (mgr.sv_entry_multi) ikut -> A;
+                    // dijalankan setelah transaksi jbc_live commit (koneksi berbeda)
+                    DB::table('mgr.sv_entry_multi')
                         ->where($critedit2)
                         ->update(['status' => 'A']);
                 } catch (\Throwable $e) {

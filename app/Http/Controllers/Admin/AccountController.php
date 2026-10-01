@@ -14,13 +14,13 @@ class AccountController extends Controller
 {
     public function getTable()
     {
-        $query = DB::connection('ifcaadm')->select("SELECT @rownum := @rownum + 1 AS row_number, t.* FROM all_login t, (SELECT @rownum := 0) r");
+        $query = DB::connection('ifcaadm')->select("SELECT ROW_NUMBER() OVER (ORDER BY t.id) AS [row_number], t.* FROM mgr.all_login t ORDER BY t.id");
         return DataTables::of($query)->make(true);
     }
     public function getbyemail($email)
     {
         $data = DB::connection('ifcaadm')
-            ->select("SELECT * from all_login where email='$email'");
+            ->select("SELECT * from mgr.all_login where email='$email'");
         echo json_encode($data);
     }
     /**
@@ -94,7 +94,7 @@ class AccountController extends Controller
         try { 
             
                 DB::connection('ifcaadm')
-                    ->table('all_login')
+                    ->table('mgr.all_login')
                     ->where($criteria)
                     ->update($data);
 
@@ -128,7 +128,7 @@ class AccountController extends Controller
         try { 
             
                 DB::connection('ifcaadm')
-                    ->table('all_login')
+                    ->table('mgr.all_login')
                     ->where($criteria)
                     ->update($data);
                 
@@ -164,7 +164,7 @@ class AccountController extends Controller
                 'password' => $password
             );
                 DB::connection('ifcaadm')
-                    ->table('all_login')
+                    ->table('mgr.all_login')
                     ->where($criteria)
                     ->update($data);
                 $msg = __('common.updated');

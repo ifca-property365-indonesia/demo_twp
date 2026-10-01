@@ -15,23 +15,23 @@ class SurveyPublishController extends Controller
     {
         $where = array('publish_id' => $id);
         $data = DB::connection('ifcaadm')
-            ->table('v_pmpublish_pmsurveyhd')
+            ->table('mgr.v_pmpublish_pmsurveyhd')
             ->where($where)
             ->get();
         echo json_encode($data);
     }
     public function getTable()
     {
-        $query = DB::connection('ifcaadm')->select("SELECT @rownum := @rownum + 1 AS row_number, t.* FROM v_pm_survey_publish t, (SELECT @rownum := 0) r  where t.flag_publish=0");
+        $query = DB::connection('ifcaadm')->select("SELECT ROW_NUMBER() OVER (ORDER BY t.publish_id) AS [row_number], t.* FROM mgr.v_pm_survey_publish t where t.flag_publish=0 ORDER BY t.publish_id");
         return DataTables::of($query)->make(true);
     }
     public function getTable_publish()
     {
-        $query = DB::connection('ifcaadm')->select("SELECT @rownum := @rownum + 1 AS row_number, t.* FROM v_pm_survey_publish t, (SELECT @rownum := 0) r  where t.flag_publish=1 order by publishdate desc");
+        $query = DB::connection('ifcaadm')->select("SELECT ROW_NUMBER() OVER (ORDER BY t.publishdate DESC) AS [row_number], t.* FROM mgr.v_pm_survey_publish t where t.flag_publish=1 order by t.publishdate desc");
         return DataTables::of($query)->make(true);
     }
     public function form(){
-        $table = "SELECT subject,id from pm_tmpsurvey order by subject asc";
+        $table = "SELECT subject,id from mgr.pm_tmpsurvey order by subject asc";
         $proDescs = DB::connection('ifcaadm')->select($table);
         
         $comboProject[]='';
@@ -64,12 +64,12 @@ class SurveyPublishController extends Controller
                         'audit_date'=>$audit_date
                     );
                     DB::connection('ifcaadm')
-                    ->table('pm_survey_publish')
+                    ->table('mgr.pm_survey_publish')
                     ->insert($dataPub);
                 $whereid = $dataPub;
                 $whereid['audit_date'] = date('Y-m-d H:i:s',strtotime($dataPub['audit_date']));
                 $data = DB::connection('ifcaadm')
-                    ->table('pm_survey_publish')
+                    ->table('mgr.pm_survey_publish')
                     ->where($whereid)
                     ->get();
                 $publish_id=$data[0]->id;
@@ -77,7 +77,7 @@ class SurveyPublishController extends Controller
                 foreach ($subject as $surveyid) {
                     $wheretmp = array('id'=>$surveyid);
                     $datatmp = DB::connection('ifcaadm')
-                        ->table('pm_tmpsurvey')
+                        ->table('mgr.pm_tmpsurvey')
                         ->where($wheretmp)
                         ->get();
                     $dataHD = array(    
@@ -90,19 +90,19 @@ class SurveyPublishController extends Controller
                         'audit_date'=>$audit_date
                     );
                     DB::connection('ifcaadm')
-                    ->table('pm_survey_hd')
+                    ->table('mgr.pm_survey_hd')
                     ->insert($dataHD);
                     $whereid = $dataHD;
                     unset($whereid['content']);
                     $whereid['audit_date'] = date('Y-m-d H:i:s',strtotime($dataHD['audit_date']));
                     $data = DB::connection('ifcaadm')
-                    ->table('pm_survey_hd')
+                    ->table('mgr.pm_survey_hd')
                     ->where($whereid)
                     ->get();
                     $survey_id=$data[0]->id;//ambil survey id yg baru di insert di 
                     $wheretmp=array('tmpsurvey_id'=>$surveyid);//surveyid ambil dari foreach subject
                     $datatmpdtl = DB::connection('ifcaadm')
-                        ->table('pm_tmpsurvey_dtl')
+                        ->table('mgr.pm_tmpsurvey_dtl')
                         ->where($wheretmp)
                         ->get(); 
                     
@@ -118,7 +118,7 @@ class SurveyPublishController extends Controller
                         );
                     }//end looping detail
                     DB::connection('ifcaadm')
-                    ->table('pm_survey_dt')
+                    ->table('mgr.pm_survey_dt')
                     ->insert($datadtl);
                     $datadtl = [];
                 
@@ -134,18 +134,18 @@ class SurveyPublishController extends Controller
                         'audit_date'=>$audit_date
                     );
                 DB::connection('ifcaadm')
-                    ->table('pm_survey_publish')
+                    ->table('mgr.pm_survey_publish')
                     ->where($where)
                     ->update($dataPub);
                 $wheredlt=array('publish_id'=>$publish_id);
-                DB::connection('ifcaadm')->table('pm_survey_hd')->where($wheredlt)->delete();
-                DB::connection('ifcaadm')->table('pm_survey_dt')->where($wheredlt)->delete();
+                DB::connection('ifcaadm')->table('mgr.pm_survey_hd')->where($wheredlt)->delete();
+                DB::connection('ifcaadm')->table('mgr.pm_survey_dt')->where($wheredlt)->delete();
      
                     $i=1;
                     foreach ($subject as $surveyid) {
                         $wheretmp=array('id'=>$surveyid);
                         $datatmp = DB::connection('ifcaadm')
-                        ->table('pm_tmpsurvey')
+                        ->table('mgr.pm_tmpsurvey')
                         ->where($wheretmp)
                         ->get(); 
                         $dataHD = array(
@@ -158,21 +158,21 @@ class SurveyPublishController extends Controller
                             'audit_date'=>$audit_date
                         );
                         DB::connection('ifcaadm')
-                            ->table('pm_survey_hd')
+                            ->table('mgr.pm_survey_hd')
                             ->insert($dataHD);
                        
                         $whereid = $dataHD;
                         unset($whereid['content']);
                         $whereid['audit_date'] = date('Y-m-d H:i:s',strtotime($dataHD['audit_date']));
                         $data = DB::connection('ifcaadm')
-                        ->table('pm_survey_hd')
+                        ->table('mgr.pm_survey_hd')
                         ->where($whereid)
                         ->get();
                         $survey_id = $data[0]->id;//ambil survey id yg baru di insert di 
                            
                         $wheretmp=array('tmpsurvey_id'=>$surveyid);//surveyid ambil dari foreach subject
                         $datatmpdtl = DB::connection('ifcaadm')
-                        ->table('pm_tmpsurvey_dtl')
+                        ->table('mgr.pm_tmpsurvey_dtl')
                         ->where($wheretmp)
                         ->get(); 
                             
@@ -188,7 +188,7 @@ class SurveyPublishController extends Controller
                             );
                         }//end looping detail
                         DB::connection('ifcaadm')
-                            ->table('pm_survey_dt')
+                            ->table('mgr.pm_survey_dt')
                             ->insert($datadtl);
                         
                         $datadtl = [];
@@ -232,7 +232,7 @@ class SurveyPublishController extends Controller
             );
         try { 
             DB::connection('ifcaadm')
-                    ->table('pm_survey_publish')
+                    ->table('mgr.pm_survey_publish')
                     ->where($where)
                     ->update($dataPub);
             $msg = __('common.saved');
@@ -254,15 +254,15 @@ class SurveyPublishController extends Controller
         $criteriasur = array('publish_id' => $request->publish_id);
         try { 
             DB::connection('ifcaadm')
-            ->table('pm_survey_publish')
+            ->table('mgr.pm_survey_publish')
             ->where($criteriapub)
             ->delete();
             DB::connection('ifcaadm')
-            ->table('pm_survey_hd')
+            ->table('mgr.pm_survey_hd')
             ->where($criteriasur)
             ->delete();
             DB::connection('ifcaadm')
-            ->table('pm_survey_dt')
+            ->table('mgr.pm_survey_dt')
             ->where($criteriasur)
             ->delete();
             $msg = __('common.deleted');
