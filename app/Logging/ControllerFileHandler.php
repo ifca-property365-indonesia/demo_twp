@@ -28,6 +28,16 @@ class ControllerFileHandler extends AbstractProcessingHandler
         $path = ControllerLog::path();
 
         if (!isset($this->streams[$path])) {
+            // Folder tanggal belum ada = log pertama hari ini -> sekalian hapus log lama
+            // (tanpa perlu cron; lihat ControllerLog::prune).
+            if (!is_dir(storage_path('logs/' . date('Y-m-d')))) {
+                try {
+                    ControllerLog::prune();
+                } catch (\Throwable $e) {
+                    // gagal hapus log lama tidak boleh menggagalkan penulisan log
+                }
+            }
+
             $stream = new StreamHandler($path, $this->level, true, null, true);
             $stream->setFormatter($this->getFormatter());
             $this->streams[$path] = $stream;

@@ -64,6 +64,9 @@ return [
             'driver' => 'custom',
             'via' => App\Logging\CreateControllerLogger::class,
             'level' => env('LOG_LEVEL', 'debug'),
+            // folder tanggal yang lebih tua dari ini dihapus otomatis saat log pertama tiap hari
+            // (juga manual: php artisan logs:prune)
+            'days' => env('LOG_KEEP_DAYS', 60),
         ],
 
         'single' => [

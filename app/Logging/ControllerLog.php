@@ -2,6 +2,7 @@
 
 namespace App\Logging;
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Str;
 
@@ -39,5 +40,35 @@ class ControllerLog
     public static function path(): string
     {
         return storage_path('logs/' . date('Y-m-d') . '/' . static::folder() . '.log');
+    }
+
+    /** Lama simpan log (hari), config logging.channels.controller.days (LOG_KEEP_DAYS, default 60). */
+    public static function keepDays(): int
+    {
+        return max(1, (int) config('logging.channels.controller.days', 60));
+    }
+
+    /**
+     * Hapus folder log harian (storage/logs/<yyyy-mm-dd>) yang lebih tua dari $days hari.
+     * Hanya folder bernama tanggal yang disentuh (laravel.log dll. dibiarkan).
+     *
+     * @return string[] nama folder yang dihapus
+     */
+    public static function prune(?int $days = null): array
+    {
+        $days ??= static::keepDays();
+        $limit = date('Y-m-d', strtotime('-' . $days . ' days'));
+        $deleted = [];
+
+        foreach (glob(storage_path('logs/*'), GLOB_ONLYDIR) ?: [] as $dir) {
+            $name = basename($dir);
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $name) && $name < $limit) {
+                if (File::deleteDirectory($dir)) {
+                    $deleted[] = $name;
+                }
+            }
+        }
+
+        return $deleted;
     }
 }
