@@ -64,6 +64,7 @@ class NewSurveyController extends Controller
             return response()->json(['status' => 'OK', 'message' => __('admin/survey.survey_created')]);
 
         } catch (Exception $e) {
+            report($e);
             DB::rollBack();
             return response()->json(['status' => 'Failed', 'message' => __('common.save_failed', ['message' => $e->getMessage()])]);
         }
@@ -124,6 +125,7 @@ public function getDraftTable(Request $request)
                 'message' => __('common.deleted')
             ]);
         } catch (Exception $e) {
+            report($e);
             return response()->json([
                 'status' => 'Fail',
                 'message' => __('common.delete_failed', ['message' => $e->getMessage()])
@@ -158,6 +160,7 @@ public function getDraftTable(Request $request)
                 'message' => __('admin/survey.survey_published')
             ]);
         } catch (Exception $e) {
+            report($e);
             return response()->json([
                 'status' => 'Fail',
                 'message' => __('admin/survey.publish_failed', ['message' => $e->getMessage()])
@@ -245,6 +248,7 @@ public function getDraftTable(Request $request)
             return response()->json(['status' => 'OK', 'message' => __('admin/survey.survey_updated')]);
 
         } catch (Exception $e) {
+            report($e);
             DB::rollBack();
             return response()->json(['status' => 'Failed', 'message' => __('common.update_failed', ['message' => $e->getMessage()])]);
         }
@@ -329,6 +333,7 @@ public function getDraftTable(Request $request)
             ]);
 
         } catch (\Exception $e) {
+            report($e);
             // 3. LEMPAR STATUS 500 AGAR JAVASCRIPT BISA MENANGKAP ERRORNYA
             return response()->json([
                 'status'  => 'ERROR',

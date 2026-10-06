@@ -160,6 +160,7 @@ class SysSpecController extends Controller
                         $msg = __('admin/sysspec.image_changed');
                         $psn = "OK";
                     } catch(\Illuminate\Database\QueryException $ex){ 
+                        report($ex);
                         $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
                         $psn  = 'Failed';
                     }

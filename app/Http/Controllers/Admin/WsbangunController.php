@@ -33,6 +33,7 @@ class WsbangunController extends Controller
                 ->update($data);
             $feedback = "Data has been updated successfully";
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
          
             $feedback = "Insert failed: " . $ex->getMessage();
         }
@@ -103,6 +104,7 @@ class WsbangunController extends Controller
             $this->sendAccessMails($result['notify']);
             echo json_encode($rows);
         } catch (\Illuminate\Database\QueryException $ex) {
+            report($ex);
             echo "Insert failed: " . $ex->getMessage();
         }
     }
@@ -124,6 +126,7 @@ class WsbangunController extends Controller
             $this->sendAccessMails($result['notify']);
             echo 'Tenant id: ' . $result['id'] . ' data ' . ($result['created'] ? 'inserted' : 'updated') . '!';
         } catch (\Illuminate\Database\QueryException $ex) {
+            report($ex);
             echo "Update failed: " . $ex->getMessage();
         }
     }
@@ -369,6 +372,7 @@ class WsbangunController extends Controller
             });
             echo 'Tenant no : ' . $tenancy->tenant_no . ' deleted!';
         } catch (\Illuminate\Database\QueryException $ex) {
+            report($ex);
             echo "Delete failed: " . $ex->getMessage();
         }
     }

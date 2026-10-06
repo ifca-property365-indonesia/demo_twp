@@ -128,6 +128,7 @@ class UserSurveyController extends Controller
             ]);
 
         } catch (Exception $e) {
+            report($e);
             // Jika ada error, batalkan semua proses insert sebelumnya
             DB::connection()->rollBack();
             

@@ -395,6 +395,7 @@ class TicketController extends Controller
                     ->update(['status' => 'C']);
             }
         } catch (\Illuminate\Database\QueryException $ex) {
+            report($ex);
             return response()->json(['status' => 'Failed', 'pesan' => __('common.update_failed', ['message' => $ex->getMessage()])]);
         }
 

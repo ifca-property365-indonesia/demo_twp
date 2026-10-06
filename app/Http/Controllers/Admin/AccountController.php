@@ -59,6 +59,7 @@ class AccountController extends Controller
             }
             $file->move($target, $picname);
         } catch (\Throwable $e) {
+            report($e);
             return response()->json(['status' => 'Failed', 'pesan' => __('admin/account.upload_failed_detail', ['message' => $e->getMessage()])]);
         }
 
@@ -110,6 +111,7 @@ class AccountController extends Controller
                 $st  = 'OK';
              
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
@@ -136,6 +138,7 @@ class AccountController extends Controller
                 $st  = 'OK';
              
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
@@ -171,6 +174,7 @@ class AccountController extends Controller
                 $st  = 'OK';
              
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }

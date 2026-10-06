@@ -201,6 +201,7 @@ class SurveyPublishController extends Controller
             }//end else update
 
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
@@ -238,6 +239,7 @@ class SurveyPublishController extends Controller
             $msg = __('common.saved');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('admin/survey.publish_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }
@@ -268,6 +270,7 @@ class SurveyPublishController extends Controller
             $msg = __('common.deleted');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.delete_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }

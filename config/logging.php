@@ -54,8 +54,16 @@ return [
 
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'controller')),
             'ignore_exceptions' => false,
+        ],
+
+        // Satu file per controller per hari: storage/logs/<yyyy-mm-dd>/<admin|tenant>/<controller>.log
+        // (lihat App\Logging\ControllerLog). Di luar request controller -> storage/logs/<yyyy-mm-dd>/system.log.
+        'controller' => [
+            'driver' => 'custom',
+            'via' => App\Logging\CreateControllerLogger::class,
+            'level' => env('LOG_LEVEL', 'debug'),
         ],
 
         'single' => [

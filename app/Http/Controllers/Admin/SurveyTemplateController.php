@@ -110,6 +110,7 @@ class SurveyTemplateController extends Controller
                 
             }
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
@@ -136,6 +137,7 @@ class SurveyTemplateController extends Controller
             $msg = __('common.deleted');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.delete_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }

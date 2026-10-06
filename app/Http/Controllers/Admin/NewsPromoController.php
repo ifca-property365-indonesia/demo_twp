@@ -58,6 +58,7 @@ class NewsPromoController extends Controller
         try {
             $path = NewsPicture::store($file);
         } catch (\Exception $e) {
+            report($e);
             return response()->json(['status' => 'Failed', 'pesan' => __('common.upload_error')]);
         }
 
@@ -126,6 +127,7 @@ class NewsPromoController extends Controller
                 
             }
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.save_failed', ['message' => $ex->getMessage()]);
             $st  = 'Failed';
         }
@@ -146,6 +148,7 @@ class NewsPromoController extends Controller
             $msg = __('common.deleted');
             $st  = 'OK';
         } catch(\Illuminate\Database\QueryException $ex){ 
+            report($ex);
             $msg = __('common.delete_failed', ['message' => $ex->getMessage()]);
             $st  = 'Fail';
         }
