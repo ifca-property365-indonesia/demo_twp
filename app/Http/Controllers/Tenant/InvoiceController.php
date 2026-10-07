@@ -63,7 +63,7 @@ class InvoiceController extends Controller
                 $aperid = date('Ym', strtotime($row->trx_date));
 
                 // Nama file PDF
-                $fileName = $tenant_no . '_' . $debtorName . '_' . $aperid . '.pdf';
+                $fileName = $business_no . '_' . $debtorName . '_' . $aperid . '.pdf';
 
                 // URL PDF langsung
                 $pdfUrl = 'https://ftp2.property365.co.id/CEM_TEST/' . $fileName;
