@@ -45,31 +45,17 @@ class InvoiceController extends Controller
             $no = 1;
             $totalOutstanding = 0;
 
-            $debtor = DB::connection('dblive')
-                ->table('mgr.ar_debtor')
-                ->whereIn('debtor_acct', TenantScope::tenantNos())
-                ->first();
-
-            // "PT. NUSA RAYA CIPTA Tbk." -> "PT_Nusa_Raya_Cipta_Tbk"
-            $debtorName = $this->pdfDebtorName($debtor->name ?? '');
-
             foreach ($bill as $row) {
 
                 $outstanding = ($row->base_amt ?? 0) + ($row->tax_amt ?? 0);
 
                 $totalOutstanding += $outstanding;
 
-                // APERID, contoh: 202608
-                $aperid = date('Ym', strtotime($row->trx_date));
-
-                // Nama file PDF
-                $fileName = $business_no . '_' . $debtorName . '_' . $aperid . '.pdf';
-
-                // URL PDF langsung
-                $pdfUrl = 'https://ftp2.property365.co.id/CEM_TEST/' . $fileName;
-
-                $check = '
-                    <a href="' . $pdfUrl . '"
+                // Nama file PDF dari mgr.ar_bill.file_attachment (mis. 00060-3_PT_Kreasi_Seni_Jaya_202605.pdf),
+                // dibuka lewat proformaPdf() yang mengambil file dari FTP (FTP_* di .env).
+                $fileName = trim((string) ($row->file_attachment ?? ''));
+                $check = $fileName === '' ? '' : '
+                    <a href="' . e(route('invoice.proforma.pdf', ['file' => $fileName])) . '"
                     target="_blank"
                     class="btn btn-sm btn-success">
                         <i class="cil-file"></i>
@@ -170,27 +156,22 @@ class InvoiceController extends Controller
     }
 
     /**
-     * Nama debtor untuk nama file PDF proforma: tanda baca dibuang, tiap kata huruf besar di awal,
-     * digabung "_". Singkatan badan usaha (PT, CV, ...) tetap huruf besar.
-     * Contoh: "PT. NUSA RAYA CIPTA Tbk." -> "PT_Nusa_Raya_Cipta_Tbk".
+     * PDF proforma dari FTP (disk 'ftp'). Hanya file yang tercatat di mgr.ar_bill.file_attachment
+     * milik tenant yang login, supaya tenant tidak bisa membuka file tenant lain lewat URL.
      */
-    private function pdfDebtorName($name)
-    {
-        $upper = ['PT', 'CV', 'UD', 'PD', 'FA'];
-        $words = preg_split('/[^\p{L}\p{N}]+/u', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
-
-        return implode('_', array_map(function ($w) use ($upper) {
-            return in_array(mb_strtoupper($w), $upper, true)
-                ? mb_strtoupper($w)
-                : mb_convert_case(mb_strtolower($w), MB_CASE_TITLE);
-        }, $words));
-    }
-
     public function proformaPdf($file)
     {
         $file = basename($file);
 
-        if (!Storage::disk('ftp')->exists($file)) {
+        $owned = DB::connection('dblive')
+            ->table('mgr.ar_bill')
+            ->whereIn('entity_cd', TenantScope::entityCds())
+            ->whereIn('project_no', TenantScope::projectNos())
+            ->whereIn('debtor_acct', TenantScope::tenantNos())
+            ->where('file_attachment', $file)
+            ->exists();
+
+        if (!$owned || !Storage::disk('ftp')->exists($file)) {
             abort(404, __('tenant/invoice.file_not_found'));
         }
 

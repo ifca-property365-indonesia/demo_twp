@@ -67,10 +67,10 @@ return [
             'username' => env('FTP_USERNAME'),
             'password' => env('FTP_PASSWORD'),
             'root'     => env('FTP_ROOT', '/'),
-            'port'     => env('FTP_PORT', 21),
+            'port'     => (int) env('FTP_PORT', 21),       // Flysystem mewajibkan int
             'passive'  => env('FTP_PASSIVE', true),
             'ssl'      => env('FTP_SSL', false),
-            'timeout'  => env('FTP_TIMEOUT', 30),
+            'timeout'  => (int) env('FTP_TIMEOUT', 30),
         ],
 
     ],
