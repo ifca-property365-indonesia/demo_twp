@@ -50,8 +50,8 @@ class InvoiceController extends Controller
                 ->whereIn('debtor_acct', TenantScope::tenantNos())
                 ->first();
 
-            $debtorName = $debtor->name ?? '';
-            $debtorName = preg_replace('/\s+/', '-', trim($debtorName));
+            // "PT. NUSA RAYA CIPTA Tbk." -> "PT_Nusa_Raya_Cipta_Tbk"
+            $debtorName = $this->pdfDebtorName($debtor->name ?? '');
 
             foreach ($bill as $row) {
 
@@ -167,6 +167,23 @@ class InvoiceController extends Controller
             'totalOutstanding',
             'tenant_no'
         ));
+    }
+
+    /**
+     * Nama debtor untuk nama file PDF proforma: tanda baca dibuang, tiap kata huruf besar di awal,
+     * digabung "_". Singkatan badan usaha (PT, CV, ...) tetap huruf besar.
+     * Contoh: "PT. NUSA RAYA CIPTA Tbk." -> "PT_Nusa_Raya_Cipta_Tbk".
+     */
+    private function pdfDebtorName($name)
+    {
+        $upper = ['PT', 'CV', 'UD', 'PD', 'FA'];
+        $words = preg_split('/[^\p{L}\p{N}]+/u', trim((string) $name), -1, PREG_SPLIT_NO_EMPTY);
+
+        return implode('_', array_map(function ($w) use ($upper) {
+            return in_array(mb_strtoupper($w), $upper, true)
+                ? mb_strtoupper($w)
+                : mb_convert_case(mb_strtolower($w), MB_CASE_TITLE);
+        }, $words));
     }
 
     public function proformaPdf($file)
