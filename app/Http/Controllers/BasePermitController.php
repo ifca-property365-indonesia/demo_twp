@@ -21,7 +21,8 @@ use PDF;
  *   mgr.permit_letter_tools  rincian kegiatan + peralatan / APD Work Permit
  *   mgr.permit_goods_hd/dtl  detail Permit of Goods + daftar barang
  *   mgr.sv_entry_letter_log  log; tiap perubahan status di-INSERT (tidak pernah di-update)
- *   mgr.sv_spec.letter_no    nomor permit berikutnya per entity/project (LP100001, LP100002, ...)
+ *   nomor permit: jbc_twp mgr.generatenum_report.letter_no, code_letter = 'LP' (LP100001, LP100002, ...),
+ *                            satu urutan untuk semua entity/project
  *
  * Beda portal:
  *   - tenant hanya melihat/mengubah permit miliknya (TenantScope), admin semua tenant;
@@ -179,7 +180,7 @@ abstract class BasePermitController extends Controller
 
         return view('permit.form', $this->formData([
             'tenancies' => $tenancies,
-            'letter_no' => $first ? $this->currentLetterNo($first->entity_cd, $first->project_no) : '',
+            'letter_no' => $first ? $this->currentLetterNo() : '',
             'applicant' => $applicant,
         ]));
     }
@@ -267,7 +268,7 @@ abstract class BasePermitController extends Controller
         $tenancy = $this->tenancyInScope($id_tenancy);
 
         return response()->json([
-            'letter_no' => $tenancy ? $this->currentLetterNo($tenancy->entity_cd, $tenancy->project_no) : '',
+            'letter_no' => $tenancy ? $this->currentLetterNo() : '',
         ]);
     }
 
@@ -332,10 +333,11 @@ abstract class BasePermitController extends Controller
                 return $this->fail($ctx, 422);
             }
 
-            $doc_no = DB::connection('dblive')->transaction(function () use ($ctx, $request, $type) {
-                // Nomor permit diambil di dalam transaksi dengan lock baris sv_spec,
-                // jadi dua request bersamaan tidak pernah mendapat nomor yang sama.
-                $ctx['doc_no'] = $this->takeLetterNo($ctx['entity_cd'], $ctx['project_no']);
+            // Nomor permit diambil di jbc_twp (generatenum_report, baris dikunci) dan permit disimpan
+            // di jbc_live. Transaksi jbc_twp membungkus transaksi jbc_live: kenaikan nomor baru
+            // di-commit setelah permit tersimpan, dan ikut batal kalau penyimpanan gagal.
+            $doc_no = DB::connection('twp')->transaction(fn () => DB::connection('dblive')->transaction(function () use ($ctx, $request, $type) {
+                $ctx['doc_no'] = $this->takeLetterNo();
 
                 $rows = $type === 'W'
                     ? $this->workPermitRows($ctx, $request)
@@ -351,7 +353,7 @@ abstract class BasePermitController extends Controller
                 $this->writeLog($ctx, 'Request created by ' . $this->portal());
 
                 return $ctx['doc_no'];
-            });
+            }));
 
             return response()->json([
                 'status'    => 'OK',
@@ -1015,46 +1017,70 @@ abstract class BasePermitController extends Controller
         return 'O';
     }
 
+    /** code_letter nomor permit di jbc_twp mgr.generatenum_report. */
+    private const LETTER_CODE = 'LP';
+
     /** Nomor permit yang akan dipakai berikutnya (hanya untuk ditampilkan di form). */
-    private function currentLetterNo($entity_cd, $project_no)
+    private function currentLetterNo()
     {
-        return (string) DB::connection('dblive')->table('mgr.sv_spec')
-            ->where('entity_cd', $entity_cd)
-            ->where('project_no', $project_no)
-            ->value('letter_no');
+        $no = trim((string) DB::connection('twp')->table('mgr.generatenum_report')
+            ->where('code_letter', self::LETTER_CODE)
+            ->value('letter_no'));
+
+        return $no === '' ? '' : $this->firstUnusedLetterNo($no);
     }
 
     /**
-     * Ambil nomor permit dan naikkan sv_spec.letter_no (LP100001 -> LP100002) secara atomik.
-     * Harus dipanggil di dalam transaksi: baris sv_spec dikunci (updlock/holdlock) sampai commit,
+     * Ambil nomor permit dari jbc_twp mgr.generatenum_report (code_letter = 'LP', satu urutan untuk
+     * semua entity/project) dan naikkan letter_no (LP100001 -> LP100002). Harus dipanggil di dalam
+     * transaksi koneksi 'twp' (lihat save()): baris dikunci (updlock/holdlock) sampai commit,
      * sehingga request lain menunggu dan mendapat nomor berikutnya, bukan nomor yang sama.
      */
-    private function takeLetterNo($entity_cd, $project_no)
+    private function takeLetterNo()
     {
-        $db = DB::connection('dblive');
+        $db = DB::connection('twp');
 
-        $spec = $db->table('mgr.sv_spec')
-            ->where('entity_cd', $entity_cd)
-            ->where('project_no', $project_no)
+        $row = $db->table('mgr.generatenum_report')
+            ->where('code_letter', self::LETTER_CODE)
             ->lockForUpdate()
             ->first();
 
-        $doc_no = trim((string) ($spec->letter_no ?? ''));
-        if ($doc_no === '') {
-            throw new \RuntimeException('Permit number (sv_spec.letter_no) not found for ' . trim($entity_cd) . ' / ' . trim($project_no));
+        $stored = trim((string) ($row->letter_no ?? ''));
+        if ($stored === '') {
+            throw new \RuntimeException("Permit number (mgr.generatenum_report.letter_no, code_letter '" . self::LETTER_CODE . "') not found");
         }
 
-        $updated = $db->table('mgr.sv_spec')
-            ->where('entity_cd', $entity_cd)
-            ->where('project_no', $project_no)
-            ->where('letter_no', $doc_no)
-            ->update(['letter_no' => $this->nextLetterNo($doc_no)]);
+        $doc_no = $this->firstUnusedLetterNo($stored);
 
-        if ($updated !== 1) {
-            throw new \RuntimeException('Permit number ' . $doc_no . ' has already been used, please submit again.');
-        }
+        $db->table('mgr.generatenum_report')
+            ->where('rowID', $row->rowID)
+            ->update([
+                'letter_no'  => $this->nextLetterNo($doc_no),
+                'audit_user' => 'TWP',
+                'audit_date' => DB::raw('GETDATE()'),
+            ]);
 
         return $doc_no;
+    }
+
+    /**
+     * $letter_no, atau nomor berikutnya kalau sudah dipakai di mgr.sv_entry_letter (jbc_live).
+     * Pengaman supaya tidak ada nomor permit ganda kalau generatenum_report tertinggal dari data
+     * yang sudah ada (sv_entry_letter tidak punya index unik untuk complain_no).
+     */
+    private function firstUnusedLetterNo($letter_no)
+    {
+        $used = DB::connection('dblive')->table('mgr.sv_entry_letter')
+            ->where('complain_no', 'like', preg_replace('/\d+$/', '', $letter_no) . '%')
+            ->pluck('complain_no')
+            ->map(fn ($v) => trim($v))
+            ->flip();
+
+        while (isset($used[$letter_no])) {
+            $letter_no = $this->nextLetterNo($letter_no);
+        }
+
+        return $letter_no;
     }
 
     /** LP100001 -> LP100002 (prefix & jumlah digit dipertahankan). */
