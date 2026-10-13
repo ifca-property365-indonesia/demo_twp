@@ -29,9 +29,9 @@
                 </div>
             </form>
 
-            {{-- pengaturan SMTP yang dipakai (tanpa username / password) --}}
+            {{-- alamat pengirim yang dipakai (MAIL_FROM_ADDRESS) --}}
             <div class="form-note mt-3">
-                {{ __('admin/mailtest.smtp_info', ['host' => $smtp['host'] ?: '-', 'port' => $smtp['port'] ?: '-', 'from' => $smtp['from'] ?: '-']) }}
+                {{ __('admin/mailtest.smtp_info', ['from' => $smtp['from'] ?: '-']) }}
             </div>
         </div>
     </div>
