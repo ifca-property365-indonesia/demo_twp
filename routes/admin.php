@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\SysSpecController as SysSpec;
 use App\Http\Controllers\Admin\PermitController as Permit;
 use App\Http\Controllers\Admin\ManagementController as Management;
 use App\Http\Controllers\Admin\NewSurveyController as NewSurvey;
+use App\Http\Controllers\Admin\MailTestController as MailTest;
 use Illuminate\Support\Facades\Route;
 
 // /admin -> dashboard kalau sudah login, kalau belum ke halaman login "/"
@@ -61,6 +62,10 @@ Route::group(['middleware' => ['admin-auth', 'revalidate']], function () {
     Route::post('/systemspec/saveimage', [SysSpec::class, 'imgLogin']);
     Route::get('/systemspec/defaultpass', [SysSpec::class, 'defaultpass']);
     Route::post('/systemspec/defaultpasssave', [SysSpec::class, 'defaultpasssave']);
+
+    // MailTestController: menu Test Email (tes SMTP)
+    Route::get('/mail-test', [MailTest::class, 'index']);
+    Route::post('/mail-test', [MailTest::class, 'send']);
 
     // NewsPromoController
     Route::view('/news', 'admin.news.index');

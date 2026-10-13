@@ -110,5 +110,12 @@
                 </li>
             </ul>
         </li>
+
+        {{-- Test Email (tes SMTP) --}}
+        <li class="nav-item">
+            <a class="nav-link {{ request()->is('admin/mail-test*') ? 'active' : '' }}" href="{{ url('/admin/mail-test') }}">
+                <i class="nav-icon cil-envelope-closed"></i> {{ __('admin.menu.test_email') }}
+            </a>
+        </li>
     </ul>
 </div>

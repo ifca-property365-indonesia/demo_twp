@@ -33,5 +33,6 @@ return [
         'password'         => 'Kata Sandi',
         'password_reset'   => 'Reset Kata Sandi',
         'default_password' => 'Kata Sandi Default',
+        'test_email'       => 'Tes Email',
     ],
 ];

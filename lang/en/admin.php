@@ -33,5 +33,6 @@ return [
         'password'         => 'Password',
         'password_reset'   => 'Password Reset',
         'default_password' => 'Default Password',
+        'test_email'       => 'Test Email',
     ],
 ];
