@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Tenant;
 
 use App\Http\Controllers\Controller;
+use App\Support\ColumnFit;
 use App\Support\TenantScope;
 use App\Support\TicketHd;
 use Illuminate\Http\Request;
@@ -493,7 +494,7 @@ class TicketController extends Controller
             ->where('entity_cd', $entity)
             ->where('project_no', $project)
             ->where('report_no', $hd->report_no)
-            ->update($data);
+            ->update(ColumnFit::fit('dblive', 'mgr.sv_entry_hd', $data));
 
         return trim($hd->report_no);
     }
@@ -525,7 +526,7 @@ class TicketController extends Controller
         $url = url(self::TICKET_FILE_DIR . '/' . $name);
 
         try {
-            DB::connection('dblive')->table('mgr.sv_attachment')->insert([
+            DB::connection('dblive')->table('mgr.sv_attachment')->insert(ColumnFit::fit('dblive', 'mgr.sv_attachment', [
                 'entity_cd'       => $entity,
                 'project_no'      => $project,
                 'report_no'       => trim($reportNo),
@@ -534,7 +535,7 @@ class TicketController extends Controller
                 'file_url'        => $url,
                 'audit_user'      => 'MGR',
                 'audit_date'      => date('d M Y H:i:s'),
-            ]);
+            ]));
         } catch (\Throwable $e) {
             rename($dir . '/' . $name, $src);   // kembalikan nama file supaya gambar ticket tetap tampil
             throw $e;
@@ -651,9 +652,9 @@ class TicketController extends Controller
                     $data['status'] = trim((string) $oldStatus);
                 }
                 // ===== end insert ke HD =====
-                $updated = DB::table('mgr.sv_entry_multi')->where($critedit)->update($data);
+                $updated = DB::table('mgr.sv_entry_multi')->where($critedit)->update(ColumnFit::fit('twp', 'mgr.sv_entry_multi', $data));
             } else {
-                $updated = DB::table('mgr.sv_entry_multi')->insert($data);
+                $updated = DB::table('mgr.sv_entry_multi')->insert(ColumnFit::fit('twp', 'mgr.sv_entry_multi', $data));
             }
             
             $critedit2 = [
@@ -695,7 +696,7 @@ class TicketController extends Controller
             if (count($checkdataServ1) == 0) {
                 DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
-                ->insert($dataServ1);
+                ->insert(ColumnFit::fit('dblive', 'mgr.sv_entry_multi', $dataServ1));
 
                 // ===== start insert ke HD =====
                 // Ticket baru juga dibuat di mgr.sv_entry_hd dengan report_no dari
@@ -720,7 +721,7 @@ class TicketController extends Controller
                             ->value('staff_id');
 
                         $now = date('d M Y H:i:s');
-                        $db->table('mgr.sv_entry_hd')->insert([
+                        $db->table('mgr.sv_entry_hd')->insert(ColumnFit::fit('dblive', 'mgr.sv_entry_hd', [
                             'entity_cd'       => $entity,
                             'project_no'      => $project,
                             'debtor_acct'     => $data_tenant[0]->tenant_no,
@@ -745,7 +746,7 @@ class TicketController extends Controller
                             'location_type'   => 'U',
                             'assign_to'       => $staffId ? trim($staffId) : null,
                             'note1'           => $typeformat2,   // complain_no sv_entry_multi
-                        ]);
+                        ]));
 
                         // nomor sudah terpakai -> next_doc_no + 1
                         $db->table('mgr.cf_document_ctl_dtl')
@@ -791,7 +792,7 @@ class TicketController extends Controller
                 DB::connection('dblive')
                 ->table('mgr.sv_entry_multi')
                 ->where($critedit2)
-                ->update($dataServ1);
+                ->update(ColumnFit::fit('dblive', 'mgr.sv_entry_multi', $dataServ1));
 
                 // Edit ikut ke work order (sv_entry_hd, yang tampil di tabel ticket) selama
                 // statusnya masih EDITABLE_STATUSES (R); gambar baru saat edit -> sv_attachment.
@@ -851,7 +852,7 @@ class TicketController extends Controller
             if (count($checkdataServ2) == 0) {
                 $query = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi_dt')
-                ->insert($dataServ2);
+                ->insert(ColumnFit::fit('dblive', 'mgr.sv_entry_multi_dt', $dataServ2));
                 if ($query != "OK") {
                     $msg = $query;
                     $st = 'Fail';
@@ -863,7 +864,7 @@ class TicketController extends Controller
                 $query = DB::connection('dblive')
                 ->table('mgr.sv_entry_multi_dt')
                 ->where($critedit2)
-                ->update($dataServ2);
+                ->update(ColumnFit::fit('dblive', 'mgr.sv_entry_multi_dt', $dataServ2));
                 if ($query != "1") {
                     $msg = $query;
                     $st = 'Fail';
