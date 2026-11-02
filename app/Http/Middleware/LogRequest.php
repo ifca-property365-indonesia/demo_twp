@@ -27,8 +27,10 @@ class LogRequest
         $start = microtime(true);
 
         // Banyak controller memakai echo (mis. echo json_encode(...), echo 'Bad request') alih-alih
-        // return. Output itu ditangkap lalu digabung ke isi respons (yang dikirim ke browser tetap
-        // sama) supaya tanda gagalnya ikut terbaca di log.
+        // return. Output itu ditangkap lalu digabung ke isi respons teks (yang dikirim ke browser tetap
+        // sama) supaya tanda gagalnya ikut terbaca di log. Respons file (PDF, gambar, download) tidak
+        // boleh diberi tambahan apa pun: output liar (spasi / BOM / pesan PHP dari file lain) dibuang
+        // dan dicatat, karena satu byte saja di depan "%PDF" membuat PDF gagal dibuka.
         ob_start();
         $level = ob_get_level();
         try {
@@ -37,11 +39,14 @@ class LogRequest
             $echoed = ob_get_level() === $level ? (string) ob_get_clean() : '';
         }
         if ($echoed !== '') {
-            if ($response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse
-                || $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse) {
-                echo $echoed;
-            } else {
+            if ($this->isTextResponse($response)) {
                 $response->setContent($echoed . $response->getContent());
+            } else {
+                Log::warning('Output liar dibuang dari respons ' . ($response->headers->get('Content-Type') ?: get_class($response)), [
+                    'bytes' => strlen($echoed),
+                    'awal'  => mb_substr($echoed, 0, 300),
+                    'hex'   => bin2hex(substr($echoed, 0, 32)),
+                ]);
             }
         }
 
@@ -77,6 +82,19 @@ class LogRequest
         }
 
         Log::log($level, sprintf('%s %s -> %s %d', $request->method(), $request->path(), $action, $status), $context);
+    }
+
+    /** Respons teks (HTML / JSON / teks biasa) yang aman diberi output echo di depannya. */
+    private function isTextResponse(Response $response): bool
+    {
+        if ($response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse
+            || $response instanceof \Symfony\Component\HttpFoundation\StreamedResponse) {
+            return false;
+        }
+        $type = strtolower((string) $response->headers->get('Content-Type'));
+
+        return $type === '' || str_starts_with($type, 'text/')
+            || preg_match('#^application/(json|javascript|xml)#', $type) === 1;
     }
 
     /** Email user yang login (admin / tenant), kosong untuk API. */

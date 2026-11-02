@@ -179,6 +179,7 @@ class InvoiceController extends Controller
 
         return response($content, 200)
             ->header('Content-Type', 'application/pdf')
+            ->header('Content-Length', (string) strlen($content))
             ->header(
                 'Content-Disposition',
                 'inline; filename="' . $file . '"'
