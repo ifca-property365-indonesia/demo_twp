@@ -21,4 +21,5 @@ return [
 
     // pesan
     'file_not_found'    => 'File tidak ditemukan di Server FTP.',
+    'file_unavailable'  => 'File gagal diambil dari Server FTP. Silakan coba lagi nanti.',
 ];

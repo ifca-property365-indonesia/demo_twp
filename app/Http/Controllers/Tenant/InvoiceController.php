@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Tenant;
 use App\Http\Controllers\Controller;
 use App\Support\TenantScope;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use PDF;
@@ -175,7 +176,13 @@ class InvoiceController extends Controller
             abort(404, __('tenant/invoice.file_not_found'));
         }
 
+        // get() mengembalikan null kalau koneksi data FTP gagal (error-nya sudah dicatat di log);
+        // jangan kirim 200 kosong, browser akan menampilkan "Failed to load PDF document"
         $content = Storage::disk('ftp')->get($file);
+        if ($content === null || $content === '') {
+            Log::error('PDF proforma gagal diambil dari FTP', ['file' => $file]);
+            abort(502, __('tenant/invoice.file_unavailable'));
+        }
 
         return response($content, 200)
             ->header('Content-Type', 'application/pdf')

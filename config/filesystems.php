@@ -71,6 +71,9 @@ return [
             'passive'  => env('FTP_PASSIVE', true),
             'ssl'      => env('FTP_SSL', false),
             'timeout'  => (int) env('FTP_TIMEOUT', 30),
+            // server FTP di balik NAT mengirim IP internal untuk koneksi data passive -> data
+            // gagal setelah ~21 detik. true = pakai IP host FTP yang sama dengan koneksi kontrol.
+            'ignorePassiveAddress' => (bool) env('FTP_IGNORE_PASSIVE_ADDRESS', true),
         ],
 
     ],
