@@ -33,4 +33,14 @@ return [
     'no_file_received'    => 'No file received (check upload size limit).',
     'upload_error_detail' => 'Upload error: :message',
     'upload_failed_detail'=> 'Sorry, there was an error uploading your file: :message',
+    // ganti email
+    'current_password'       => 'Current Password',
+    'current_password_note'  => 'Required to change your email.',
+    'current_password_wrong' => 'Current password is incorrect.',
+    'email_invalid'          => 'Invalid email format.',
+    'email_taken'            => 'This email is already used by another account.',
+    'email_changed'          => 'Profile saved. Use :email next time you log in.',
+    'change_tenant_email'       => 'Also change the email of the tenant account(s) using this email:',
+    'change_tenant_email_note'  => 'Also update the email in IFCA. Otherwise the next IFCA sync will restore the old email and reset the tenant password.',
+    'email_changed_tenant'      => 'The tenant account email was changed too; please also update it in IFCA.',
 ];

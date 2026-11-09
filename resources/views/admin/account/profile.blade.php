@@ -62,8 +62,22 @@
                         <input type="text" class="form-control" id="name" name="name">
                     </div>
                     <div class="mb-3">
-                        <label for="email" class="form-label">{{ __('common.email') }}</label>
-                        <input type="text" class="form-control" id="email" name="email" readonly>
+                        <label for="email" class="form-label">{{ __('common.email') }} <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" maxlength="100" autocomplete="email">
+                    </div>
+                    {{-- muncul kalau email diubah: konfirmasi pemilik akun --}}
+                    <div class="mb-3 d-none" id="emailConfirm">
+                        <label for="current_password" class="form-label">{{ __('admin/account.current_password') }} <span class="text-danger">*</span></label>
+                        <input type="password" class="form-control" id="current_password" name="current_password" autocomplete="current-password">
+                        <div class="form-note">{{ __('admin/account.current_password_note') }}</div>
+
+                        {{-- hanya muncul kalau email ini juga dipakai akun tenant (getbyemail -> shared_tenants) --}}
+                        <div class="form-check mt-3 d-none" id="tenantEmailWrap">
+                            <input class="form-check-input" type="checkbox" value="1" id="change_tenant_email" name="change_tenant_email">
+                            <label class="form-check-label" for="change_tenant_email">{{ __('admin/account.change_tenant_email') }}</label>
+                            <ul class="mb-1 ps-3 small" id="tenantEmailList"></ul>
+                            <div class="form-note text-warning"><i class="cil-warning"></i> {{ __('admin/account.change_tenant_email_note') }}</div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="handphone" class="form-label">{{ __('admin/account.handphone') }} <span class="text-danger">*</span></label>
@@ -113,8 +127,25 @@
         return $('#password1').val() === $('#password2').val();
     }, @json(__('admin/account.password_mismatch')));
 
+    // email yang tersimpan; kolom password konfirmasi muncul kalau email diubah
+    var originalEmail = '';
+
+    function emailChanged() {
+        return $.trim($('#email').val()).toLowerCase() !== originalEmail.toLowerCase();
+    }
+    $('#email').on('input change', function () {
+        var changed = emailChanged();
+        $('#emailConfirm').toggleClass('d-none', !changed);
+        if (!changed) { $('#current_password').val('').removeClass('is-invalid').next('.invalid-feedback').remove(); }
+    });
+
     $('#frmEditor').validate($.extend({}, validateOpts, {
-        rules: { name: { required: true }, handphone: { required: true } }
+        rules: {
+            name: { required: true },
+            handphone: { required: true },
+            email: { required: true, email: true },
+            current_password: { required: function () { return emailChanged(); } }
+        }
     }));
 
     $('#frmchangepass').validate($.extend({}, validateOpts, {
@@ -261,10 +292,22 @@
         }).done(function (res) {
             if (res.status === 'OK') {
                 // header ikut berubah tanpa reload
-                $('.header .user-role, .dropdown-menu-user .user-card .sub-text:first').text($('#name').val());
+                $('.header .user-name, .dropdown-menu-user .user-card .sub-text:first').text($('#name').val());
                 $('.header .user-avatar img').attr('src', $('#picturebox').attr('src'));
                 $('#picturebox').removeClass('profile-changed');
                 $('#pictureHint').addClass('d-none');
+                if (res.email) {
+                    // email baru: header & data modal profil berikutnya ikut email baru
+                    $('.header .user-role, .dropdown-menu-user .user-card .sub-text:last').text(res.email);
+                    $('#modal').data('Id', res.email);
+                    originalEmail = res.email;
+                    $('#current_password').val('');
+                    $('#emailConfirm').addClass('d-none');
+                    // tenant ikut pindah -> tidak ada lagi tenant di email lama; kalau tidak, email baru belum dipakai tenant
+                    $('#change_tenant_email').prop('checked', false);
+                    $('#tenantEmailWrap').addClass('d-none');
+                    $('#tenantEmailList').empty();
+                }
             }
             Swal.fire({ title: @json(__('common.information')), text: res.pesan, icon: res.status === 'OK' ? 'success' : 'error' })
                 .then(function () { if (res.status === 'OK') { $('#modal').modal('hide'); } });
@@ -304,6 +347,12 @@
             $('#name').val(data[0].name);
             $('#handphone').val(data[0].handphone);
             $('#email').val(data[0].email);
+            originalEmail = data[0].email || '';
+            // akun tenant dengan email yang sama -> tampilkan pilihan "ganti juga email tenant"
+            var tenants = data[0].shared_tenants || [];
+            $('#tenantEmailList').empty();
+            $.each(tenants, function (i, name) { $('<li>').text(name).appendTo('#tenantEmailList'); });
+            $('#tenantEmailWrap').toggleClass('d-none', tenants.length === 0);
             $('#image').val(data[0].pict);
             $('#labelimage').val(data[0].pict);
             if (data[0].pict) {

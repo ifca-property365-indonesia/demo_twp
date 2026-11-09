@@ -33,4 +33,14 @@ return [
     'no_file_received'    => 'Tidak ada file yang diterima (periksa batas ukuran unggahan).',
     'upload_error_detail' => 'Kesalahan unggah: :message',
     'upload_failed_detail'=> 'Maaf, terjadi kesalahan saat mengunggah file Anda: :message',
+    // ganti email
+    'current_password'       => 'Kata Sandi Saat Ini',
+    'current_password_note'  => 'Wajib diisi untuk mengganti email.',
+    'current_password_wrong' => 'Kata sandi saat ini salah.',
+    'email_invalid'          => 'Format email tidak valid.',
+    'email_taken'            => 'Email ini sudah dipakai akun lain.',
+    'email_changed'          => 'Profil disimpan. Login berikutnya memakai email :email.',
+    'change_tenant_email'       => 'Ganti juga email akun tenant yang memakai email ini:',
+    'change_tenant_email_note'  => 'Ubah juga email di IFCA. Kalau tidak, sinkron IFCA berikutnya akan mengembalikan email lama dan mereset password tenant.',
+    'email_changed_tenant'      => 'Email akun tenant ikut diganti; ubah juga email di IFCA.',
 ];
