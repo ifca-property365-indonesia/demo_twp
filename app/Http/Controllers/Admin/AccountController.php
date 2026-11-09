@@ -144,8 +144,8 @@ class AccountController extends Controller
                     Session::put('Tspict', $image);
                 }
 
-                // dicentang di form: akun tenant dengan email yang sama ikut pindah ke email baru
-                $withTenant = $emailChanged && $request->boolean('change_tenant_email')
+                // akun tenant dengan email yang sama selalu ikut pindah ke email baru
+                $withTenant = $emailChanged
                     && DB::connection('ifcaadm')->table('mgr.tenant')->where('email', $email)->exists();
                 if ($emailChanged) {
                     $this->changeEmail($email, $newEmail, $withTenant);
@@ -192,11 +192,9 @@ class AccountController extends Controller
     }
 
     /**
-     * Pindahkan akun admin ke email baru. $withTenant = false: hanya baris all_login administrator,
-     * akun tenant dengan email lama tetap (email tenant diatur dari sinkron IFCA). $withTenant = true
-     * (dicentang di form): akun tenant dengan email lama ikut pindah (all_login tenant, mgr.tenant,
-     * responden survey). Email di IFCA perlu diubah juga, kalau tidak sinkron berikutnya
-     * mengembalikannya (dan mereset password tenant).
+     * Pindahkan akun admin ke email baru. $withTenant = true (email lama juga dipakai akun tenant):
+     * akun tenant itu ikut pindah (all_login tenant, mgr.tenant, responden survey). Email di IFCA
+     * perlu diubah juga, kalau tidak sinkron berikutnya mengembalikannya (dan mereset password tenant).
      */
     private function changeEmail($email, $newEmail, $withTenant = false)
     {

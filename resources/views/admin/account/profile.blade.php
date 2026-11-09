@@ -71,10 +71,10 @@
                         <input type="password" class="form-control" id="current_password" name="current_password" autocomplete="current-password">
                         <div class="form-note">{{ __('admin/account.current_password_note') }}</div>
 
-                        {{-- hanya muncul kalau email ini juga dipakai akun tenant (getbyemail -> shared_tenants) --}}
-                        <div class="form-check mt-3 d-none" id="tenantEmailWrap">
-                            <input class="form-check-input" type="checkbox" value="1" id="change_tenant_email" name="change_tenant_email">
-                            <label class="form-check-label" for="change_tenant_email">{{ __('admin/account.change_tenant_email') }}</label>
+                        {{-- hanya muncul kalau email ini juga dipakai akun tenant (getbyemail -> shared_tenants);
+                             akun tenant itu selalu ikut diganti (Admin\AccountController::updateprofile) --}}
+                        <div class="mt-3 d-none" id="tenantEmailWrap">
+                            <div class="small">{{ __('admin/account.change_tenant_email') }}</div>
                             <ul class="mb-1 ps-3 small" id="tenantEmailList"></ul>
                             <div class="form-note text-warning"><i class="cil-warning"></i> {{ __('admin/account.change_tenant_email_note') }}</div>
                         </div>
@@ -303,8 +303,7 @@
                     originalEmail = res.email;
                     $('#current_password').val('');
                     $('#emailConfirm').addClass('d-none');
-                    // tenant ikut pindah -> tidak ada lagi tenant di email lama; kalau tidak, email baru belum dipakai tenant
-                    $('#change_tenant_email').prop('checked', false);
+                    // tenant sudah ikut pindah ke email baru
                     $('#tenantEmailWrap').addClass('d-none');
                     $('#tenantEmailList').empty();
                 }

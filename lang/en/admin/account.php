@@ -40,7 +40,7 @@ return [
     'email_invalid'          => 'Invalid email format.',
     'email_taken'            => 'This email is already used by another account.',
     'email_changed'          => 'Profile saved. Use :email next time you log in.',
-    'change_tenant_email'       => 'Also change the email of the tenant account(s) using this email:',
+    'change_tenant_email'       => 'The tenant account(s) using this email will be changed too:',
     'change_tenant_email_note'  => 'Also update the email in IFCA. Otherwise the next IFCA sync will restore the old email and reset the tenant password.',
     'email_changed_tenant'      => 'The tenant account email was changed too; please also update it in IFCA.',
 ];

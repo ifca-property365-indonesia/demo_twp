@@ -40,7 +40,7 @@ return [
     'email_invalid'          => 'Format email tidak valid.',
     'email_taken'            => 'Email ini sudah dipakai akun lain.',
     'email_changed'          => 'Profil disimpan. Login berikutnya memakai email :email.',
-    'change_tenant_email'       => 'Ganti juga email akun tenant yang memakai email ini:',
+    'change_tenant_email'       => 'Akun tenant yang memakai email ini ikut diganti:',
     'change_tenant_email_note'  => 'Ubah juga email di IFCA. Kalau tidak, sinkron IFCA berikutnya akan mengembalikan email lama dan mereset password tenant.',
     'email_changed_tenant'      => 'Email akun tenant ikut diganti; ubah juga email di IFCA.',
 ];
