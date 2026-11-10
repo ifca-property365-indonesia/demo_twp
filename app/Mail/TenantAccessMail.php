@@ -4,20 +4,26 @@ namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 /**
- * Email pemberitahuan akses portal tenant: URL portal, email login dan password.
- * Dikirim Admin\WsbangunController saat akun login tenant dibuat (business/insert|edit dari
- * IFCA) atau email akunnya diganti dari IFCA (password direset ke password default).
+ * Email pemberitahuan akses portal tenant: URL portal, email login dan password, dengan
+ * lampiran user guide (USER_GUIDE). Dikirim Admin\WsbangunController saat akun login tenant
+ * dibuat (business/insert|edit dari IFCA) atau email akunnya diganti dari IFCA (password
+ * direset ke password default).
  *
  * $reason: 'created' | 'email_changed'
  */
 class TenantAccessMail extends Mailable
 {
     use Queueable, SerializesModels;
+
+    /** User guide yang dilampirkan, relatif ke root project. Tidak ada -> email tetap terkirim tanpa lampiran. */
+    public const USER_GUIDE = 'public/lainnya/attachments/AddFile/UserGuide/USER GUIDE TENANT WEB PORTAL CARSTENSZ.pdf';
 
     public function __construct(
         public string $name,
@@ -45,5 +51,25 @@ class TenantAccessMail extends Mailable
                 'logoUrl'   => rtrim(config('app.portal_url'), '/') . '/img/logoweb/carstensz-logo-new2.png',
             ],
         );
+    }
+
+    /** @return array<int, Attachment> */
+    public function attachments(): array
+    {
+        $path = $this->userGuidePath();
+        if (!is_file($path)) {
+            Log::warning('User guide tidak ditemukan, email akses tenant dikirim tanpa lampiran', ['path' => $path, 'to' => $this->email]);
+
+            return [];
+        }
+
+        return [
+            Attachment::fromPath($path)->as(basename($path))->withMime('application/pdf'),
+        ];
+    }
+
+    protected function userGuidePath(): string
+    {
+        return base_path(self::USER_GUIDE);
     }
 }
