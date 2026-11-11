@@ -115,4 +115,11 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    // BCC email akses tenant (App\Mail\TenantAccessMail: akun dibuat / email diganti).
+    // MAIL_BCC_ENABLED=false -> tanpa BCC. Beberapa alamat dipisah koma.
+    'bcc' => [
+        'enabled' => (bool) env('MAIL_BCC_ENABLED', false),
+        'address' => env('MAIL_BCC_ADDRESS', 'customerservice@carstensz.co.id'),
+    ],
+
 ];

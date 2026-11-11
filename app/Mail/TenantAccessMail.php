@@ -37,7 +37,21 @@ class TenantAccessMail extends Mailable
     {
         return new Envelope(
             subject: 'Akses Carstensz Tenant Web Portal / Tenant Web Portal Access',
+            bcc: $this->bccAddresses(),
         );
+    }
+
+    /** Alamat BCC dari config mail.bcc (MAIL_BCC_ENABLED / MAIL_BCC_ADDRESS di .env). */
+    private function bccAddresses(): array
+    {
+        if (!config('mail.bcc.enabled')) {
+            return [];
+        }
+
+        return array_values(array_filter(
+            array_map('trim', explode(',', (string) config('mail.bcc.address'))),
+            fn ($a) => filter_var($a, FILTER_VALIDATE_EMAIL) && strcasecmp($a, $this->email) !== 0
+        ));
     }
 
     public function content(): Content
